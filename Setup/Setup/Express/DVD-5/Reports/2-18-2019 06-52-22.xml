@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="C:\Program Files (x86)\InstallShield\2018 Lite\Support\0409\buildreport.xsl"?>
+<BuildReport ProductName="STL Exporter For Revit 2019" ProductVersion="19.0.0.0" Built="2-18-2019 06-52-22" Media="DVD-5" Uncompressed="0.00 MB">
+  <Features>
+    <Feature Title="##DN_AlwaysInstall##" Description="Enter the description for this feature here." Comment="Enter comments regarding this feature here.">AlwaysInstall</Feature>
+  </Features>
+  <Prerequisites />
+  <MergeModules />
+  <DynamicLinks />
+  <Files>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="15.02.2019 11:39:08" Size="8451" Version="">ADSKSTLExporterHelp.htm</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="15.02.2019 11:39:08" Size="415" Version="">STLExport.addin</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="15.02.2019 11:39:08" Size="2095" Version="">STLExporter_32.png</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="15.02.2019 11:39:08" Size="6867" Version="">STLExporter_80.png</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle" Feature="Always Install" Modified="15.02.2019 11:39:08" Size="1303" Version="">PackageContents.xml</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\General Public License" Feature="Always Install" Modified="" Size="0" Version="">LICENSE.rtf</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\General Public License" Feature="Always Install" Modified="" Size="0" Version="">LICENSE.txt</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="18.02.2019 14:15:48" Size="69632" Version="19.0.0.0">STLExport.dll</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="09.05.2017 00:40:42" Size="1648128" Version="">CefSharp.Core.dll</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="09.05.2017 00:40:42" Size="184832" Version="57.0.0.0">CefSharp.dll</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="29.03.2018 02:27:22" Size="1009592" Version="19.0.1.1">MaterialDBAPI.dll</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="29.03.2018 02:27:22" Size="465848" Version="19.0.1.1">PersistenceDBAPI.dll</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="09.01.2018 18:44:30" Size="407552" Version="2.0.19.4">Xceed.Wpf.AvalonDock.dll</File>
+    <File Destination="[CommonAppDataFolder]Autodesk\ApplicationPlugins\ADSK-STLExporter2019.bundle\Contents\2019" Feature="Always Install" Modified="15.02.2019 11:39:08" Size="121343" Version="">STL_Export.chm</File>
+  </Files>
+</BuildReport>

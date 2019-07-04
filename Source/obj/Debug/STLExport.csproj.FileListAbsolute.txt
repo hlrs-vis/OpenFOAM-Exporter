@@ -1,0 +1,11 @@
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\STLExport.csprojAssemblyReference.cache
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\BIM.STLExport.Properties.Resources.resources
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\BIM.STLExport.STLExportCancelForm.resources
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\BIM.STLExport.STLExportForm.resources
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\BIM.STLExport.STLExportResource.resources
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\STLExport.csproj.GenerateResource.cache
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\STLExport.csproj.CoreCompileInputs.cache
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\bin\Debug\STLExport.dll
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\bin\Debug\STLExport.pdb
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\STLExport.dll
+C:\Users\Marko Djuric\Downloads\STL_REVIT\revit-stl-extension\Source\obj\Debug\STLExport.pdb
