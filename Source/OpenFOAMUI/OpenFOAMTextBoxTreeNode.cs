@@ -97,6 +97,10 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             {
                 format = "x";
             }
+            else
+            {
+                format = "pls initialize format for this valueType in OpenFOAMTextBoxTreeNode";
+            }
         }
         #endregion
 

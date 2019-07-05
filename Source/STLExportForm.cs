@@ -45,7 +45,7 @@ namespace BIM.OpenFoamExport
 
         private SortedDictionary<string, DisplayUnitType> m_DisplayUnits = new SortedDictionary<string, DisplayUnitType>();
         private static DisplayUnitType m_SelectedDUT = DisplayUnitType.DUT_UNDEFINED;
-
+        private Settings m_Settings;
         readonly Autodesk.Revit.UI.UIApplication m_Revit = null;
 
         /// <summary>
@@ -73,13 +73,13 @@ namespace BIM.OpenFoamExport
             // scan for categories to populate category list
             m_CategoryList = m_Generator.ScanCategories(true);
 
-            Settings settings = new Settings(SaveFormat.ascii,  ElementsExportRange.OnlyVisibleOnes, MeshType.Snappy, OpenFOAMEnvironment.blueCFD, StartFrom.latestTime,
+            m_Settings = new Settings(SaveFormat.ascii, ElementsExportRange.OnlyVisibleOnes, MeshType.Snappy, OpenFOAMEnvironment.blueCFD, StartFrom.latestTime,
             StopAt.endTime, WriteControl.timeStep, WriteFormat.ascii, WriteCompression.off,
             TimeFormat.general, ExtractionMethod.extractFromSurface, MethodDecompose.simple, Agglomerator.faceAreaPair, CacheAgglomeration.on, Solver.GAMG,
-            Solver.smoothSolver, Solver.smoothSolver,  Solver.smoothSolver, Smoother.GaussSeidel, Smoother.GaussSeidel,
+            Solver.smoothSolver, Solver.smoothSolver, Solver.smoothSolver, Smoother.GaussSeidel, Smoother.GaussSeidel,
             Smoother.GaussSeidel, TransportModel.Newtonian, SimulationType.RAS);
-            
-            foreach(var att in settings.SimulationDefault)
+
+            foreach (var att in m_Settings.SimulationDefault)
             {
                 TreeNode treeNodeSimulation = new TreeNode(att.Key);
                 if (att.Value is Dictionary<string, object>)
@@ -166,14 +166,14 @@ namespace BIM.OpenFoamExport
                     OpenFOAMDropDownTreeNode dropDown = new OpenFOAMDropDownTreeNode(@enum);
                     child.Nodes.Add(dropDown);
                 }
-                else if(att.Value is Vector3D)
-                {
-                    Vector3D vec = (Vector3D)att.Value;
-                    string vecName = att.Value.ToString().Replace(";", " ");
-                    string node = "( " + vec + " )";
-                    OpenFOAMTextBoxTreeNode<dynamic> vecNode = new OpenFOAMTextBoxTreeNode<dynamic>(vec);
-                    child.Nodes.Add(vecNode);
-                }
+                //else if(att.Value is Vector3D)
+                //{
+                //    Vector3D vec = (Vector3D)att.Value;
+                //    //string vecName = att.Value.ToString().Replace(";", " ");
+                //    //string node = "( " + vec + " )";
+                //    OpenFOAMTextBoxTreeNode<Vector3D> vecNode = new OpenFOAMTextBoxTreeNode<Vector3D>(vec);
+                //    child.Nodes.Add(vecNode);
+                //}
                 //else if(att.Value is ValueType)
                 //{
                 //    //var keyValuePair = (KeyValuePair<string,string>)att.Value;
@@ -182,6 +182,22 @@ namespace BIM.OpenFoamExport
                 //}
                 else
                 {
+                    //if (att.Value is double)
+                    //{
+                    //    double d = Convert.ToDouble(att.Value);
+                    //    OpenFOAMTextBoxTreeNode<double> txtBoxNode = new OpenFOAMTextBoxTreeNode<double>(ref d);
+                    //    child.Nodes.Add(txtBoxNode);
+                    //}
+                    //else if(att.Value is int)
+                    //{
+                    //    int i = Convert.ToInt32(att.Value);
+                    //    OpenFOAMTextBoxTreeNode<int> txtBoxNode = new OpenFOAMTextBoxTreeNode<int>(ref i);
+                    //}
+                    //else if(att.Value is string)
+                    //{
+                    //    string s = att.Value.ToString();
+                    //    OpenFOAMTextBoxTreeNode<string> txtBoxNode = new OpenFOAMTextBoxTreeNode<string>(ref s);
+                    //}
                     OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value);
                     child.Nodes.Add(txtBoxNode);
                 }
@@ -286,12 +302,13 @@ namespace BIM.OpenFoamExport
                 m_SelectedDUT = dup;
 
                 // create settings object to save setting information
-                Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
+                //Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
+                //    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
+
 
                 // save Revit document's triangular data in a temporary file
                 m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
-                DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, aSetting);
+                DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, m_Settings/*aSetting*/);
 
                 if (succeed == DataGenerator.GeneratorStatus.FAILURE)
                 {
@@ -414,11 +431,12 @@ namespace BIM.OpenFoamExport
             if (cbOpenFOAM.Checked == true)
             {
                 rbBinary.Enabled = false;
-
+                m_Settings.OpenFOAM = true;
                 rbAscii.Select();
             }
             else
             {
+                m_Settings.OpenFOAM = false;
                 rbBinary.Enabled = true;
             }
         }

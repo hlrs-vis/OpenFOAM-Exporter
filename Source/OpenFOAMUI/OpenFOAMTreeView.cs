@@ -6,6 +6,7 @@
 //*********************************************************************************************************************************//
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
@@ -36,6 +37,10 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         private OpenFOAMTextBoxTreeNode<dynamic> m_CurrentOFTreeNode = null;
 
         private bool m_ChangeValue=false;
+
+        private Regex m_Vector3DReg = new Regex(@"^\d+\s+\d+\s+\d+$");
+        private Regex m_VectorReg = new Regex(@"^\d+\s+\d+$");
+        private Regex m_SingleReg = new Regex(@"^\d+");
 
         /// <summary>
         /// Occurs when the <see cref="E:System.Windows.Forms.TreeView.NodeMouseClick"></see> event is fired
@@ -200,7 +205,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             if(m_CurrentOFTreeNode != null)
             {
                 TextBox_ChangeValue();
-
+                m_ChangeValue = false;
                 m_CurrentOFTreeNode.TxtBox.TextChanged -= TextBox_TextChanged;
                 m_CurrentOFTreeNode.Text = m_CurrentOFTreeNode.TxtBox.Text;
                 m_CurrentOFTreeNode.TxtBox.Hide();
@@ -222,47 +227,19 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             try
             {
                 //Vector3D ( d d d )
-                if (Regex.IsMatch(valueString, @"^\s+\d+\s+\d+\s+\d+\s+$") && m_CurrentOFTreeNode.Value is Vector3D)
+                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTreeNode.Value is Vector3D)
                 {
-                    //string vecWithoutClip = valueString.Trim('(', ')');
-                    //string vec = vecWithoutClip.Substring(1, vecWithoutClip.Length - 2);
-                    double j = 0;
-                    int i = 0;
-                    double[] entries = new double[3];
-                    foreach (string s in valueString.Split(' '))
-                    {
-                        s.Trim();
-                        if (s.Equals(""))
-                        {
-                            continue;
-                        }
-                        j = Convert.ToDouble(s);
-                        entries[i] = j;
-                        i++;
-                    }
+                    List<double> entries = GetListFromVectorString(valueString);
                     m_CurrentOFTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
                 }
                 //Vector ( d d )
-                else if (Regex.IsMatch(valueString, @"^\s+\d+\s+\d+\s+$") && m_CurrentOFTreeNode.Value is Vector)
+                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTreeNode.Value is Vector)
                 {
-                    double j = 0;
-                    int i = 0;
-                    double[] entries = new double[2];
-                    foreach(string s in valueString.Split(' '))
-                    {
-                        s.Trim();
-                        if(s.Equals(""))
-                        {
-                            continue;
-                        }
-                        j = Convert.ToDouble(s);
-                        entries[i] = j;
-                        i++;
-                    }
+                    List<double> entries = GetListFromVectorString(valueString);
                     m_CurrentOFTreeNode.Value = new Vector(entries[0], entries[1]);
                 }
                 //double / integer ( d )
-                else if (Regex.IsMatch(valueString, @"^\s+\d+\s+$"))
+                else if (m_SingleReg.IsMatch(valueString))
                 {
                     string value = valueString.Trim();
                     if(m_CurrentOFTreeNode.Value is int)
@@ -289,6 +266,33 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
                     , OpenFoamExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="vecString"></param>
+        /// <returns></returns>
+        private List<double> GetListFromVectorString(string vecString)
+        {
+            if(vecString.Equals("")|| vecString == string.Empty)
+            {
+                return null;
+            }
+
+            List<double> entries = new List<double>();
+            double j = 0;
+            foreach (string s in vecString.Split(' '))
+            {
+                s.Trim();
+                if (s.Equals(""))
+                {
+                    continue;
+                }
+                j = Convert.ToDouble(s);
+                entries.Add(j);
+            }
+            return entries;
         }
     }
 }

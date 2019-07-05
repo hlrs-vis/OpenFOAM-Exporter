@@ -1030,6 +1030,10 @@ namespace BIM.OpenFoamExport
             {
                 return m_OpenFOAM;
             }
+            set
+            {
+                m_OpenFOAM = value;
+            }
         }
 
         /// <summary>
@@ -1194,13 +1198,13 @@ namespace BIM.OpenFoamExport
             {
                 Delta = 0.001
             };
-            m_SimpleCoeffs.SetN(new Vector3D(2,2,2));
+            m_SimpleCoeffs.SetN(new Vector3D(2,2,1));
 
             m_HierarchicalCoeffs = new CoeffsMethod
             {
                 Delta = 0.001
             };
-            m_HierarchicalCoeffs.SetN(new Vector3D(2, 2, 2));
+            m_HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
             m_Order = "xyz";
 
             m_DataFile = "cellDecomposition";
@@ -1517,7 +1521,7 @@ namespace BIM.OpenFoamExport
             m_InternalFieldP = 0;
             m_WallP = new FOAMParameterPatch("zeroGradient");
             m_InletP = new FOAMParameterPatch("zeroGradient");
-            m_OutletP = new FOAMParameterPatch<double>("inletOutlet", "uniform", 126.7);
+            m_OutletP = new FOAMParameterPatch<double>("fixedValue", "uniform", 126.7);
 
             m_PDict.Add("InternalField", m_InternalFieldP);
             m_PDict.Add("Wall", m_WallP.ToDictionary());
