@@ -38,8 +38,19 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
 
         private bool m_ChangeValue=false;
 
+        /// <summary>
+        /// Regular Expresion for Vector3D.
+        /// </summary>
         private Regex m_Vector3DReg = new Regex(@"^\d+\s+\d+\s+\d+$");
+
+        /// <summary>
+        /// Regular Expression for Vector.
+        /// </summary>
         private Regex m_VectorReg = new Regex(@"^\d+\s+\d+$");
+
+        /// <summary>
+        /// Regular Expression for number.
+        /// </summary>
         private Regex m_SingleReg = new Regex(@"^\d+");
 
         /// <summary>
@@ -223,6 +234,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             {
                 return;
             }
+
             string valueString = m_CurrentOFTreeNode.TxtBox.Text;
             try
             {

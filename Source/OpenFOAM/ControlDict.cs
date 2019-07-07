@@ -38,7 +38,11 @@ namespace BIM.OpenFoamExport.OpenFOAM
             FoamFile.Attributes.Add("startFrom", m_Settings._StartFrom);
             FoamFile.Attributes.Add("startTime", m_Settings.StartTime);
             FoamFile.Attributes.Add("stopAt", m_Settings._StopAt);
-            FoamFile.Attributes.Add("endTime", m_Settings.EndTime);
+            Dictionary<string, object> test = m_Settings.SimulationDefault["Test"] as Dictionary<string, object>;
+
+            Dictionary<string, object> control = test["ControlDictionary"] as Dictionary<string, object>;
+
+            FoamFile.Attributes.Add("endTime", control["EndTime"]/*m_Settings.EndTime*/);
             FoamFile.Attributes.Add("deltaT", m_Settings.DeltaT);
             FoamFile.Attributes.Add("writeControl", m_Settings._WriteControl);
             FoamFile.Attributes.Add("writeInterval", m_Settings.WriteInterval);

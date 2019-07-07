@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Media3D;
@@ -85,17 +87,18 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         {
             value = _value;
             txtBox.Text = Text;
+
             if (value is Vector3D)
             {
-                format = "x y z";
+                format = "x y z -> x,y,z∊ℝ";
             }
             else if (value is Vector)
             {
-                format = "x y";
+                format = "x y -> x,y∊ℝ";
             }
             else if (value is int || value is double)
             {
-                format = "x";
+                format = "int/double";
             }
             else
             {

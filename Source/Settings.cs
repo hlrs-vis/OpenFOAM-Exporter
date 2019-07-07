@@ -1097,6 +1097,10 @@ namespace BIM.OpenFoamExport
             {
                 return m_SimulationDefaultList;
             }
+            set
+            {
+                this.SimulationDefault = value;
+            }
         }
 
         /// <summary>
@@ -1198,7 +1202,7 @@ namespace BIM.OpenFoamExport
             {
                 Delta = 0.001
             };
-            m_SimpleCoeffs.SetN(new Vector3D(2,2,1));
+            m_SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
 
             m_HierarchicalCoeffs = new CoeffsMethod
             {
@@ -1622,7 +1626,12 @@ namespace BIM.OpenFoamExport
             Solver solverU = Solver.smoothSolver, Solver solverK = Solver.smoothSolver, Solver solverEpsilon = Solver.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
             Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
         {
+            //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
+
+            Dictionary<string, object> m_System = new Dictionary<string, object>();
+            Dictionary<string, object> m_Constant = new Dictionary<string, object>();
+            Dictionary<string, object> m_Null = new Dictionary<string, object>();
 
             m_SaveFormat = saveFormat;
             m_ExportRange = exportRange;
@@ -1630,10 +1639,19 @@ namespace BIM.OpenFoamExport
             m_openFOAMEnvironment = windowsFOAMEnv;
 
             //blockMeshDict
+            Dictionary<string, object> m_BlockMeshDict = new Dictionary<string, object>();
+
             m_CellSize = new Vector3D(0,0,0);
             m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
 
+            m_BlockMeshDict.Add("CellSize", m_CellSize);
+            m_BlockMeshDict.Add("SimpleGrading", m_SimpleGrading);
+
+            m_System.Add("BlockMeshDictionary", m_BlockMeshDict);
+
             //ControlDict
+            Dictionary<string, object> m_ControlDict = new Dictionary<string, object>();
+
             m_StartFrom = startFrom;
             m_StartTime = startTime;
             m_StopAt = stopAt;
@@ -1648,6 +1666,25 @@ namespace BIM.OpenFoamExport
             m_TimeFormat = timeFormat;
             m_TimePrecision = timePrecision;
             m_RunTimeModifiable = runTimeModifiable;
+
+            m_ControlDict.Add("StartFrom", m_StartFrom);
+            m_ControlDict.Add("StartTime", m_StartTime);
+            m_ControlDict.Add("StopAt", m_StopAt);
+            m_ControlDict.Add("EndTime", m_EndTime);
+            m_ControlDict.Add("DeltaT", m_DeltaT);
+            m_ControlDict.Add("WriteControl", m_WriteControl);
+            m_ControlDict.Add("WriteInterval", m_WriteInterval);
+            m_ControlDict.Add("PurgeWrite", m_PurgeWrite);
+            m_ControlDict.Add("WriteFormat", m_WriteFormat);
+            m_ControlDict.Add("WritePrecision", m_WritePrecision);
+            m_ControlDict.Add("WriteCompression", m_WriteCompression);
+            m_ControlDict.Add("TimeFormat", m_TimeFormat);
+            m_ControlDict.Add("TimePrecision", m_TimePrecision);
+            m_ControlDict.Add("RunTimeModifiable", m_RunTimeModifiable);
+
+            m_System.Add("ControlDictionary", m_ControlDict);
+
+            m_SimulationDefaultList.Add("Test", m_System);
 
             //surfaceFeatureExtract
             m_ExtractionMethod = extractionMethod;
