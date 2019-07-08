@@ -87,9 +87,12 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_SimpleGrading = m_Settings.SimpleGrading;
+            Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
+            Dictionary<string, object> block = system["BlockMeshDictionary"] as Dictionary<string, object>;
+
+            m_SimpleGrading = (Vector3D)block["simpleGrading"];
             EnlargeBoundingboxVector(1);
-            m_CellSize = m_Settings.CellSize;
+            m_CellSize = (Vector3D)block["cellSize"];
             if (m_CellSize.Length == 0)
             {
                 InitDefaultCellSize();
@@ -139,6 +142,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         private void InitBlocks()
         {
+            Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
+            Dictionary<string, object> block = system["BlockMeshDictionary"] as Dictionary<string, object>;
+
             m_Blocks.Add("hex (0 1 2 3 4 5 6 7) (" + m_CellSize.ToString().Replace(';', ' ') + ")");
             m_Blocks.Add("simpleGrading (" + m_SimpleGrading.ToString().Replace(';', ' ') + ")");
         }

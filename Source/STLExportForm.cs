@@ -245,16 +245,21 @@ namespace BIM.OpenFoamExport
                 }
                 else if (att.Value is Enum)
                 {
+                    //var refEnum = att.Value as RefVar<Enum>;
                     Enum @enum = att.Value as Enum;
-                    OpenFOAMDropDownTreeNode dropDown = new OpenFOAMDropDownTreeNode(@enum);
+                    OpenFOAMDropDownTreeNode dropDown = new OpenFOAMDropDownTreeNode(@enum, ref m_Settings, keyPath);
                     child.Nodes.Add(dropDown);
                 }
                 else
                 {
+                    //var obj = att.Value as RefVar<dynamic>;
+                    //var v = obj.RefV;
                     OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value, ref m_Settings, keyPath);
                     child.Nodes.Add(txtBoxNode);
                 }
+
                 keyPath.Remove(att.Key);
+
                 if (child != null)
                     treeNode.Nodes.Add(child);
             }

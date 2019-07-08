@@ -147,6 +147,7 @@
     </Compile>
     <Compile Include="OpenFOAMUI\OpenFOAMDropDownTreeNode.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMTextBoxTreeNode.cs" />
+    <Compile Include="OpenFOAMUI\OpenFOAMTreeNode.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMTreeView.cs">
       <SubType>Component</SubType>
     </Compile>

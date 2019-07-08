@@ -5,6 +5,7 @@
 //*********************************************************************************************************************************//
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
 
@@ -13,81 +14,26 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
     /// <summary>
     /// This class is in use for list OpenFOAM-Parameter as a dropdownlist.
     /// </summary>
-    public class OpenFOAMDropDownTreeNode : TreeNode
+    public class OpenFOAMDropDownTreeNode : OpenFOAMTreeNode<Enum>
     {
+        /// <summary>
+        /// ComboBox-Object
+        /// </summary>
         private ComboBox m_ComboBox = new ComboBox();
 
         #region Constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
         /// </summary>
-        public OpenFOAMDropDownTreeNode()
-            : base()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        public OpenFOAMDropDownTreeNode(string text)
-            : base(text)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        /// <param name="children">The children.</param>
-        public OpenFOAMDropDownTreeNode(string text, TreeNode[] children)
-            : base(text, children)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
-        /// </summary>
-        /// <param name="serializationInfo">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> containing the data to deserialize the class.</param>
-        /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> containing the source and destination of the serialized stream.</param>
-        public OpenFOAMDropDownTreeNode(SerializationInfo serializationInfo, StreamingContext context)
-            : base(serializationInfo, context)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        /// <param name="imageIndex">Index of the image.</param>
-        /// <param name="selectedImageIndex">Index of the selected image.</param>
-        public OpenFOAMDropDownTreeNode(string text, int imageIndex, int selectedImageIndex)
-            : base(text, imageIndex, selectedImageIndex)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        /// <param name="imageIndex">Index of the image.</param>
-        /// <param name="selectedImageIndex">Index of the selected image.</param>
-        /// <param name="children">The children.</param>
-        public OpenFOAMDropDownTreeNode(string text, int imageIndex, int selectedImageIndex, TreeNode[] children)
-            : base(text, imageIndex, selectedImageIndex, children)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
-        /// </summary>
-        /// <param name="enum">Enum-object</param>
-        public OpenFOAMDropDownTreeNode(Enum @enum)
-            : base(@enum.ToString())
+        /// <param name="enum">Stored value in node.</param>
+        /// <param name="_settings">Settings-object.</param>
+        /// <param name="_keyPath">Path to value in dictionary in settings.</param>
+        public OpenFOAMDropDownTreeNode(Enum @enum, ref Settings _settings, List<string> _keyPath)
+            : base(@enum.ToString(), ref _settings, _keyPath, @enum)
         {
             foreach (var value in Enum.GetValues(@enum.GetType()))
             {
-                m_ComboBox.Items.Add(value.ToString());
+                m_ComboBox.Items.Add(value);
             }
         }
         #endregion

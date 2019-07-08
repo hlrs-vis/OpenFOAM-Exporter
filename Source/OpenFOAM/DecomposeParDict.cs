@@ -61,20 +61,29 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
+            Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
+            Dictionary<string, object> decompose = system["DecomposeParDictionary"] as Dictionary<string, object>;
+
             m_NumberOfSubdomains = m_Settings.NumberOfSubdomains;
             m_Method = m_Settings.MethodDecompose;
-            m_SimpleCoeffs.Add("n", m_Settings.SimpleCoeffs.N);
-            m_SimpleCoeffs.Add("delta", m_Settings.SimpleCoeffs.Delta);
-            m_HierarchicalCoeffs.Add("n", m_Settings.HierarchicalCoeffs.N);
-            m_HierarchicalCoeffs.Add("delta", m_Settings.HierarchicalCoeffs.Delta);
-            m_HierarchicalCoeffs.Add("order", m_Settings.Order);
-            m_ManualCoeffs.Add("dataFile", m_Settings.DataFile);
 
             FoamFile.Attributes.Add("numberOfSubdomains", m_NumberOfSubdomains);
-            FoamFile.Attributes.Add("method", m_Method);
-            FoamFile.Attributes.Add("simpleCoeffs", m_SimpleCoeffs);
-            FoamFile.Attributes.Add("hierarchicalCoeffs", m_HierarchicalCoeffs);
-            FoamFile.Attributes.Add("manualCoeffs", m_ManualCoeffs);
+            foreach(var obj in decompose)
+            {
+                FoamFile.Attributes.Add(obj.Key, obj.Value);
+            }
+            //m_SimpleCoeffs.Add("n", m_Settings.SimpleCoeffs.N);
+            //m_SimpleCoeffs.Add("delta", m_Settings.SimpleCoeffs.Delta);
+            //m_HierarchicalCoeffs.Add("n", m_Settings.HierarchicalCoeffs.N);
+            //m_HierarchicalCoeffs.Add("delta", m_Settings.HierarchicalCoeffs.Delta);
+            //m_HierarchicalCoeffs.Add("order", m_Settings.Order);
+            //m_ManualCoeffs.Add("dataFile", m_Settings.DataFile);
+
+            //FoamFile.Attributes.Add("numberOfSubdomains", m_NumberOfSubdomains);
+            //FoamFile.Attributes.Add("method", m_Method);
+            //FoamFile.Attributes.Add("simpleCoeffs", m_SimpleCoeffs);
+            //FoamFile.Attributes.Add("hierarchicalCoeffs", m_HierarchicalCoeffs);
+            //FoamFile.Attributes.Add("manualCoeffs", m_ManualCoeffs);
         }
 
     }

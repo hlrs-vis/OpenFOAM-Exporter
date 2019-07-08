@@ -1,6 +1,6 @@
 ﻿//*********************************************************************************************************************************//
 // Source Code: https://www.codeproject.com/Articles/14544/A-TreeView-Control-with-ComboBox-Dropdown-Nodes
-// Additional Code : m_CurrentOFTreeNode, TextBod_TextChanged, TextBox_Leave, TextBox_Click, HideComboBox, TextBox_ChangeValue
+// Additional Code : m_CurrentOFTreeNode, TextBod_TextChanged, TextBox_Leave, TextBox_Click, HideComboBox, TextBox_ChangeValue, Combobox_ChangeValue
 // Modified Code: OnNodeMousClick, OnMouseWheel
 // Modified by Marko Djuric
 //*********************************************************************************************************************************//
@@ -32,9 +32,9 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
 
         // We'll use this variable to keep track of the current node that is being edited.
         // This is set to something (non-null) only if the node's ComboBox is being displayed.
-        private OpenFOAMDropDownTreeNode m_CurrentNode = null;
+        private OpenFOAMDropDownTreeNode m_CurrentOFDropDownNode = null;
 
-        private OpenFOAMTextBoxTreeNode<dynamic> m_CurrentOFTreeNode = null;
+        private OpenFOAMTextBoxTreeNode<dynamic> m_CurrentOFTxtBoxTreeNode = null;
 
         private bool m_ChangeValue=false;
 
@@ -63,48 +63,48 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             // Are we dealing with a dropdown node?
             if (e.Node is OpenFOAMDropDownTreeNode)
             {
-                m_CurrentNode = (OpenFOAMDropDownTreeNode)e.Node;
+                m_CurrentOFDropDownNode = (OpenFOAMDropDownTreeNode)e.Node;
 
                 // Need to add the node's ComboBox to the TreeView's list of controls for it to work
-                Controls.Add(m_CurrentNode.ComboBox);
+                Controls.Add(m_CurrentOFDropDownNode.ComboBox);
 
                 // Set the bounds of the ComboBox, with a little adjustment to make it look right
-                m_CurrentNode.ComboBox.SetBounds(
-                    m_CurrentNode.Bounds.X - 1,
-                    m_CurrentNode.Bounds.Y - 2,
-                    m_CurrentNode.Bounds.Width + 25,
-                    m_CurrentNode.Bounds.Height);
+                m_CurrentOFDropDownNode.ComboBox.SetBounds(
+                    m_CurrentOFDropDownNode.Bounds.X - 1,
+                    m_CurrentOFDropDownNode.Bounds.Y - 2,
+                    m_CurrentOFDropDownNode.Bounds.Width + 25,
+                    m_CurrentOFDropDownNode.Bounds.Height);
 
                 // Listen to the SelectedValueChanged event of the node's ComboBox
-                m_CurrentNode.ComboBox.SelectedValueChanged += new EventHandler(ComboBox_SelectedValueChanged);
-                m_CurrentNode.ComboBox.DropDownClosed += new EventHandler(ComboBox_DropDownClosed);
+                m_CurrentOFDropDownNode.ComboBox.SelectedValueChanged += new EventHandler(ComboBox_SelectedValueChanged);
+                m_CurrentOFDropDownNode.ComboBox.DropDownClosed += new EventHandler(ComboBox_DropDownClosed);
 
                 // Now show the ComboBox
-                m_CurrentNode.ComboBox.Show();
-                m_CurrentNode.ComboBox.DroppedDown = true;
+                m_CurrentOFDropDownNode.ComboBox.Show();
+                m_CurrentOFDropDownNode.ComboBox.DroppedDown = true;
             }
             else if (e.Node is OpenFOAMTextBoxTreeNode<dynamic>)
             {
-                if (m_CurrentOFTreeNode != (OpenFOAMTextBoxTreeNode<dynamic>)e.Node)
+                if (m_CurrentOFTxtBoxTreeNode != (OpenFOAMTextBoxTreeNode<dynamic>)e.Node)
                 {
                     HideTextBox();
                 }
 
-                m_CurrentOFTreeNode = (OpenFOAMTextBoxTreeNode<dynamic>)e.Node;
+                m_CurrentOFTxtBoxTreeNode = (OpenFOAMTextBoxTreeNode<dynamic>)e.Node;
 
-                Controls.Add(m_CurrentOFTreeNode.TxtBox);
+                Controls.Add(m_CurrentOFTxtBoxTreeNode.TxtBox);
 
-                m_CurrentOFTreeNode.TxtBox.SetBounds(
-                    m_CurrentOFTreeNode.Bounds.X - 1,
-                    m_CurrentOFTreeNode.Bounds.Y - 2,
-                    m_CurrentOFTreeNode.Bounds.Width + 25,
-                    m_CurrentOFTreeNode.Bounds.Height);
+                m_CurrentOFTxtBoxTreeNode.TxtBox.SetBounds(
+                    m_CurrentOFTxtBoxTreeNode.Bounds.X - 1,
+                    m_CurrentOFTxtBoxTreeNode.Bounds.Y - 2,
+                    m_CurrentOFTxtBoxTreeNode.Bounds.Width + 25,
+                    m_CurrentOFTxtBoxTreeNode.Bounds.Height);
 
-                m_CurrentOFTreeNode.TxtBox.TextChanged += new EventHandler(TextBox_TextChanged);
-                m_CurrentOFTreeNode.TxtBox.Click += new EventHandler(TextBox_Click);
-                m_CurrentOFTreeNode.TxtBox.MouseLeave += new EventHandler(TextBox_Leave);
+                m_CurrentOFTxtBoxTreeNode.TxtBox.TextChanged += new EventHandler(TextBox_TextChanged);
+                m_CurrentOFTxtBoxTreeNode.TxtBox.Click += new EventHandler(TextBox_Click);
+                m_CurrentOFTxtBoxTreeNode.TxtBox.MouseLeave += new EventHandler(TextBox_Leave);
 
-                m_CurrentOFTreeNode.TxtBox.Show();
+                m_CurrentOFTxtBoxTreeNode.TxtBox.Show();
             }
             else
             {
@@ -122,6 +122,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         void ComboBox_SelectedValueChanged(object sender, EventArgs e)
         {
+            m_ChangeValue = true;
             HideComboBox();
         }
 
@@ -132,7 +133,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <param name="e"></param>
         void TextBox_TextChanged(object sender, EventArgs e)
         {
-            m_CurrentOFTreeNode.TxtBox.MouseLeave += new EventHandler(TextBox_Leave);
+            m_CurrentOFTxtBoxTreeNode.TxtBox.MouseLeave += new EventHandler(TextBox_Leave);
             m_ChangeValue = true;
         }
 
@@ -153,7 +154,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <param name="e"></param>
         void TextBox_Click(object sender, EventArgs e)
         {
-            m_CurrentOFTreeNode.TxtBox.MouseLeave -= TextBox_Leave;
+            m_CurrentOFTxtBoxTreeNode.TxtBox.MouseLeave -= TextBox_Leave;
         }
 
         /// <summary>
@@ -164,6 +165,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         void ComboBox_DropDownClosed(object sender, EventArgs e)
         {
+            m_ChangeValue = true;
             HideComboBox();
         }
 
@@ -186,24 +188,27 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// </summary>
         private void HideComboBox()
         {
-            if (m_CurrentNode != null)
+            if (m_CurrentOFDropDownNode != null)
             {
+                ComboBox_ChangeValue();
+                m_ChangeValue = false;
+
                 // Unregister the event listener
-                m_CurrentNode.ComboBox.SelectedValueChanged -= ComboBox_SelectedValueChanged;
-                m_CurrentNode.ComboBox.DropDownClosed -= ComboBox_DropDownClosed;
+                m_CurrentOFDropDownNode.ComboBox.SelectedValueChanged -= ComboBox_SelectedValueChanged;
+                m_CurrentOFDropDownNode.ComboBox.DropDownClosed -= ComboBox_DropDownClosed;
 
                 // Copy the selected text from the ComboBox to the TreeNode
-                m_CurrentNode.Text = m_CurrentNode.ComboBox.Text;
+                m_CurrentOFDropDownNode.Text = m_CurrentOFDropDownNode.ComboBox.Text;
 
                 // Hide the ComboBox
-                m_CurrentNode.ComboBox.Hide();
-                m_CurrentNode.ComboBox.DroppedDown = false;
+                m_CurrentOFDropDownNode.ComboBox.Hide();
+                m_CurrentOFDropDownNode.ComboBox.DroppedDown = false;
 
                 // Remove the control from the TreeView's list of currently-displayed controls
-                Controls.Remove(m_CurrentNode.ComboBox);
+                Controls.Remove(m_CurrentOFDropDownNode.ComboBox);
 
                 // And return to the default state (no ComboBox displayed)
-                m_CurrentNode = null;
+                m_CurrentOFDropDownNode = null;
             }
 
         }
@@ -213,16 +218,26 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// </summary>
         private void HideTextBox()
         {
-            if(m_CurrentOFTreeNode != null)
+            if(m_CurrentOFTxtBoxTreeNode != null)
             {
                 TextBox_ChangeValue();
                 m_ChangeValue = false;
-                m_CurrentOFTreeNode.TxtBox.TextChanged -= TextBox_TextChanged;
-                m_CurrentOFTreeNode.Text = m_CurrentOFTreeNode.TxtBox.Text;
-                m_CurrentOFTreeNode.TxtBox.Hide();
-                Controls.Remove(m_CurrentOFTreeNode.TxtBox);
-                m_CurrentOFTreeNode = null;
+                m_CurrentOFTxtBoxTreeNode.TxtBox.TextChanged -= TextBox_TextChanged;
+                m_CurrentOFTxtBoxTreeNode.Text = m_CurrentOFTxtBoxTreeNode.TxtBox.Text;
+                m_CurrentOFTxtBoxTreeNode.TxtBox.Hide();
+                Controls.Remove(m_CurrentOFTxtBoxTreeNode.TxtBox);
+                m_CurrentOFTxtBoxTreeNode = null;
             }
+        }
+
+        private void ComboBox_ChangeValue()
+        {
+            if(!m_ChangeValue)
+            {
+                return;
+            }
+
+            m_CurrentOFDropDownNode.Value = m_CurrentOFDropDownNode.ComboBox.SelectedItem as Enum;
         }
 
         /// <summary>
@@ -235,34 +250,38 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
                 return;
             }
 
-            string valueString = m_CurrentOFTreeNode.TxtBox.Text;
+            string valueString = m_CurrentOFTxtBoxTreeNode.TxtBox.Text;
             try
             {
                 //Vector3D ( d d d )
-                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTreeNode.TxtBoxValue is Vector3D)
+                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value/*.TxtBoxValue*/ is Vector3D)
                 {
                     List<double> entries = GetListFromVectorString(valueString);
-                    m_CurrentOFTreeNode.TxtBoxValue = new Vector3D(entries[0], entries[1], entries[2]);
+                    //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = new Vector3D(entries[0], entries[1], entries[2]);
+                    m_CurrentOFTxtBoxTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
                 }
                 //Vector ( d d )
-                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTreeNode.TxtBoxValue is Vector)
+                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value/*.TxtBoxValue*/ is Vector)
                 {
                     List<double> entries = GetListFromVectorString(valueString);
-                    m_CurrentOFTreeNode.TxtBoxValue = new Vector(entries[0], entries[1]);
+                    //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = new Vector(entries[0], entries[1]);
+                    m_CurrentOFTxtBoxTreeNode.Value = new Vector(entries[0], entries[1]);
                 }
                 //double / integer ( d )
                 else if (m_SingleReg.IsMatch(valueString))
                 {
                     string value = valueString.Trim();
-                    if(m_CurrentOFTreeNode.TxtBoxValue is int)
+                    if(m_CurrentOFTxtBoxTreeNode.Value/*.TxtBoxValue*/ is int)
                     {
                         int j = Convert.ToInt32(value);
-                        m_CurrentOFTreeNode.TxtBoxValue = j;
+                        //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = j;
+                        m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
                     else
                     {
                         double j = Convert.ToDouble(value);
-                        m_CurrentOFTreeNode.TxtBoxValue = j;
+                        //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = j;
+                        m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
                 }
                 else
@@ -274,7 +293,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             catch (FormatException)
             {
                 System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_FORMAT
-                    + " " + valueString + "\nFormat: " + m_CurrentOFTreeNode.Format
+                    + " " + valueString + "\nFormat: " + m_CurrentOFTxtBoxTreeNode.Format
                     , OpenFoamExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
