@@ -26,7 +26,31 @@ using System.Windows.Media.Media3D;
 using System;
 
 namespace BIM.OpenFoamExport
-{ 
+{
+    public class RefVar<T> : Object
+    {
+        public T RefV{ get; set; }
+
+        public override string ToString()
+        {
+            return RefV.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Pseudo-Pointer for reference to GUI.
+    /// </summary>
+    sealed class VariablePointer
+    {
+        public Func<object> Get { get; private set; }
+        public Action<object> Set { get; private set; }
+        public VariablePointer(Func<object> getter, Action<object> setter)
+        {
+            Get = getter;
+            Set = setter;
+        }
+    }
+
     /// <summary>
     /// Patch for boundaryField in Parameter-Dictionaries without values.
     /// </summary>
@@ -623,9 +647,10 @@ namespace BIM.OpenFoamExport
     /// <summary>
     /// Settings made by user to export.
     /// </summary>
-    public struct Settings
+    public class Settings
     {
         private Dictionary<string, object> m_SimulationDefaultList;
+        private Dictionary<string, object> m_SimulationDefaultList2;
 
         private SaveFormat m_SaveFormat;
         private ElementsExportRange m_ExportRange;
@@ -1122,6 +1147,7 @@ namespace BIM.OpenFoamExport
         {
             //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
+            m_SimulationDefaultList2 = new Dictionary<string, object>();
 
             Dictionary<string, object> m_System = new Dictionary<string, object>();
             Dictionary<string, object> m_Constant = new Dictionary<string, object>();
@@ -1628,6 +1654,7 @@ namespace BIM.OpenFoamExport
         {
             //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
+            m_SimulationDefaultList2 = new Dictionary<string, object>();
 
             Dictionary<string, object> m_System = new Dictionary<string, object>();
             Dictionary<string, object> m_Constant = new Dictionary<string, object>();
@@ -1644,8 +1671,8 @@ namespace BIM.OpenFoamExport
             m_CellSize = new Vector3D(0,0,0);
             m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
 
-            m_BlockMeshDict.Add("CellSize", m_CellSize);
-            m_BlockMeshDict.Add("SimpleGrading", m_SimpleGrading);
+            //m_BlockMeshDict.Add("CellSize", m_CellSize);
+            //m_BlockMeshDict.Add("SimpleGrading", m_SimpleGrading);
 
             m_System.Add("BlockMeshDictionary", m_BlockMeshDict);
 
@@ -1667,20 +1694,34 @@ namespace BIM.OpenFoamExport
             m_TimePrecision = timePrecision;
             m_RunTimeModifiable = runTimeModifiable;
 
-            m_ControlDict.Add("StartFrom", m_StartFrom);
-            m_ControlDict.Add("StartTime", m_StartTime);
-            m_ControlDict.Add("StopAt", m_StopAt);
-            m_ControlDict.Add("EndTime", m_EndTime);
-            m_ControlDict.Add("DeltaT", m_DeltaT);
-            m_ControlDict.Add("WriteControl", m_WriteControl);
-            m_ControlDict.Add("WriteInterval", m_WriteInterval);
-            m_ControlDict.Add("PurgeWrite", m_PurgeWrite);
-            m_ControlDict.Add("WriteFormat", m_WriteFormat);
-            m_ControlDict.Add("WritePrecision", m_WritePrecision);
-            m_ControlDict.Add("WriteCompression", m_WriteCompression);
-            m_ControlDict.Add("TimeFormat", m_TimeFormat);
-            m_ControlDict.Add("TimePrecision", m_TimePrecision);
-            m_ControlDict.Add("RunTimeModifiable", m_RunTimeModifiable);
+            //m_ControlDict.Add("StartFrom", m_StartFrom);
+            //m_ControlDict.Add("StartTime", m_StartTime);
+            //m_ControlDict.Add("StopAt", m_StopAt);
+            //m_ControlDict.Add("EndTime", m_EndTime);
+            //m_ControlDict.Add("DeltaT", m_DeltaT);
+            //m_ControlDict.Add("WriteControl", m_WriteControl);
+            //m_ControlDict.Add("WriteInterval", m_WriteInterval);
+            //m_ControlDict.Add("PurgeWrite", m_PurgeWrite);
+            //m_ControlDict.Add("WriteFormat", m_WriteFormat);
+            //m_ControlDict.Add("WritePrecision", m_WritePrecision);
+            //m_ControlDict.Add("WriteCompression", m_WriteCompression);
+            //m_ControlDict.Add("TimeFormat", m_TimeFormat);
+            //m_ControlDict.Add("TimePrecision", m_TimePrecision);
+            //m_ControlDict.Add("RunTimeModifiable", m_RunTimeModifiable);
+            //SaveVar(m_ControlDict, "StartFrom", () => m_StartFrom, v => { m_StartFrom = (enum) v; });
+            //m_ControlDict.Add("StartFrom", new VariablePointer(
+            //    () => m_StartFrom,
+            //    val => { m_StartFrom = (StartFrom)val; }
+            //));
+
+            //m_ControlDict.Add("EndTime", new VariablePointer(
+            //    () => m_EndTime,
+            //    val => { m_EndTime = (double)val; }
+            //));
+
+            m_ControlDict.Add("StartTime", new RefVar<double> { RefV = m_StartTime });
+            m_ControlDict.Add("EndTime", new RefVar<double> { RefV = m_EndTime });
+            m_ControlDict.Add("DeltaT", new RefVar<double> { RefV = m_DeltaT });
 
             m_System.Add("ControlDictionary", m_ControlDict);
 
@@ -1921,5 +1962,11 @@ namespace BIM.OpenFoamExport
             m_SelectedCategories = selectedCategories;
             m_Units = units;
         }
+
+        private void SaveVar(Dictionary<string, VariablePointer> dict, string key, Func<object> getter, Action<object> setter)
+        {
+            dict.Add(key, new VariablePointer(getter, setter));
+        }
+
     }
 }

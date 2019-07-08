@@ -239,30 +239,30 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             try
             {
                 //Vector3D ( d d d )
-                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTreeNode.Value is Vector3D)
+                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTreeNode.TxtBoxValue is Vector3D)
                 {
                     List<double> entries = GetListFromVectorString(valueString);
-                    m_CurrentOFTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
+                    m_CurrentOFTreeNode.TxtBoxValue = new Vector3D(entries[0], entries[1], entries[2]);
                 }
                 //Vector ( d d )
-                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTreeNode.Value is Vector)
+                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTreeNode.TxtBoxValue is Vector)
                 {
                     List<double> entries = GetListFromVectorString(valueString);
-                    m_CurrentOFTreeNode.Value = new Vector(entries[0], entries[1]);
+                    m_CurrentOFTreeNode.TxtBoxValue = new Vector(entries[0], entries[1]);
                 }
                 //double / integer ( d )
                 else if (m_SingleReg.IsMatch(valueString))
                 {
                     string value = valueString.Trim();
-                    if(m_CurrentOFTreeNode.Value is int)
+                    if(m_CurrentOFTreeNode.TxtBoxValue is int)
                     {
                         int j = Convert.ToInt32(value);
-                        m_CurrentOFTreeNode.Value = j;
+                        m_CurrentOFTreeNode.TxtBoxValue = j;
                     }
                     else
                     {
                         double j = Convert.ToDouble(value);
-                        m_CurrentOFTreeNode.Value = j;
+                        m_CurrentOFTreeNode.TxtBoxValue = j;
                     }
                 }
                 else
@@ -281,10 +281,11 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         }
 
         /// <summary>
-        /// 
+        /// This method extract entries from a vector that is given as string, convert them to double and 
+        /// return them as List.
         /// </summary>
-        /// <param name="vecString"></param>
-        /// <returns></returns>
+        /// <param name="vecString">Vector-String</param>
+        /// <returns>Double-List</returns>
         private List<double> GetListFromVectorString(string vecString)
         {
             if(vecString.Equals("")|| vecString == string.Empty)

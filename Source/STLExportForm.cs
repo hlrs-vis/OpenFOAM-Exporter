@@ -199,14 +199,17 @@ namespace BIM.OpenFoamExport
             //Solver.smoothSolver, Solver.smoothSolver, Solver.smoothSolver, Smoother.GaussSeidel, Smoother.GaussSeidel,
             //Smoother.GaussSeidel, TransportModel.Newtonian, SimulationType.RAS);
 
+            List<string> keyPath = new List<string>();
+
             foreach (var att in m_Settings.SimulationDefault)
             {
-
+                keyPath.Add(att.Key);
                 TreeNode treeNodeSimulation = new TreeNode(att.Key);
                 if (att.Value is Dictionary<string, object>)
                 {
-                    treeNodeSimulation = GetChildNode(att.Key, att.Value as Dictionary<string, object>);
+                    treeNodeSimulation = GetChildNode(att.Key, att.Value as Dictionary<string, object>, keyPath);
                 }
+                keyPath.Remove(att.Key);
                 if (treeNodeSimulation != null)
                     m_OpenFOAMTreeView.Nodes.Add(treeNodeSimulation);
             }
@@ -218,7 +221,7 @@ namespace BIM.OpenFoamExport
         /// <param name="parent">Parent node</param>
         /// <param name="dict">Dictionary that contains attributes.</param>
         /// <returns>TreeNode with all attributes from dictionary as child nodes.</returns>
-        private TreeNode GetChildNode(string parent, Dictionary<string, object> dict)
+        private TreeNode GetChildNode(string parent, Dictionary<string, object> dict, List<string> keyPath)
         {
             if (parent == null)
                 return null;
@@ -234,10 +237,11 @@ namespace BIM.OpenFoamExport
 
             foreach(var att in dict)
             {
+                keyPath.Add(att.Key);
                 TreeNode child = new TreeNode(att.Key);
                 if (att.Value is Dictionary<string,object>)
                 {
-                    child = GetChildNode(att.Key, att.Value as Dictionary<string, object>);
+                    child = GetChildNode(att.Key, att.Value as Dictionary<string, object>, keyPath);
                 }
                 else if (att.Value is Enum)
                 {
@@ -247,9 +251,10 @@ namespace BIM.OpenFoamExport
                 }
                 else
                 {
-                    OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value);
+                    OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value, ref m_Settings, keyPath);
                     child.Nodes.Add(txtBoxNode);
                 }
+                keyPath.Remove(att.Key);
                 if (child != null)
                     treeNode.Nodes.Add(child);
             }
@@ -356,7 +361,7 @@ namespace BIM.OpenFoamExport
                 //aSetting.SimulationDefault = m_Settings.SimulationDefault;
                 // save Revit document's triangular data in a temporary file
                 m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
-                DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, /*m_Settings*/aSetting);
+                DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, m_Settings/*aSetting*/);
 
                 if (succeed == DataGenerator.GeneratorStatus.FAILURE)
                 {

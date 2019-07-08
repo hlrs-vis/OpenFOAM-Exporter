@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Forms;
@@ -13,9 +14,11 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
     /// <typeparam name="T">Generic Value inside Textbox.</typeparam>
     public class OpenFOAMTextBoxTreeNode<T> : TreeNode
     {
-        private T value;
+        private T txtBoxValue;
         private string format;
         private TextBox txtBox = new TextBox();
+        private List<string> keyPath;
+        private Settings settings;
 
         #region
         /// <summary>
@@ -81,22 +84,32 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <summary>
         /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
         /// </summary>
-        /// <param name="_value">Type of value.</param>
-        public OpenFOAMTextBoxTreeNode(T _value)
-            : base(_value.ToString().Replace(';', ' '))
+        /// <param name="_txtBoxValue">Type of value.</param>
+        public OpenFOAMTextBoxTreeNode(T _txtBoxValue, ref Settings _settings, List<string> _keyPath)
+            : base(_txtBoxValue.ToString().Replace(';', ' '))
         {
-            value = _value;
+            txtBoxValue = _txtBoxValue;
             txtBox.Text = Text;
 
-            if (value is Vector3D)
+
+            settings = _settings;
+
+            keyPath = new List<string>();
+            foreach(string s in _keyPath)
+            {
+                keyPath.Add(s);
+            }
+
+
+            if (txtBoxValue is Vector3D)
             {
                 format = "x y z -> x,y,z∊ℝ";
             }
-            else if (value is Vector)
+            else if (txtBoxValue is Vector)
             {
                 format = "x y -> x,y∊ℝ";
             }
-            else if (value is int || value is double)
+            else if (txtBoxValue is int || txtBoxValue is double)
             {
                 format = "int/double";
             }
@@ -110,15 +123,31 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <summary>
         /// Getter-Setter for value.
         /// </summary>
-        public T Value
+        public T TxtBoxValue
         {
             get
             {
-                return value;
+                return txtBoxValue;
             }
             set
             {
-                this.value = value;
+                this.txtBoxValue = value;
+                Dictionary<string, object> att = settings.SimulationDefault;
+                foreach (string s in keyPath)
+                {
+                    if(att[s] is Dictionary<string,object>)
+                    {
+                        Dictionary<string, object> newLevel = att[s] as Dictionary<string, object>;
+                        att = newLevel;
+                    }
+                    else
+                    {
+                        var refValue = att[s] as RefVar<double>;
+                        refValue.RefV = Convert.ToDouble(txtBoxValue);
+                    }
+                    
+                }
+
             }
         }
 
