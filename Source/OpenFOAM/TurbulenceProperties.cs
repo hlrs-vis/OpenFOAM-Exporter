@@ -7,10 +7,10 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// </summary>
     public class TurbulenceProperties : FoamDict
     {
-        /// <summary>
-        /// includes all paramter for this Dictionary.
-        /// </summary>
-        TurbulenceParameter m_TurbulenceParameter;
+        ///// <summary>
+        ///// includes all paramter for this Dictionary.
+        ///// </summary>
+        //TurbulenceParameter m_TurbulenceParameter;
 
         /// <summary>
         /// Contructor.
@@ -21,9 +21,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-objects</param>
         public TurbulenceProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("turbulenceProperties", "dictionary", version, path, attributes, format)
+            : base("turbulenceProperties", "dictionary", version, path, attributes, format, settings)
         {
-            m_Settings = settings;
+            //m_Settings = settings;
             InitAttributes();
         }
 
@@ -32,9 +32,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_TurbulenceParameter = m_Settings.TurbulenceParameter;
+            //m_TurbulenceParameter = (TurbulenceParameter)m_DictFile["turbulenceProperties"]/*m_Settings.TurbulenceParameter*/;
 
-            foreach(var obj in m_TurbulenceParameter.ToDictionary())
+            foreach(var obj in m_DictFile/*m_TurbulenceParameter.ToDictionary()*/)
             {
                 FoamFile.Attributes.Add(obj.Key, obj.Value);
             }

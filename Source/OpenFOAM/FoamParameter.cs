@@ -1,11 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Windows.Media.Media3D;
 
 namespace BIM.OpenFoamExport.OpenFOAM
 {
+
+
     /// <summary>
     /// Abstract base class for simulation parameter that vary with used simulation-model.
     /// </summary>
-    public abstract class FoamParameter : FoamDict
+    /// <typeparam name="T">Type of value.</typeparam>
+    public abstract class FoamParameter<T> : FoamDict
     {
         /// <summary>
         /// Name of the patch wall
@@ -30,11 +36,11 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Struct for internalField-entry
         /// </summary>
-        protected struct InternalField<T>
+        protected struct InternalField<K>
         {
-            T m_Value;
+            K m_Value;
 
-            public T Value
+            public K Value
             {
                 get
                 {
@@ -46,6 +52,16 @@ namespace BIM.OpenFoamExport.OpenFOAM
                 }
             }
         }
+
+        /// <summary>
+        /// InternalField-entry.
+        /// </summary>
+        protected InternalField<T> m_InternalField;
+
+        /// <summary>
+        /// Internalfield as string.
+        /// </summary>
+        protected string m_InternalFieldString;
 
         /// <summary>
         /// Dimension-entry
@@ -72,16 +88,38 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
         public FoamParameter(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _class, string _object, string _wallName,
             List<string> _InletNames, List<string> _OutletNames)
-            : base(_class, _object, version, path, attributes, format)
+            : base(_class, _object, version, path, attributes, format, settings)
         {
-            m_Settings = settings;
+            //m_Settings = settings;
             m_WallName = _wallName;
             m_InletNames = _InletNames;
             m_OutletNames = _OutletNames;
             m_Uniform = "uniform";
             m_Dimensions = new int[7];
             m_BoundaryField = new Dictionary<string, object>();
+            m_InternalField.Value = (T)m_DictFile["internalField"];
             InitAttributes();
+        }
+
+        /// <summary>
+        /// Initialize Attributes.
+        /// </summary>
+        public override void InitAttributes()
+        {
+            m_BoundaryField.Add(m_WallName, m_DictFile["wall"] as Dictionary<string, object>/*m_Settings.WallU.Attributes*/);
+
+            foreach (string s in m_OutletNames)
+            {
+                m_BoundaryField.Add(s, m_DictFile["outlet"] as Dictionary<string, object>/*m_Settings.OutletU.Attributes*/);
+            }
+            foreach (string s in m_InletNames)
+            {
+                m_BoundaryField.Add(s, m_DictFile["inlet"] as Dictionary<string, object>/* m_Settings.InletU.Attributes*/);
+            }
+
+            FoamFile.Attributes.Add("dimensions", m_Dimensions);
+            FoamFile.Attributes.Add("internalField", m_InternalFieldString);
+            FoamFile.Attributes.Add("boundaryField", m_BoundaryField);
         }
     }
 }

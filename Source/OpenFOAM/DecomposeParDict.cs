@@ -12,10 +12,10 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>        
         private int m_NumberOfSubdomains;
         
-        /// <summary>
-        /// Method for decomposing.
-        /// </summary>
-        private MethodDecompose m_Method;
+        ///// <summary>
+        ///// Method for decomposing.
+        ///// </summary>
+        //private MethodDecompose m_Method;
 
         /// <summary>
         /// SimpleCoeffs-Dictionary
@@ -46,10 +46,8 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-objects</param>
         public DecomposeParDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("decomposeParDict", "dictionary", version, path, attributes, format)
+            : base("decomposeParDict", "dictionary", version, path, attributes, format, settings)
         {
-            m_Settings = settings;
-
             m_SimpleCoeffs = new Dictionary<string, object>();
             m_HierarchicalCoeffs = new Dictionary<string, object>();
             m_ManualCoeffs = new Dictionary<string, object>();
@@ -61,17 +59,18 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
-            Dictionary<string, object> decompose = system["DecomposeParDictionary"] as Dictionary<string, object>;
+            //Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
+            //Dictionary<string, object> decompose = system["DecomposeParDictionary"] as Dictionary<string, object>;
 
             m_NumberOfSubdomains = m_Settings.NumberOfSubdomains;
-            m_Method = m_Settings.MethodDecompose;
+            //m_Method = m_Settings.MethodDecompose;
 
             FoamFile.Attributes.Add("numberOfSubdomains", m_NumberOfSubdomains);
-            foreach(var obj in decompose)
-            {
-                FoamFile.Attributes.Add(obj.Key, obj.Value);
-            }
+            base.InitAttributes();
+            //foreach(var obj in decompose)
+            //{
+            //    FoamFile.Attributes.Add(obj.Key, obj.Value);
+            //}
             //m_SimpleCoeffs.Add("n", m_Settings.SimpleCoeffs.N);
             //m_SimpleCoeffs.Add("delta", m_Settings.SimpleCoeffs.Delta);
             //m_HierarchicalCoeffs.Add("n", m_Settings.HierarchicalCoeffs.N);

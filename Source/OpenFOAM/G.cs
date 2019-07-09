@@ -17,9 +17,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="format">Ascii or Binary</param>
         /// <param name="settings">Settings-object</param>
         public G(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            :base("g", "uniformDimensionedVectorField", version, path, attributes, format)
+            :base("g", "uniformDimensionedVectorField", version, path, attributes, format, settings)
         {
-            m_Settings = settings;
+            //m_Settings = settings;
             InitAttributes();
         }
 
@@ -30,7 +30,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         {
             int[] dimension = new int[] { 0, 1, -2, 0, 0, 0, 0 };
             FoamFile.Attributes.Add("dimensions", dimension);
-            FoamFile.Attributes.Add("value", new Vector3D(0, 0, m_Settings.GValue));
+            FoamFile.Attributes.Add("value", new Vector3D(0, 0, (double)m_DictFile["g"]/*m_Settings.GValue*/));
         }
     }
 }

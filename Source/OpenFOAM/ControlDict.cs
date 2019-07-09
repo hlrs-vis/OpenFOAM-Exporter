@@ -22,9 +22,8 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="settings">Settings-object</param>
         /// <param name="_functions">Additional functions as string</param>
         public ControlDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _functions)
-            : base("controlDict" , "dictionary", version, path, attributes, format)
+            : base("controlDict" , "dictionary", version, path, attributes, format, settings)
         {
-            m_Settings = settings;
             m_Functions = new Dictionary<string, object>();
 
             InitAttributes();
@@ -35,14 +34,14 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
-            Dictionary<string, object> control = system["ControlDictionary"] as Dictionary<string, object>;
+            //Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
+            //Dictionary<string, object> control = system["ControlDictionary"] as Dictionary<string, object>;
 
-            foreach(var obj in control)
-            {
-                FoamFile.Attributes.Add(obj.Key, obj.Value);
-            }
-
+            //foreach(var obj in m_DictFolder)
+            //{
+            //    FoamFile.Attributes.Add(obj.Key, obj.Value);
+            //}
+            base.InitAttributes();
             FoamFile.Attributes.Add("functions", m_Functions);
 
             //FoamFile.Attributes.Add("startFrom", control["StartFrom"]/*m_Settings._StartFrom*/);

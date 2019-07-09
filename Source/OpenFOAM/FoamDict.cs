@@ -23,6 +23,16 @@ namespace BIM.OpenFoamExport.OpenFOAM
         protected Settings m_Settings;
 
         /// <summary>
+        /// ParentDictionary of the simulation dictionary in settings.
+        /// </summary>
+        protected Dictionary<string, object> m_ParentFolder;
+
+        /// <summary>
+        /// Dictionary in settings which contains all attributes for this file.
+        /// </summary>
+        protected Dictionary<string, object> m_DictFile;
+
+        /// <summary>
         /// FoamFile-Object
         /// </summary>
         private FoamFile foamFile;
@@ -41,10 +51,12 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="path">Path to this File.</param>
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary.</param>
-        public FoamDict(string _name, string m_class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format)
+        /// <param name="settings">Settings-object</param>
+        public FoamDict(string _name, string m_class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
         {
             name = _name;
             _class = m_class;
+            m_Settings = settings;
 
             if (format == SaveFormat.ascii)
             {
@@ -54,12 +66,20 @@ namespace BIM.OpenFoamExport.OpenFOAM
             {
                 foamFile = new FoamFileAsBinary(name, version, path, _class, attributes, format);
             }
+            m_ParentFolder = m_Settings.SimulationDefault[FoamFile.Location.Trim('"')] as Dictionary<string, object>;
+            m_DictFile = m_ParentFolder[name] as Dictionary<string, object>;
         }
 
         /// <summary>
         /// Interface for initializing attributes.
         /// </summary>
-        public abstract void InitAttributes();
+        public virtual void InitAttributes()
+        {
+            foreach (var obj in m_DictFile)
+            {
+                FoamFile.Attributes.Add(obj.Key, obj.Value);
+            }
+        }
 
         /// <summary>
         /// Add the attributes to the Foamfile.

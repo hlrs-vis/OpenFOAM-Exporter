@@ -12,7 +12,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
     public class MeshDict : FoamDict
     {
         public MeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("meshDict", "dictionary", version, path, attributes, format)
+            : base("meshDict", "dictionary", version, path, attributes, format, settings)
         {
 
         }

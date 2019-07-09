@@ -10,7 +10,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Dictionary for SurfaceFeatures
         /// </summary>
-        private Dictionary<string, object> m_SurfaceFeature;
+        //private Dictionary<string, object> m_SurfaceFeature;
 
         /// <summary>
         /// Name of the STL
@@ -27,10 +27,10 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="settings">Settings-object</param>
         /// <param name="stlName">Name of the stl</param>
         public SurfaceFeatureExtract(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string stlName)
-            : base("surfaceFeatureExtractDict", "dictionary", version, path, attributes, format)
+            : base("surfaceFeatureExtractDict", "dictionary", version, path, attributes, format, settings)
         {
-            m_Settings = settings;
-            m_SurfaceFeature = new Dictionary<string, object>();
+            //m_SurfaceFeature = new Dictionary<string, object>();
+            //m_SurfaceFeature = m_DictFolder;
             m_STLName = stlName;
             InitAttributes();
         }
@@ -40,11 +40,19 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_SurfaceFeature.Add("extractionMethod", m_Settings.ExtractionMethod);
-            m_SurfaceFeature.Add("extractFromSurfaceCoeffs", m_Settings.ExtractFromSurfaceCoeffs);
-            m_SurfaceFeature.Add("writeObj", m_Settings.WriteObj);
+            //m_SurfaceFeature.Add("extractionMethod", m_Settings.ExtractionMethod);
+            //m_SurfaceFeature.Add("extractFromSurfaceCoeffs", m_Settings.ExtractFromSurfaceCoeffs);
+            //m_SurfaceFeature.Add("writeObj", m_Settings.WriteObj);
+            //Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
+            //Dictionary<string, object> surfaceFeature = system["SurfaceFeatureExtract"] as Dictionary<string, object>;
 
-            FoamFile.Attributes.Add(m_STLName + ".stl", m_SurfaceFeature);
+            //foreach (var obj in surfaceFeature)
+            //{
+            //    FoamFile.Attributes.Add(obj.Key, obj.Value);
+            //}
+            //base.InitAttributes();
+
+            FoamFile.Attributes.Add(m_STLName + ".stl", m_DictFile/*m_SurfaceFeature*/);
 
             //TO-DO: Dont set in this class
             //m_Settings.Features.Add("{file \"" + m_STLName + ".eMesh\"; level 3;}");

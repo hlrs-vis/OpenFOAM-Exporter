@@ -6,12 +6,12 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// <summary>
     /// Nut-Parameter for Simplefoam.
     /// </summary>
-    public class Nut : FoamParameter
+    public class Nut : FoamParameter<double>
     {
-        /// <summary>
-        /// InternalField entry
-        /// </summary>
-        private InternalField<double> m_InternalField;
+        ///// <summary>
+        ///// InternalField entry
+        ///// </summary>
+        //private InternalField<double> m_InternalField;
 
         /// <summary>
         /// Constructor.
@@ -37,22 +37,24 @@ namespace BIM.OpenFoamExport.OpenFOAM
         public override void InitAttributes()
         {
             m_Dimensions = new int[] { 0, 2, -1, 0, 0, 0, 0 };
-            m_InternalField.Value = m_Settings.InternalFieldNut;
-            m_BoundaryField.Add(m_WallName, m_Settings.WallNut.Attributes);
+            m_InternalFieldString = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
+            base.InitAttributes();
+            //m_InternalField.Value = m_Settings.InternalFieldNut;
+            //m_BoundaryField.Add(m_WallName, m_Settings.WallNut.Attributes);
 
-            foreach (string s in m_OutletNames)
-            {
-                m_BoundaryField.Add(s, m_Settings.OutletNut.Attributes);
-            }
-            foreach (string s in m_InletNames)
-            {
-                m_BoundaryField.Add(s, m_Settings.InletNut.Attributes);
-            }
+            //foreach (string s in m_OutletNames)
+            //{
+            //    m_BoundaryField.Add(s, m_Settings.OutletNut.Attributes);
+            //}
+            //foreach (string s in m_InletNames)
+            //{
+            //    m_BoundaryField.Add(s, m_Settings.InletNut.Attributes);
+            //}
 
-            FoamFile.Attributes.Add("dimensions", m_Dimensions);
-            string internalField = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
-            FoamFile.Attributes.Add("internalField", internalField);
-            FoamFile.Attributes.Add("boundaryField", m_BoundaryField);
+            //FoamFile.Attributes.Add("dimensions", m_Dimensions);
+            //string internalField = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
+            //FoamFile.Attributes.Add("internalField", internalField);
+            //FoamFile.Attributes.Add("boundaryField", m_BoundaryField);
         }
     }
 }

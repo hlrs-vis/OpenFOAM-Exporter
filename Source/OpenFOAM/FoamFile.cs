@@ -55,13 +55,24 @@ namespace BIM.OpenFoamExport.OpenFOAM
         protected SaveFormat m_SaveFormat = SaveFormat.ascii;
 
         /// <summary>
-        ///Additional attributes of the File.
+        ///Attributes of the File.
         /// </summary>
         public Dictionary<string, object> Attributes
         {
             get
             {
                 return m_Attributes;
+            }
+        }
+
+        /// <summary>
+        /// Returns folder name this file is stored in.
+        /// </summary>
+        public string Location
+        {
+            get
+            {
+                return m_Location;
             }
         }
 

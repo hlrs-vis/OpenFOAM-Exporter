@@ -22,9 +22,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-objects</param>
         public TransportProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("transportProperties", "dictionary", version, path, attributes, format)
+            : base("transportProperties", "dictionary", version, path, attributes, format, settings)
         {
-            m_Settings = settings;
+            //m_Settings = settings;
             InitAttributes();
         }
 
@@ -33,8 +33,8 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_TransportModel = m_Settings.TransportModel;
-
+            m_TransportModel = (TransportModel)m_DictFile["transportModel"];/*m_Settings.TransportModel*/;
+            Dictionary<string, object> transportModelParameterSettings = m_DictFile["transportModelParameter"] as Dictionary<string, object>;
             //nu-Unit = default
             int[] m_Unit = new int[] { 0, 2, -1, 0, 0, 0, 0};
             FoamFile.Attributes.Add("transportModel", m_TransportModel);
@@ -43,7 +43,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
             if(m_TransportModel != TransportModel.Newtonian)
             {
                 Dictionary<string, object> transportModelParemeter = new Dictionary<string, object>();
-                foreach (var v in m_Settings.TransportModelParameter)
+                foreach (var v in transportModelParameterSettings/*m_Settings.TransportModelParameter*/)
                 {
                     if (v.Key.Equals("function polynomial"))
                     {
@@ -66,12 +66,12 @@ namespace BIM.OpenFoamExport.OpenFOAM
             }
             else
             {
-                foreach(var obj in m_Settings.TransportModelParameter)
+                foreach(var obj in transportModelParameterSettings/*m_Settings.TransportModelParameter*/)
                 {
                     m_Unit = ChangeDimension(obj.Key);
                     if (m_Unit != null)
                     {
-                        modelParameterValue = AddUnit(m_Unit, m_Settings.TransportModelParameter[obj.Key]);
+                        modelParameterValue = AddUnit(m_Unit, /*m_Settings.TransportModelParameter*/transportModelParameterSettings[obj.Key]);
                         FoamFile.Attributes.Add(obj.Key + " " + obj.Key, modelParameterValue);
                     }
                     else

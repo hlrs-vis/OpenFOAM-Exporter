@@ -6,12 +6,12 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// <summary>
     /// Represents velocity parameter in CFD-Simulation in OpenFOAM.
     /// </summary>
-    public class U : FoamParameter
+    public class U : FoamParameter<Vector3D>
     {
-        /// <summary>
-        /// InternalField-entry
-        /// </summary>
-        private InternalField<Vector3D> m_InternalField;
+        ///// <summary>
+        ///// InternalField-entry
+        ///// </summary>
+        //private InternalField<Vector3D> m_InternalField;
 
         /// <summary>
         /// Constructor.
@@ -37,22 +37,25 @@ namespace BIM.OpenFoamExport.OpenFOAM
         public override void InitAttributes()
         {
             m_Dimensions = new int[] { 0, 1, -1, 0, 0, 0, 0 };
-            m_InternalField.Value = m_Settings.InternalFieldU;
-            m_BoundaryField.Add(m_WallName, m_Settings.WallU.Attributes);
+            m_InternalFieldString = m_Uniform + " (" + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat).Replace(",", " ") + ")";
+            base.InitAttributes();
+            //m_InternalField.Value = (Vector3D)m_DictFolder["internalField"];/*m_Settings.InternalFieldU*/;
+            
+            //m_BoundaryField.Add(m_WallName, (FOAMParameterPatch < Vector3D >)m_DictFolder["wall"]/*m_Settings.WallU.Attributes*/);
 
-            foreach(string s in m_OutletNames)
-            {
-                m_BoundaryField.Add(s, m_Settings.OutletU.Attributes);
-            }
-            foreach(string s in m_InletNames)
-            {
-                m_BoundaryField.Add(s, m_Settings.InletU.Attributes);
-            }
+            //foreach(string s in m_OutletNames)
+            //{
+            //    m_BoundaryField.Add(s, (FOAMParameterPatch<Vector3D>)m_DictFolder["outlet"]/*m_Settings.OutletU.Attributes*/);
+            //}
+            //foreach(string s in m_InletNames)
+            //{
+            //    m_BoundaryField.Add(s, (FOAMParameterPatch<Vector3D>)m_DictFolder["inlet"]/* m_Settings.InletU.Attributes*/);
+            //}
 
-            FoamFile.Attributes.Add("dimensions", m_Dimensions);
-            string internalField = m_Uniform + " (" + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat).Replace(","," ") + ")";
-            FoamFile.Attributes.Add("internalField", internalField);
-            FoamFile.Attributes.Add("boundaryField", m_BoundaryField);
+            //FoamFile.Attributes.Add("dimensions", m_Dimensions);
+            //string internalField = m_Uniform + " (" + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat).Replace(","," ") + ")";
+            //FoamFile.Attributes.Add("internalField", internalField);
+            //FoamFile.Attributes.Add("boundaryField", m_BoundaryField);
         }
     }
 }

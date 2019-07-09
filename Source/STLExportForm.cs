@@ -67,56 +67,6 @@ namespace BIM.OpenFoamExport
             // scan for categories to populate category list
             m_CategoryList = m_Generator.ScanCategories(true);
 
-            //SaveFormat saveFormat;
-            //if (rbBinary.Checked)
-            //{
-            //    saveFormat = SaveFormat.binary;
-            //}
-            //else
-            //{
-            //    saveFormat = SaveFormat.ascii;
-            //}
-            //ElementsExportRange exportRange;
-
-            //exportRange = ElementsExportRange.OnlyVisibleOnes;
-
-            //// get selected categories from the category list
-            //List<Category> selectedCategories = new List<Category>();
-
-            //// only for projects
-            //if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
-            //{
-            //    foreach (TreeNode treeNode in tvCategories.Nodes)
-            //    {
-            //        AddSelectedTreeNode(treeNode, selectedCategories);
-            //    }
-            //}
-
-            //DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
-            //m_SelectedDUT = dup;
-
-            //// create settings object to save setting information
-            //m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-            //    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
-
-            ////m_Settings = new Settings(SaveFormat.ascii, ElementsExportRange.OnlyVisibleOnes, MeshType.Snappy, OpenFOAMEnvironment.blueCFD, StartFrom.latestTime,
-            ////StopAt.endTime, WriteControl.timeStep, WriteFormat.ascii, WriteCompression.off,
-            ////TimeFormat.general, ExtractionMethod.extractFromSurface, MethodDecompose.simple, Agglomerator.faceAreaPair, CacheAgglomeration.on, Solver.GAMG,
-            ////Solver.smoothSolver, Solver.smoothSolver, Solver.smoothSolver, Smoother.GaussSeidel, Smoother.GaussSeidel,
-            ////Smoother.GaussSeidel, TransportModel.Newtonian, SimulationType.RAS);
-
-            //foreach (var att in m_Settings.SimulationDefault)
-            //{
-            //    TreeNode treeNodeSimulation = new TreeNode(att.Key);
-            //    if (att.Value is Dictionary<string, object>)
-            //    {
-            //        treeNodeSimulation = GetChildNode(att.Key, att.Value as Dictionary<string, object>);
-            //    }
-
-            //    if (treeNodeSimulation != null)
-            //        m_OpenFOAMTreeView.Nodes.Add(treeNodeSimulation);
-            //}
-
             foreach (Category category in m_CategoryList.Values)
             {
                 TreeNode treeNode = GetChildNode(category,m_Revit.ActiveUIDocument.Document.ActiveView);
@@ -245,15 +195,13 @@ namespace BIM.OpenFoamExport
                 }
                 else if (att.Value is Enum)
                 {
-                    //var refEnum = att.Value as RefVar<Enum>;
                     Enum @enum = att.Value as Enum;
                     OpenFOAMDropDownTreeNode dropDown = new OpenFOAMDropDownTreeNode(@enum, ref m_Settings, keyPath);
                     child.Nodes.Add(dropDown);
                 }
                 else
                 {
-                    //var obj = att.Value as RefVar<dynamic>;
-                    //var v = obj.RefV;
+
                     OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value, ref m_Settings, keyPath);
                     child.Nodes.Add(txtBoxNode);
                 }
