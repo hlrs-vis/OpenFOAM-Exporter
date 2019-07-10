@@ -27,38 +27,6 @@ using System;
 
 namespace BIM.OpenFoamExport
 {
-    ///// <summary>
-    ///// Patch for boundaryField in Parameter-Dictionaries without values.
-    ///// </summary>
-    //public struct FOAMParameterPatch
-    //{
-    //    //maybe later with enum
-    //    //Attributes for Parameter-Dictionaries in 0 folder.
-    //    string type;
-    //    Dictionary<string, object> attributes;
-
-    //    /// <summary>
-    //    /// Constructor.
-    //    /// </summary>
-    //    /// <param name="_type">Type of Patch</param>
-    //    public FOAMParameterPatch(string _type)
-    //    {
-    //        type = _type;
-    //        attributes = new Dictionary<string, object>
-    //        {
-    //            {"type", type }
-    //        };
-    //    }
-
-    //    //Getter for Attributes.
-    //    public Dictionary<string, object> Attributes { get => attributes;}
-
-    //    public Dictionary<string, object> ToDictionary()
-    //    {
-    //        return attributes;
-    //    }
-    //}
-
     /// <summary>
     /// Patch for boundaryField in Parameter-Dictionaries.
     /// </summary>
@@ -1170,17 +1138,10 @@ namespace BIM.OpenFoamExport
             m_openFOAMEnvironment = openFOAMEnv;
 
             //blockMeshDict
-            Dictionary<string, object> m_BlockMeshDict = new Dictionary<string, object>();
             m_CellSize = new Vector3D(0, 0, 0);
             m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
 
-            m_BlockMeshDict.Add("CellSize", m_CellSize);
-            m_BlockMeshDict.Add("SimpleGrading", m_SimpleGrading);
-
-            m_System.Add("BlockMeshDictionary", m_BlockMeshDict);
-
             //controlDict
-            Dictionary<string, object> m_ControlDict = new Dictionary<string, object>();
             m_StartFrom = startFrom;
             m_StartTime = 0;
             m_StopAt = stopAt;
@@ -1196,42 +1157,15 @@ namespace BIM.OpenFoamExport
             m_TimePrecision = 6;
             m_RunTimeModifiable = true;
 
-            m_ControlDict.Add("StartFrom", m_StartFrom);
-            m_ControlDict.Add("StartTime", m_StartTime);
-            m_ControlDict.Add("StopAt", m_StopAt);
-            m_ControlDict.Add("EndTime", m_EndTime);
-            m_ControlDict.Add("DeltaT", m_DeltaT);
-            m_ControlDict.Add("WriteControl", m_WriteControl);
-            m_ControlDict.Add("WriteInterval", m_WriteInterval);
-            m_ControlDict.Add("PurgeWrite", m_PurgeWrite);
-            m_ControlDict.Add("WriteFormat", m_WriteFormat);
-            m_ControlDict.Add("WritePrecision", m_WritePrecision);
-            m_ControlDict.Add("WriteCompression", m_WriteCompression);
-            m_ControlDict.Add("TimeFormat", m_TimeFormat);
-            m_ControlDict.Add("TimePrecision", m_TimePrecision);
-            m_ControlDict.Add("RunTimeModifiable", m_RunTimeModifiable);
-
-            m_System.Add("ControlDictionary", m_ControlDict);
-
 
             //surfaceFeatureExtract
-            Dictionary<string, object> m_SurfaceFeatureExtract = new Dictionary<string, object>();
+
             m_ExtractionMethod = extractionMethod;
-            m_ExtractFromSurfaceCoeffs = new Dictionary<string, object>()
-            {
-                {"includedAngle", m_IncludedAngle  = 150 }
-            };
+            m_IncludedAngle = 150;
             m_WriteObj = "yes";
-
-            m_SurfaceFeatureExtract.Add("ExtractionMethod", m_ExtractionMethod);
-            m_SurfaceFeatureExtract.Add("ExtractFromSurfaceCoeffs", m_ExtractFromSurfaceCoeffs);
-            m_SurfaceFeatureExtract.Add("WriteObj", m_WriteObj);
-
-            m_System.Add("SurfaceFeatureExtract", m_SurfaceFeatureExtract);
 
 
             //decomposeParDict
-            Dictionary<string, object> m_DecomposeParDict = new Dictionary<string, object>();
             m_NumberOfSubdomains = 4;
             m_MethodDecompose = methodDecompose;
 
@@ -1250,14 +1184,7 @@ namespace BIM.OpenFoamExport
 
             m_DataFile = "cellDecomposition";
 
-            m_DecomposeParDict.Add("method", m_MethodDecompose);
-            m_DecomposeParDict.Add("SimpleCoeffs", m_SimpleCoeffs.ToDictionary());
-            m_DecomposeParDict.Add("HierarchicalCoeefs", m_HierarchicalCoeffs.ToDictionary());
-
-            m_System.Add("DecomposeParDictionary", m_DecomposeParDict);
-
             //FvSchemes
-            Dictionary<string, object> m_FvSchemes = new Dictionary<string, object>();
 
             //To-DO: Implement schemes depending on used Simulation model
             m_ddtSchemes = new KeyValuePair<string, string>("default", "steadyState");
@@ -1275,20 +1202,9 @@ namespace BIM.OpenFoamExport
             m_snGradSchemes = new KeyValuePair<string, string>("default", "limited corrected 0.333");
             m_fluxRequired = new KeyValuePair<string, string>("default", "no");
 
-            m_FvSchemes.Add("ddtSchemes", m_ddtSchemes);
-            m_FvSchemes.Add("gradSchemes", m_gradSchemes);
-            m_FvSchemes.Add("divSchemes", m_divSchemes);
-            m_FvSchemes.Add("laplacianSchemes", m_laplacianSchemes);
-            m_FvSchemes.Add("snGradSchemes" , m_snGradSchemes);
-            m_FvSchemes.Add("fluxRequired", m_fluxRequired);
-
-            m_System.Add("FvSchemes", m_FvSchemes);
-
 
             //FvSolution
-            Dictionary<string, object> m_FvSolution = new Dictionary<string, object>();
 
-            Dictionary<string, object> m_Solvers = new Dictionary<string, object>();
             FvSolutionParamter _p = new FvSolutionParamter();
             _p.Solver = solverP;
             _p.RelTol = 0.1;
@@ -1337,53 +1253,26 @@ namespace BIM.OpenFoamExport
                 Smoother = smootherEpsilon
             };
 
-            m_Solvers.Add("P", m_p.ToDictionary());
-            m_Solvers.Add("U", m_U.ToDictionary());
-            m_Solvers.Add("K", m_k.ToDictionary());
-            m_Solvers.Add("Epsilon", m_epsilon.ToDictionary());
 
             //FvSolution-SIMPLE
-            Dictionary<string, object> m_SIMPLE = new Dictionary<string, object>();
             m_nNonOrhtogonalCorrectors = 2;
             m_residualControl = new Dictionary<string, object>();
 
-            m_SIMPLE.Add("NNonOrthogonalCorrectors", m_nNonOrhtogonalCorrectors);
-            m_SIMPLE.Add("ResidualControl", m_residualControl);
-
             //FvSolution-relaxationFactors
-            Dictionary<string, object> m_RelaxationFactors = new Dictionary<string, object>();
             m_relaxFactor_k = 0.7;
             m_relaxFactor_U = 0.7;
             m_relaxFactor_epsilon = 0.7;
             m_relaxFactor_p = 0.3;
 
-            m_RelaxationFactors.Add("RelaxFactor k", m_relaxFactor_k);
-            m_RelaxationFactors.Add("RelaxFactor U", m_relaxFactor_U);
-            m_RelaxationFactors.Add("RelaxFactor Epsilon", m_relaxFactor_epsilon);
-            m_RelaxationFactors.Add("RelaxFactor P", m_relaxFactor_p);
-
-            m_FvSolution.Add("Solvers", m_Solvers);
-            m_FvSolution.Add("SIMPLE", m_SIMPLE);
-            m_FvSolution.Add("RelaxtionFactors", m_RelaxationFactors);
-
-            m_System.Add("FvSolution", m_FvSolution);
-
             //SnappyHexMesh-General
-            Dictionary<string, object> m_SnappyHexMeshDict = new Dictionary<string, object>();
-
             m_CastellatedMesh = true;
             m_Snap = true;
             m_AddLayers = false;
             m_Debug = 0;
             m_MergeTolerance = 1e-6;
 
-            m_SnappyHexMeshDict.Add("CastellatedMesh", m_CastellatedMesh);
-            m_SnappyHexMeshDict.Add("Snap", m_Snap);
-            m_SnappyHexMeshDict.Add("AddLayers", m_AddLayers);
-
             //SnappyHexMesh-CastellatedMeshControls
 
-            Dictionary<string, object> m_CastellatedMeshControls = new Dictionary<string, object>();
             m_MaxLocalCells = 1000000;
             m_MaxGlobalCells = 2000000;
             m_MinRefinementCalls = 10;
@@ -1397,23 +1286,8 @@ namespace BIM.OpenFoamExport
             m_RefinementRegions = new Dictionary<string, object>();
             m_AllowFreeStandingZoneFaces = true;
 
-            m_CastellatedMeshControls.Add("MaxLocalCells", m_MaxLocalCells);
-            m_CastellatedMeshControls.Add("MaxGlobalCells", m_MaxGlobalCells);
-            m_CastellatedMeshControls.Add("MinRefinementCells", m_MinRefinementCalls);
-            m_CastellatedMeshControls.Add("MaxLoadUnbalance", m_MaxLoadUnbalance);
-            m_CastellatedMeshControls.Add("NCellsBetweenLevels", m_NCellsBetweenLevels);
-            m_CastellatedMeshControls.Add("Features", "implement later!!!");
-            m_CastellatedMeshControls.Add("WallLevel", m_WallLevel);
-            m_CastellatedMeshControls.Add("OutletLevel", m_OutletLevel);
-            m_CastellatedMeshControls.Add("InletLevel", m_InletLevel);
-            m_CastellatedMeshControls.Add("ResolveFeatureAngle", m_ResolveFeatureAngle);
-            m_CastellatedMeshControls.Add("RefinementRegions", m_RefinementRegions);
-            m_CastellatedMeshControls.Add("AllowFreeStandingZoneFaces", m_AllowFreeStandingZoneFaces);
-
-            m_SnappyHexMeshDict.Add("CastellatedMeshControls", m_CastellatedMeshControls);
-
             //SnappyHexMesh-SnapControls
-            Dictionary<string, object> m_SnapControls = new Dictionary<string, object>();
+
             m_NSmoothPatch = 5;
             m_Tolerance = 5;
             m_NSolverIter = 100;
@@ -1422,18 +1296,8 @@ namespace BIM.OpenFoamExport
             m_ImplicitFeatureSnap = true;
             m_MultiRegionFeatureSnap = true;
 
-            m_SnapControls.Add("NSmoothPatch", m_NSmoothPatch);
-            m_SnapControls.Add("Tolerance", m_Tolerance);
-            m_SnapControls.Add("NSolverIter", m_NSolverIter);
-            m_SnapControls.Add("NRelaxIterSnap", m_NRelaxIterSnap);
-            m_SnapControls.Add("NFeatureSnapIter", m_NFeatureSnapIter);
-            m_SnapControls.Add("ImplicitFeatureSnap", m_ImplicitFeatureSnap);
-            m_SnapControls.Add("MultiRegionFeaturSnap", m_MultiRegionFeatureSnap);
-
-            m_SnappyHexMeshDict.Add("SnapControls", m_SnapControls);
 
             //SnappyHexMesh-AddLayersControl
-            Dictionary<string, object> m_AddLayersControl = new Dictionary<string, object>();
             m_RelativeSizes = true;
             m_Layers = new Dictionary<string, object>();
             m_ExpansionRatio = 1.1;
@@ -1452,28 +1316,7 @@ namespace BIM.OpenFoamExport
             m_NLayerIter = 50;
             m_NRelaxedIterLayer = 20;
 
-            m_AddLayersControl.Add("RelativeSizes", m_RelativeSizes);
-            m_AddLayersControl.Add("Layers", m_Layers);
-            m_AddLayersControl.Add("ExpansionRatio", m_ExpansionRatio);
-            m_AddLayersControl.Add("FinalLayerThickness", m_FinalLayerThickness);
-            m_AddLayersControl.Add("MinThickness", m_MinThickness);
-            m_AddLayersControl.Add("NGrow", m_NGrow);
-            m_AddLayersControl.Add("FeatureAngle", m_FeatureAngle);
-            m_AddLayersControl.Add("NRelaxeIterLayer", m_NRelaxeIterLayer);
-            m_AddLayersControl.Add("NSmoothSurfaceNormals", m_nSmoothSurfaceNormals);
-            m_AddLayersControl.Add("NSmoothThickness", m_NSmoothThickness);
-            m_AddLayersControl.Add("NSmoothNormals", m_NSmoothNormals);
-            m_AddLayersControl.Add("MaxFaceThicknessRatio", m_MaxFaceThicknessRatio);
-            m_AddLayersControl.Add("MaxThicknessToMeadialRatio", m_MaxThicknessToMeadialRatio);
-            m_AddLayersControl.Add("MinMedianAxisAngle", m_MinMedianAxisAngle);
-            m_AddLayersControl.Add("NBufferCellsNoExtrude", m_NBufferCellsNoExtrude);
-            m_AddLayersControl.Add("NLayerIter", m_NLayerIter);
-            m_AddLayersControl.Add("NRelaxedIterLayer", m_NRelaxedIterLayer);
-
-            m_SnappyHexMeshDict.Add("AddLayersControl", m_AddLayersControl);
-
             //SnappyHexMesh-MeshQualityControls
-            Dictionary<string, object> m_MeshQualityControls = new Dictionary<string, object>();
             m_MaxNonOrthoMeshQualtiy = 60;
             m_MaxBoundarySkewness = 20;
             m_MaxInternalSkewness = 4;
@@ -1489,114 +1332,58 @@ namespace BIM.OpenFoamExport
             m_MinTriangleTwist = -1;
             m_NSmoothScale = 4;
             m_ErrorReduction = 0.75;
-            m_Relaxed = new Dictionary<string, object>
-            {
-                {"maxNonOrtho" ,m_MaxNonOrtho = 75 }
-            };
+            m_MaxNonOrtho = 75;
 
-            m_MeshQualityControls.Add("MaxNonOrthoMeshQuality" , m_MaxNonOrthoMeshQualtiy);
-            m_MeshQualityControls.Add("MaxBoundarySkewness", m_MaxBoundarySkewness);
-            m_MeshQualityControls.Add("MaxInternalSkewness", m_MaxInternalSkewness);
-            m_MeshQualityControls.Add("MaxConcave", m_MaxConcave);
-            m_MeshQualityControls.Add("MinFlatness", m_MinFlatness);
-            m_MeshQualityControls.Add("MinVol", m_MinVol);
-            m_MeshQualityControls.Add("MinTetQuality", m_MinTetQuality);
-            m_MeshQualityControls.Add("MinAre", m_MinArea);
-            m_MeshQualityControls.Add("MinTwist", m_MinTwist);
-            m_MeshQualityControls.Add("MinDeterminant", m_MinDeterminant);
-            m_MeshQualityControls.Add("MinFaceWeight", m_MinFaceWeight);
-            m_MeshQualityControls.Add("MinVolRatio", m_MinVolRatio);
-            m_MeshQualityControls.Add("MinTriangleTwist", m_MinTriangleTwist);
-            m_MeshQualityControls.Add("NSmoothScale", m_NSmoothScale);
-            m_MeshQualityControls.Add("ErrorReduction", m_ErrorReduction);
-            m_MeshQualityControls.Add("Relaxed", m_Relaxed);
-
-            m_SnappyHexMeshDict.Add("MeshQualityControls", m_MeshQualityControls);
-            m_SnappyHexMeshDict.Add("Debug", m_Debug);
-            m_SnappyHexMeshDict.Add("MergeTolerance", m_MergeTolerance);
-
-            m_System.Add("SnappyHexMeshDict", m_SnappyHexMeshDict);
-
-            m_SimulationDefaultList.Add("System", m_System);
 
             //U
-            Dictionary<string, object> m_UDict = new Dictionary<string, object>();
+
             m_InternalFieldU = new Vector3D(0, 0, 0);
             m_WallU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0, 0, 0));
             m_InletU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -5.0));
             m_OutletU = new FOAMParameterPatch<Vector3D>("inletOutlet", "uniform", new Vector3D(0, 0, 0));
             m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0, 0, 0));
 
-            m_UDict.Add("InternalField", m_InternalFieldU);
-            m_UDict.Add("Wall", m_WallU.ToDictionary());
-            m_UDict.Add("Inlet", m_InletU.ToDictionary());
-            m_UDict.Add("Outlet", m_OutletU.ToDictionary());
 
             //Epsilon
-            Dictionary<string, object> m_EpsilonDict = new Dictionary<string, object>();
+
             m_InternalFieldEpsilon = 0.01;
             m_WallEpsilon = new FOAMParameterPatch<double>("epsilonWallFunction", "uniform", 0.01);
             m_InletEpsilon = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
             m_OutletEpsilon = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
             m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
 
-            m_EpsilonDict.Add("InternalField", m_InternalFieldEpsilon);
-            m_EpsilonDict.Add("Wall", m_WallEpsilon.ToDictionary());
-            m_EpsilonDict.Add("Inlet", m_InletEpsilon.ToDictionary());
-            m_EpsilonDict.Add("Outlet", m_OutletEpsilon.ToDictionary());
 
             //Nut
-            Dictionary<string, object> m_NutDict = new Dictionary<string, object>();
+
             m_InternalFieldNut = 0;
             m_WallNut = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
             m_InletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
             m_OutletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
 
-            m_NutDict.Add("InternalField", m_InternalFieldNut);
-            m_NutDict.Add("Wall", m_WallNut.ToDictionary());
-            m_NutDict.Add("Inlet", m_InletNut.ToDictionary());
-            m_NutDict.Add("Outlet", m_OutletNut.ToDictionary());
 
             //P
-            Dictionary<string, object> m_PDict = new Dictionary<string, object>();
+
             m_InternalFieldP = 0;
             m_WallP = new FOAMParameterPatch<double>("zeroGradient");
             m_InletP = new FOAMParameterPatch<double>("zeroGradient");
             m_OutletP = new FOAMParameterPatch<double>("fixedValue", "uniform", 126.7);
 
-            m_PDict.Add("InternalField", m_InternalFieldP);
-            m_PDict.Add("Wall", m_WallP.ToDictionary());
-            m_PDict.Add("Inlet", m_InletP.ToDictionary());
-            m_PDict.Add("Outlet", m_OutletP.ToDictionary());
 
             //K
-            Dictionary<string, object> m_KDict = new Dictionary<string, object>();
+
             m_InternalFieldK = 0.1;
             m_WallK = new FOAMParameterPatch<double>("kqRWallFunction", "uniform", 0.1);
             m_InletK = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.1);
             m_OutletK = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
             m_OutletK.Attributes.Add("inletValue uniform", 0.1);
 
-            m_KDict.Add("InternalField", m_InternalFieldK);
-            m_KDict.Add("Wall", m_WallK.ToDictionary());
-            m_KDict.Add("Inlet", m_InletK.ToDictionary());
-            m_KDict.Add("Outlet", m_OutletK.ToDictionary());
-
-            m_Null.Add("U", m_UDict);
-            m_Null.Add("Epsilon", m_EpsilonDict);
-            m_Null.Add("Nut", m_NutDict);
-            m_Null.Add("P", m_PDict);
-            m_Null.Add("K", m_KDict);
-
-            m_SimulationDefaultList.Add("0", m_Null);
 
             //g
             m_GValue = -9.81;
 
-            m_Constant.Add("g", m_GValue);
 
             //TransportProperties
-            Dictionary<string, object> m_TransportProperties = new Dictionary<string, object>();
+
             m_TransportModel = transportModel;
             m_TransportModelParameter = new Dictionary<string, object>();
             m_TransportModelParameter.Add("nu", 1e-05);
@@ -1606,18 +1393,14 @@ namespace BIM.OpenFoamExport
             m_TransportModelParameter.Add("Prt", 0.7);
             m_TransportModelParameter.Add("Cp0", 1000);
 
-            m_TransportProperties.Add("TransportModel", m_TransportModel);
-            m_TransportProperties.Add("TransportModelParameter", m_TransportModelParameter);
-
-            m_Constant.Add("TransportProperties", m_TransportProperties);
 
             //TurbulenceProperties
             RASModel rasModel = RASModel.RNGkEpsilon;
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
-            m_Constant.Add("TurbulencProperties", m_TurbulenceParameter.ToDictionary());
-
-            m_SimulationDefaultList.Add("Constant", m_Constant);
+            InitSystemDictionary();
+            InitConstantDictionary();
+            InitNullDictionary();
 
             //General
             m_OpenFOAM = false;
@@ -2160,7 +1943,7 @@ namespace BIM.OpenFoamExport
             m_SnapControls.Add("nSolveIter", m_NSolverIter);
             m_SnapControls.Add("nRelaxIter", m_NRelaxIterSnap);
             m_SnapControls.Add("nFeatureSnapIter", m_NFeatureSnapIter);
-            m_SnapControls.Add("implicitFeature", m_ImplicitFeatureSnap);
+            m_SnapControls.Add("implicitFeatureSnap", m_ImplicitFeatureSnap);
             m_SnapControls.Add("multiRegionFeatureSnap", m_MultiRegionFeatureSnap);
 
             m_SnappyHexMeshDict.Add("snapControls", m_SnapControls);

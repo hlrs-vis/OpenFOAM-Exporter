@@ -139,15 +139,10 @@ namespace BIM.OpenFoamExport
             m_SelectedDUT = dup;
 
             saveFormat = SaveFormat.ascii;
+
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
-
-            //m_Settings = new Settings(SaveFormat.ascii, ElementsExportRange.OnlyVisibleOnes, MeshType.Snappy, OpenFOAMEnvironment.blueCFD, StartFrom.latestTime,
-            //StopAt.endTime, WriteControl.timeStep, WriteFormat.ascii, WriteCompression.off,
-            //TimeFormat.general, ExtractionMethod.extractFromSurface, MethodDecompose.simple, Agglomerator.faceAreaPair, CacheAgglomeration.on, Solver.GAMG,
-            //Solver.smoothSolver, Solver.smoothSolver, Solver.smoothSolver, Smoother.GaussSeidel, Smoother.GaussSeidel,
-            //Smoother.GaussSeidel, TransportModel.Newtonian, SimulationType.RAS);
 
             List<string> keyPath = new List<string>();
 
@@ -196,8 +191,18 @@ namespace BIM.OpenFoamExport
                 else if (att.Value is Enum)
                 {
                     Enum @enum = att.Value as Enum;
-                    OpenFOAMDropDownTreeNode dropDown = new OpenFOAMDropDownTreeNode(@enum, ref m_Settings, keyPath);
+                    OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>(@enum, ref m_Settings, keyPath);
                     child.Nodes.Add(dropDown);
+                }
+                else if (att.Value is bool)
+                {
+                    bool? _bool = att.Value as bool?;
+                    if(_bool != null)
+                    {
+                        
+                        OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>((bool)_bool, ref m_Settings, keyPath);
+                        child.Nodes.Add(dropDown);
+                    }
                 }
                 else
                 {
@@ -308,10 +313,9 @@ namespace BIM.OpenFoamExport
                 m_SelectedDUT = dup;
 
                 // create settings object to save setting information
-                Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
+                //Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
+                //    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
 
-                //aSetting.SimulationDefault = m_Settings.SimulationDefault;
                 // save Revit document's triangular data in a temporary file
                 m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
                 DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, m_Settings/*aSetting*/);

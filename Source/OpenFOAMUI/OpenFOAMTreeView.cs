@@ -32,7 +32,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
 
         // We'll use this variable to keep track of the current node that is being edited.
         // This is set to something (non-null) only if the node's ComboBox is being displayed.
-        private OpenFOAMDropDownTreeNode m_CurrentOFDropDownNode = null;
+        private OpenFOAMDropDownTreeNode<dynamic> m_CurrentOFDropDownNode = null;
 
         private OpenFOAMTextBoxTreeNode<dynamic> m_CurrentOFTxtBoxTreeNode = null;
 
@@ -61,9 +61,9 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         protected override void OnNodeMouseClick(TreeNodeMouseClickEventArgs e)
         {
             // Are we dealing with a dropdown node?
-            if (e.Node is OpenFOAMDropDownTreeNode)
+            if (e.Node is OpenFOAMDropDownTreeNode<dynamic>)
             {
-                m_CurrentOFDropDownNode = (OpenFOAMDropDownTreeNode)e.Node;
+                m_CurrentOFDropDownNode = (OpenFOAMDropDownTreeNode<dynamic>)e.Node;
 
                 // Need to add the node's ComboBox to the TreeView's list of controls for it to work
                 Controls.Add(m_CurrentOFDropDownNode.ComboBox);
