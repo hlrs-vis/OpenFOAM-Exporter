@@ -24,7 +24,6 @@ namespace BIM.OpenFoamExport.OpenFOAM
         public TransportProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
             : base("transportProperties", "dictionary", version, path, attributes, format, settings)
         {
-            //m_Settings = settings;
             InitAttributes();
         }
 

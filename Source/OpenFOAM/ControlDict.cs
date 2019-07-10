@@ -34,31 +34,8 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            //Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
-            //Dictionary<string, object> control = system["ControlDictionary"] as Dictionary<string, object>;
-
-            //foreach(var obj in m_DictFolder)
-            //{
-            //    FoamFile.Attributes.Add(obj.Key, obj.Value);
-            //}
             base.InitAttributes();
             FoamFile.Attributes.Add("functions", m_Functions);
-
-            //FoamFile.Attributes.Add("startFrom", control["StartFrom"]/*m_Settings._StartFrom*/);
-            //FoamFile.Attributes.Add("startTime", m_Settings.StartTime);
-            //FoamFile.Attributes.Add("stopAt", control["StopAt"] /*m_Settings._StopAt*/);
-            //FoamFile.Attributes.Add("endTime", control["EndTime"]/*m_Settings.EndTime*/);
-            //FoamFile.Attributes.Add("deltaT", control["DeltaT"]/*m_Settings.DeltaT*/);
-            //FoamFile.Attributes.Add("writeControl", /*control["WriteControl"]*/m_Settings._WriteControl);
-            //FoamFile.Attributes.Add("writeInterval", m_Settings.WriteInterval);
-            //FoamFile.Attributes.Add("purgeWrite", m_Settings.PurgeWrite);
-            //FoamFile.Attributes.Add("writeFormat", m_Settings._WriteFormat);
-            //FoamFile.Attributes.Add("writePrecision", m_Settings.WritePrecision);
-            //FoamFile.Attributes.Add("writeCompression", m_Settings.WriteCompression);
-            //FoamFile.Attributes.Add("timeFormat", m_Settings._TimeFormat);
-            //FoamFile.Attributes.Add("timePrecision", m_Settings.TimePrecision);
-            //FoamFile.Attributes.Add("runTimeModifiable", m_Settings.RunTimeModifiable);
-            //FoamFile.Attributes.Add("functions", m_Functions);
         }
         
         /// <summary>

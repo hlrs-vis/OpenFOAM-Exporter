@@ -40,19 +40,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            //m_SurfaceFeature.Add("extractionMethod", m_Settings.ExtractionMethod);
-            //m_SurfaceFeature.Add("extractFromSurfaceCoeffs", m_Settings.ExtractFromSurfaceCoeffs);
-            //m_SurfaceFeature.Add("writeObj", m_Settings.WriteObj);
-            //Dictionary<string, object> system = m_Settings.SimulationDefault["System"] as Dictionary<string, object>;
-            //Dictionary<string, object> surfaceFeature = system["SurfaceFeatureExtract"] as Dictionary<string, object>;
-
-            //foreach (var obj in surfaceFeature)
-            //{
-            //    FoamFile.Attributes.Add(obj.Key, obj.Value);
-            //}
-            //base.InitAttributes();
-
-            FoamFile.Attributes.Add(m_STLName + ".stl", m_DictFile/*m_SurfaceFeature*/);
+            FoamFile.Attributes.Add(m_STLName + ".stl", m_DictFile);
 
             //TO-DO: Dont set in this class
             //m_Settings.Features.Add("{file \"" + m_STLName + ".eMesh\"; level 3;}");

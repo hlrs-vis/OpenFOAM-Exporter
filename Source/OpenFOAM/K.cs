@@ -28,6 +28,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
             List<string> _InletNames, List<string> _OutletNames)
             : base(version, path, attributes, format, settings, "k", "volScalarField", _wallName, _InletNames, _OutletNames)
         {
+            m_Dimensions = new int[] { 0, 2, -2, 0, 0, 0, 0 };
         }
 
         /// <summary>
@@ -35,25 +36,8 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_Dimensions = new int[] { 0, 2, -2, 0, 0, 0, 0 };
             m_InternalFieldString = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
             base.InitAttributes();
-            //m_InternalField.Value = m_Settings.InternalFieldK;
-            //m_BoundaryField.Add(m_WallName, m_Settings.WallK.Attributes);
-
-            //foreach (string s in m_OutletNames)
-            //{
-            //    m_BoundaryField.Add(s, m_Settings.OutletK.Attributes);
-            //}
-            //foreach (string s in m_InletNames)
-            //{
-            //    m_BoundaryField.Add(s, m_Settings.InletK.Attributes);
-            //}
-
-            //FoamFile.Attributes.Add("dimensions", m_Dimensions);
-            //string internalField = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
-            //FoamFile.Attributes.Add("internalField", internalField);
-            //FoamFile.Attributes.Add("boundaryField", m_BoundaryField);
         }
     }
 }

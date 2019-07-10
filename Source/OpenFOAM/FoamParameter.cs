@@ -106,15 +106,15 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_BoundaryField.Add(m_WallName, m_DictFile["wall"] as Dictionary<string, object>/*m_Settings.WallU.Attributes*/);
+            m_BoundaryField.Add(m_WallName, m_DictFile["wall"] as Dictionary<string, object>);
 
             foreach (string s in m_OutletNames)
             {
-                m_BoundaryField.Add(s, m_DictFile["outlet"] as Dictionary<string, object>/*m_Settings.OutletU.Attributes*/);
+                m_BoundaryField.Add(s, m_DictFile["outlet"] as Dictionary<string, object>);
             }
             foreach (string s in m_InletNames)
             {
-                m_BoundaryField.Add(s, m_DictFile["inlet"] as Dictionary<string, object>/* m_Settings.InletU.Attributes*/);
+                m_BoundaryField.Add(s, m_DictFile["inlet"] as Dictionary<string, object>);
             }
 
             FoamFile.Attributes.Add("dimensions", m_Dimensions);
