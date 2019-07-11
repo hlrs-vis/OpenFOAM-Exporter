@@ -224,6 +224,28 @@ namespace BIM.OpenFoamExport.OpenFOAM
     }
 
     /// <summary>
+    /// Runmanager that is used for running OpenFOAM native in subsystem.
+    /// </summary>
+    public class RunManagerLinuxSubsystem : RunManager
+    {
+        public RunManagerLinuxSubsystem(string casePath)
+            : base(casePath)
+        {
+
+        }
+
+        public override void CreateEnvConfig()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool RunCommands(List<string> commands)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
     /// Runmanager that is used for running OpenFOAM in Docker.
     /// </summary>
     public class RunManagerDocker : RunManager
@@ -250,7 +272,6 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// </summary>
     public class RunManagerLinux : RunManager
     {
-
         public RunManagerLinux(string casePath)
             :base(casePath)
         {

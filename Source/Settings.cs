@@ -474,8 +474,9 @@ namespace BIM.OpenFoamExport
     public enum OpenFOAMEnvironment
     {
         blueCFD = 0,
-        docker,
-        linux
+        docker, //not implemented yet
+        linuxSubsystem, //not implemented yet
+        linux //not implemeneted yet
     }
 
     /// <summary>
@@ -715,7 +716,9 @@ namespace BIM.OpenFoamExport
         private int m_ResolveFeatureAngle;
         private int m_NCellsBetweenLevels;
         private double m_MaxLoadUnbalance;
+        private string m_NameEMesh;
         private ArrayList m_Features;
+        private int m_FeatureLevel;
         private Vector m_WallLevel;
         private Vector m_OutletLevel;
         private Vector m_InletLevel;
@@ -906,6 +909,8 @@ namespace BIM.OpenFoamExport
         public int NCellsBetweenLevels { get => m_NCellsBetweenLevels; set => m_NCellsBetweenLevels = value; }
         public double MaxLoadUnbalance { get => m_MaxLoadUnbalance; set => m_MaxLoadUnbalance = value; }
         public ArrayList Features { get => m_Features; set => m_Features = value; }
+        public string NameEMesh { get => m_NameEMesh; set => m_NameEMesh = value; }
+        public int FeatureLevel { get => m_FeatureLevel; set => m_FeatureLevel = value; }
         public Vector WallLevel { get => m_WallLevel; set => m_WallLevel = value; }
         public Vector OutletLevel { get => m_OutletLevel; set => m_OutletLevel = value; }
         public Vector InletLevel { get => m_InletLevel; set => m_InletLevel = value; }
@@ -1108,6 +1113,7 @@ namespace BIM.OpenFoamExport
             }
         }
 
+
         /// <summary>
         /// General Constructor for Test.
         /// </summary>
@@ -1273,12 +1279,13 @@ namespace BIM.OpenFoamExport
 
             //SnappyHexMesh-CastellatedMeshControls
 
-            m_MaxLocalCells = 1000000;
+            m_MaxLocalCells = 100000;
             m_MaxGlobalCells = 2000000;
             m_MinRefinementCalls = 10;
             m_MaxLoadUnbalance = 0.10;
             m_NCellsBetweenLevels = 3;
             m_Features = new ArrayList();
+            m_FeatureLevel = 4;
             m_WallLevel = new Vector(3, 3);
             m_OutletLevel = new Vector(4, 4);
             m_InletLevel = new Vector(4, 4);
@@ -1599,12 +1606,13 @@ namespace BIM.OpenFoamExport
             m_MergeTolerance = 1e-6;
 
             //SnappyHexMesh-CastellatedMeshControls
-            m_MaxLocalCells = 1000000;
+            m_MaxLocalCells = 100000;
             m_MaxGlobalCells = 2000000;
             m_MinRefinementCalls = 10;
             m_MaxLoadUnbalance = 0.10;
             m_NCellsBetweenLevels = 3;
             m_Features = new ArrayList();
+            m_FeatureLevel = 3;
             m_WallLevel = new Vector(3, 3);
             m_OutletLevel = new Vector(4, 4);
             m_InletLevel = new Vector(4, 4);

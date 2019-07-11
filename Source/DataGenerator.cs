@@ -149,17 +149,20 @@ namespace BIM.OpenFoamExport
         /// <param name="casePath">Path to openFOAM-Case.</param>
         private void InitRunManager(string casePath)
         {
-            if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.blueCFD)
+            switch(m_Settings.OpenFOAMEnvironment)
             {
-                m_RunManager = new RunManagerBlueCFD(casePath/*, @"C:\Program FIles\blueCFD-Core-2017\setvars.bat"*/);
-            }
-            else if(m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.docker)
-            {
-                m_RunManager = new RunManagerDocker(casePath);
-            }
-            else if(m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.linux)
-            {
-                m_RunManager = new RunManagerLinux(casePath);
+                case OpenFOAMEnvironment.blueCFD:
+                    m_RunManager = new RunManagerBlueCFD(casePath);
+                    break;
+                case OpenFOAMEnvironment.docker:
+                    m_RunManager = new RunManagerDocker(casePath);
+                    break;
+                case OpenFOAMEnvironment.linux:
+                    m_RunManager = new RunManagerLinux(casePath);
+                    break;
+                case OpenFOAMEnvironment.linuxSubsystem:
+                    m_RunManager = new RunManagerLinuxSubsystem(casePath);
+                    break;
             }
         }
 

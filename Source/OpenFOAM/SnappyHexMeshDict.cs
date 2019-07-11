@@ -2,6 +2,7 @@
 using System.Windows;
 using Autodesk.Revit.DB;
 using System.Windows.Media.Media3D;
+using System.Collections;
 
 namespace BIM.OpenFoamExport.OpenFOAM
 {
@@ -135,12 +136,11 @@ namespace BIM.OpenFoamExport.OpenFOAM
         {
             InitRefinementSurfaces();
             InitLocationInMesh();           
-            List<string> addAttributes = new List<string> { "maxLocalCells", "maxGlobalCells", "minRefinementCells", "maxLoadUnbalance", "nCellsBetweenLevels", "features" };
+            List<string> addAttributes = new List<string> { "maxLocalCells", "maxGlobalCells", "minRefinementCells", "maxLoadUnbalance", "nCellsBetweenLevels", "features"};
             foreach(var s in addAttributes)
             {
                 m_CastellatedMeshControls.Add(s, m_SettingsCMC[s]);
             }
-
             m_CastellatedMeshControls.Add("refinementSurfaces", m_RefinementSurfaces);
             m_CastellatedMeshControls.Add("resolveFeatureAngle", m_SettingsCMC["resolveFeatureAngle"]);
             m_CastellatedMeshControls.Add("refinementRegions", m_SettingsCMC["refinementRegions"]);

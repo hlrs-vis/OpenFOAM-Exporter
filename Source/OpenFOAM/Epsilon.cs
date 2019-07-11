@@ -27,7 +27,6 @@ namespace BIM.OpenFoamExport.OpenFOAM
             List<string> _InletNames, List<string> _OutletNames)
             : base(version, path, attributes, format, settings, "epsilon", "volScalarField", _wallName, _InletNames, _OutletNames)
         {
-            m_Dimensions = new int[] { 0, 2, -3, 0, 0, 0, 0 };
         }
 
         /// <summary>
@@ -35,6 +34,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
+            m_Dimensions = new int[] { 0, 2, -3, 0, 0, 0, 0 };
             m_InternalFieldString = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
             base.InitAttributes();
         }
