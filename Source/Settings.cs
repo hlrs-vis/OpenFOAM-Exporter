@@ -1463,7 +1463,8 @@ namespace BIM.OpenFoamExport
             m_SaveFormat = saveFormat;
             m_ExportRange = exportRange;
             m_Mesh = mesh;
-            m_openFOAMEnvironment = windowsFOAMEnv;
+            //m_openFOAMEnvironment = windowsFOAMEnv;
+            m_openFOAMEnvironment = OpenFOAMEnvironment.linuxSubsystem;
 
 
             //blockMeshDict

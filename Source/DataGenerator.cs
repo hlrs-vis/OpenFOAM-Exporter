@@ -152,16 +152,16 @@ namespace BIM.OpenFoamExport
             switch(m_Settings.OpenFOAMEnvironment)
             {
                 case OpenFOAMEnvironment.blueCFD:
-                    m_RunManager = new RunManagerBlueCFD(casePath);
+                    m_RunManager = new RunManagerBlueCFD(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
                 case OpenFOAMEnvironment.docker:
-                    m_RunManager = new RunManagerDocker(casePath);
+                    m_RunManager = new RunManagerDocker(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
                 case OpenFOAMEnvironment.linux:
-                    m_RunManager = new RunManagerLinux(casePath);
+                    m_RunManager = new RunManagerLinux(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
                 case OpenFOAMEnvironment.linuxSubsystem:
-                    m_RunManager = new RunManagerLinuxSubsystem(casePath);
+                    m_RunManager = new RunManagerLinuxSubsystem(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
             }
         }

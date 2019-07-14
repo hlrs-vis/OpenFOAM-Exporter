@@ -35,8 +35,6 @@ namespace BIM.OpenFoamExport
 
         private OpenFOAMTreeView m_OpenFOAMTreeView = new OpenFOAMTreeView();
 
-        //private Dictionary<string, object> m_SimulationDefaultList = new Dictionary<string, object>();
-
         private SortedDictionary<string, DisplayUnitType> m_DisplayUnits = new SortedDictionary<string, DisplayUnitType>();
         private static DisplayUnitType m_SelectedDUT = DisplayUnitType.DUT_UNDEFINED;
         private Settings m_Settings;
@@ -106,10 +104,8 @@ namespace BIM.OpenFoamExport
                 tvCategories.Enabled = false;
                 btnCheckAll.Enabled = false;
                 btnCheckNone.Enabled = false;
+
             }
-
-
-
             SaveFormat saveFormat;
             if (rbBinary.Checked)
             {
@@ -311,7 +307,6 @@ namespace BIM.OpenFoamExport
 
                 DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
                 m_SelectedDUT = dup;
-
                 // create settings object to save setting information
                 //Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 //    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
