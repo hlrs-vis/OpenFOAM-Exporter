@@ -146,6 +146,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="OpenFOAMUI\OpenFOAMDropDownTreeNode.cs" />
+    <Compile Include="OpenFOAMUI\OpenFOAMEnvironmentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OpenFOAMUI\OpenFOAMEnvironmentForm.Designer.cs">
+      <DependentUpon>OpenFOAMEnvironmentForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="OpenFOAMUI\OpenFOAMTextBoxTreeNode.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMTreeNode.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMTreeView.cs">
@@ -205,6 +211,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OpenFoamExportResource.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="OpenFOAMUI\OpenFOAMEnvironmentForm.resx">
+      <DependentUpon>OpenFOAMEnvironmentForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

@@ -198,69 +198,6 @@
   <data name="&gt;&gt;btnSave.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <data name="&gt;&gt;tvCategories.Name" xml:space="preserve">
-    <value>tvCategories</value>
-  </data>
-  <data name="&gt;&gt;tvCategories.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TreeView, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tvCategories.Parent" xml:space="preserve">
-    <value>tpCategories</value>
-  </data>
-  <data name="&gt;&gt;tvCategories.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;btnCheckNone.Name" xml:space="preserve">
-    <value>btnCheckNone</value>
-  </data>
-  <data name="&gt;&gt;btnCheckNone.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;btnCheckNone.Parent" xml:space="preserve">
-    <value>tpCategories</value>
-  </data>
-  <data name="&gt;&gt;btnCheckNone.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="&gt;&gt;btnCheckAll.Name" xml:space="preserve">
-    <value>btnCheckAll</value>
-  </data>
-  <data name="&gt;&gt;btnCheckAll.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;btnCheckAll.Parent" xml:space="preserve">
-    <value>tpCategories</value>
-  </data>
-  <data name="&gt;&gt;btnCheckAll.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="tpCategories.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
-  </data>
-  <data name="tpCategories.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="tpCategories.Size" type="System.Drawing.Size, System.Drawing">
-    <value>367, 352</value>
-  </data>
-  <data name="tpCategories.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="tpCategories.Text" xml:space="preserve">
-    <value>Categories</value>
-  </data>
-  <data name="&gt;&gt;tpCategories.Name" xml:space="preserve">
-    <value>tpCategories</value>
-  </data>
-  <data name="&gt;&gt;tpCategories.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tpCategories.Parent" xml:space="preserve">
-    <value>tabOpenFOAM</value>
-  </data>
-  <data name="&gt;&gt;tpCategories.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
   <data name="tvCategories.Location" type="System.Drawing.Point, System.Drawing">
     <value>6, 6</value>
   </data>
@@ -336,116 +273,32 @@
   <data name="&gt;&gt;btnCheckAll.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
-  <data name="&gt;&gt;cbOpenFOAM.Name" xml:space="preserve">
-    <value>cbOpenFOAM</value>
-  </data>
-  <data name="&gt;&gt;cbOpenFOAM.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;cbOpenFOAM.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;cbOpenFOAM.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;cbExportSharedCoordinates.Name" xml:space="preserve">
-    <value>cbExportSharedCoordinates</value>
-  </data>
-  <data name="&gt;&gt;cbExportSharedCoordinates.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;cbExportSharedCoordinates.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;cbExportSharedCoordinates.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="&gt;&gt;cbExportColor.Name" xml:space="preserve">
-    <value>cbExportColor</value>
-  </data>
-  <data name="&gt;&gt;cbExportColor.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;cbExportColor.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;cbExportColor.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="&gt;&gt;comboBox_DUT.Name" xml:space="preserve">
-    <value>comboBox_DUT</value>
-  </data>
-  <data name="&gt;&gt;comboBox_DUT.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;comboBox_DUT.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;comboBox_DUT.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
-  <data name="&gt;&gt;label1.Name" xml:space="preserve">
-    <value>label1</value>
-  </data>
-  <data name="&gt;&gt;label1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;label1.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="&gt;&gt;cbIncludeLinked.Name" xml:space="preserve">
-    <value>cbIncludeLinked</value>
-  </data>
-  <data name="&gt;&gt;cbIncludeLinked.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;cbIncludeLinked.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;cbIncludeLinked.ZOrder" xml:space="preserve">
-    <value>5</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.Name" xml:space="preserve">
-    <value>gbSTLFormat</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.Type" xml:space="preserve">
-    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.ZOrder" xml:space="preserve">
-    <value>6</value>
-  </data>
-  <data name="tpGeneral.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="tpCategories.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
   </data>
-  <data name="tpGeneral.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+  <data name="tpCategories.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
-  <data name="tpGeneral.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="tpCategories.Size" type="System.Drawing.Size, System.Drawing">
     <value>367, 352</value>
   </data>
-  <data name="tpGeneral.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+  <data name="tpCategories.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
   </data>
-  <data name="tpGeneral.Text" xml:space="preserve">
-    <value>General</value>
+  <data name="tpCategories.Text" xml:space="preserve">
+    <value>Categories</value>
   </data>
-  <data name="&gt;&gt;tpGeneral.Name" xml:space="preserve">
-    <value>tpGeneral</value>
+  <data name="&gt;&gt;tpCategories.Name" xml:space="preserve">
+    <value>tpCategories</value>
   </data>
-  <data name="&gt;&gt;tpGeneral.Type" xml:space="preserve">
+  <data name="&gt;&gt;tpCategories.Type" xml:space="preserve">
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;tpGeneral.Parent" xml:space="preserve">
+  <data name="&gt;&gt;tpCategories.Parent" xml:space="preserve">
     <value>tabOpenFOAM</value>
   </data>
-  <data name="&gt;&gt;tpGeneral.ZOrder" xml:space="preserve">
-    <value>0</value>
+  <data name="&gt;&gt;tpCategories.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <data name="cbOpenFOAM.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -606,54 +459,6 @@
   <data name="&gt;&gt;cbIncludeLinked.ZOrder" xml:space="preserve">
     <value>5</value>
   </data>
-  <data name="&gt;&gt;rbAscii.Name" xml:space="preserve">
-    <value>rbAscii</value>
-  </data>
-  <data name="&gt;&gt;rbAscii.Type" xml:space="preserve">
-    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;rbAscii.Parent" xml:space="preserve">
-    <value>gbSTLFormat</value>
-  </data>
-  <data name="&gt;&gt;rbAscii.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;rbBinary.Name" xml:space="preserve">
-    <value>rbBinary</value>
-  </data>
-  <data name="&gt;&gt;rbBinary.Type" xml:space="preserve">
-    <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;rbBinary.Parent" xml:space="preserve">
-    <value>gbSTLFormat</value>
-  </data>
-  <data name="&gt;&gt;rbBinary.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="gbSTLFormat.Location" type="System.Drawing.Point, System.Drawing">
-    <value>23, 21</value>
-  </data>
-  <data name="gbSTLFormat.Size" type="System.Drawing.Size, System.Drawing">
-    <value>326, 73</value>
-  </data>
-  <data name="gbSTLFormat.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="gbSTLFormat.Text" xml:space="preserve">
-    <value>STL Format</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.Name" xml:space="preserve">
-    <value>gbSTLFormat</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.Type" xml:space="preserve">
-    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;gbSTLFormat.ZOrder" xml:space="preserve">
-    <value>6</value>
-  </data>
   <data name="rbAscii.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
@@ -708,6 +513,57 @@
   <data name="&gt;&gt;rbBinary.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
+  <data name="gbSTLFormat.Location" type="System.Drawing.Point, System.Drawing">
+    <value>23, 21</value>
+  </data>
+  <data name="gbSTLFormat.Size" type="System.Drawing.Size, System.Drawing">
+    <value>326, 73</value>
+  </data>
+  <data name="gbSTLFormat.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="gbSTLFormat.Text" xml:space="preserve">
+    <value>STL Format</value>
+  </data>
+  <data name="&gt;&gt;gbSTLFormat.Name" xml:space="preserve">
+    <value>gbSTLFormat</value>
+  </data>
+  <data name="&gt;&gt;gbSTLFormat.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;gbSTLFormat.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;gbSTLFormat.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="tpGeneral.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 22</value>
+  </data>
+  <data name="tpGeneral.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 3</value>
+  </data>
+  <data name="tpGeneral.Size" type="System.Drawing.Size, System.Drawing">
+    <value>367, 352</value>
+  </data>
+  <data name="tpGeneral.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="tpGeneral.Text" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="&gt;&gt;tpGeneral.Name" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;tpGeneral.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tpGeneral.Parent" xml:space="preserve">
+    <value>tabOpenFOAM</value>
+  </data>
+  <data name="&gt;&gt;tpGeneral.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
   <data name="gbDefault.Location" type="System.Drawing.Point, System.Drawing">
     <value>7, 7</value>
   </data>
@@ -731,6 +587,75 @@
   </data>
   <data name="&gt;&gt;gbDefault.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="comboBoxEnv.Location" type="System.Drawing.Point, System.Drawing">
+    <value>139, 17</value>
+  </data>
+  <data name="comboBoxEnv.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 21</value>
+  </data>
+  <data name="comboBoxEnv.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;comboBoxEnv.Name" xml:space="preserve">
+    <value>comboBoxEnv</value>
+  </data>
+  <data name="&gt;&gt;comboBoxEnv.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;comboBoxEnv.Parent" xml:space="preserve">
+    <value>gbGeneral</value>
+  </data>
+  <data name="&gt;&gt;comboBoxEnv.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="lblEnv.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblEnv.Location" type="System.Drawing.Point, System.Drawing">
+    <value>7, 20</value>
+  </data>
+  <data name="lblEnv.Size" type="System.Drawing.Size, System.Drawing">
+    <value>125, 13</value>
+  </data>
+  <data name="lblEnv.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="lblEnv.Text" xml:space="preserve">
+    <value>OpenFOAM-Environment</value>
+  </data>
+  <data name="&gt;&gt;lblEnv.Name" xml:space="preserve">
+    <value>lblEnv</value>
+  </data>
+  <data name="&gt;&gt;lblEnv.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblEnv.Parent" xml:space="preserve">
+    <value>gbGeneral</value>
+  </data>
+  <data name="&gt;&gt;lblEnv.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="vScrollBar1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>333, 14</value>
+  </data>
+  <data name="vScrollBar1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>19, 139</value>
+  </data>
+  <data name="vScrollBar1.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;vScrollBar1.Name" xml:space="preserve">
+    <value>vScrollBar1</value>
+  </data>
+  <data name="&gt;&gt;vScrollBar1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.VScrollBar, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;vScrollBar1.Parent" xml:space="preserve">
+    <value>gbGeneral</value>
+  </data>
+  <data name="&gt;&gt;vScrollBar1.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <data name="gbGeneral.Location" type="System.Drawing.Point, System.Drawing">
     <value>6, 190</value>

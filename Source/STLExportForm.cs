@@ -154,6 +154,14 @@ namespace BIM.OpenFoamExport
                 if (treeNodeSimulation != null)
                     m_OpenFOAMTreeView.Nodes.Add(treeNodeSimulation);
             }
+
+            // comboBoxEnv
+            var @enum = OpenFOAMEnvironment.blueCFD;
+            foreach (var value in Enum.GetValues(@enum.GetType()))
+            {
+                comboBoxEnv.Items.Add(value);
+            }
+            comboBoxEnv.SelectedItem = @enum;
         }
 
         /// <summary>
@@ -307,6 +315,10 @@ namespace BIM.OpenFoamExport
 
                 DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
                 m_SelectedDUT = dup;
+
+                OpenFOAMEnvironment env = (OpenFOAMEnvironment)comboBoxEnv.SelectedItem;
+                m_Settings.OpenFOAMEnvironment = env;
+
                 // create settings object to save setting information
                 //Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 //    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);

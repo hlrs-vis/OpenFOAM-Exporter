@@ -475,7 +475,7 @@ namespace BIM.OpenFoamExport
     {
         blueCFD = 0,
         docker, //not implemented yet
-        linuxSubsystem, //not implemented yet
+        wsl, //not implemented yet
         linux //not implemeneted yet
     }
 
@@ -1464,7 +1464,7 @@ namespace BIM.OpenFoamExport
             m_ExportRange = exportRange;
             m_Mesh = mesh;
             //m_openFOAMEnvironment = windowsFOAMEnv;
-            m_openFOAMEnvironment = OpenFOAMEnvironment.linuxSubsystem;
+            m_openFOAMEnvironment = OpenFOAMEnvironment.wsl;
 
 
             //blockMeshDict

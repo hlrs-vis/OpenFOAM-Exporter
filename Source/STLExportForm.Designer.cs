@@ -69,11 +69,15 @@ namespace BIM.OpenFoamExport
             this.tbOpenFOAM = new System.Windows.Forms.TabPage();
             this.gbDefault = new System.Windows.Forms.GroupBox();
             this.gbGeneral = new System.Windows.Forms.GroupBox();
+            this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
+            this.lblEnv = new System.Windows.Forms.Label();
+            this.comboBoxEnv = new System.Windows.Forms.ComboBox();
             this.tpCategories.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.gbSTLFormat.SuspendLayout();
             this.tabOpenFOAM.SuspendLayout();
             this.tbOpenFOAM.SuspendLayout();
+            this.gbGeneral.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnCancel
@@ -224,9 +228,28 @@ namespace BIM.OpenFoamExport
             // 
             // gbGeneral
             // 
+            this.gbGeneral.Controls.Add(this.comboBoxEnv);
+            this.gbGeneral.Controls.Add(this.lblEnv);
+            this.gbGeneral.Controls.Add(this.vScrollBar1);
             resources.ApplyResources(this.gbGeneral, "gbGeneral");
             this.gbGeneral.Name = "gbGeneral";
             this.gbGeneral.TabStop = false;
+            // 
+            // vScrollBar1
+            // 
+            resources.ApplyResources(this.vScrollBar1, "vScrollBar1");
+            this.vScrollBar1.Name = "vScrollBar1";
+            // 
+            // lblEnv
+            // 
+            resources.ApplyResources(this.lblEnv, "lblEnv");
+            this.lblEnv.Name = "lblEnv";
+            // 
+            // comboBoxEnv
+            // 
+            this.comboBoxEnv.FormattingEnabled = true;
+            resources.ApplyResources(this.comboBoxEnv, "comboBoxEnv");
+            this.comboBoxEnv.Name = "comboBoxEnv";
             // 
             // STLExportForm
             // 
@@ -246,6 +269,8 @@ namespace BIM.OpenFoamExport
             this.gbSTLFormat.ResumeLayout(false);
             this.tabOpenFOAM.ResumeLayout(false);
             this.tbOpenFOAM.ResumeLayout(false);
+            this.gbGeneral.ResumeLayout(false);
+            this.gbGeneral.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -273,5 +298,8 @@ namespace BIM.OpenFoamExport
         private System.Windows.Forms.TabPage tbOpenFOAM;
         private System.Windows.Forms.GroupBox gbDefault;
         private System.Windows.Forms.GroupBox gbGeneral;
+        private System.Windows.Forms.ComboBox comboBoxEnv;
+        private System.Windows.Forms.Label lblEnv;
+        private System.Windows.Forms.VScrollBar vScrollBar1;
     }
 }

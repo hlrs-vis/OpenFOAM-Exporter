@@ -1025,3 +1025,4 @@ E:\Masterarbeit\Addin-Version\git-repo\OpenFOAM-Exporter\Source\obj\Debug\OpenFo
 E:\Masterarbeit\Addin-Version\git-repo\OpenFOAM-Exporter\Source\obj\Debug\OpenFoamExport.csproj.CopyComplete
 E:\Masterarbeit\Addin-Version\git-repo\OpenFOAM-Exporter\Source\obj\Debug\OpenFoamExport.dll
 E:\Masterarbeit\Addin-Version\git-repo\OpenFOAM-Exporter\Source\obj\Debug\OpenFoamExport.pdb
+E:\Masterarbeit\Addin-Version\git-repo\OpenFOAM-Exporter\Source\obj\Debug\BIM.OpenFoamExport.OpenFOAMUI.OpenFOAMEnvironmentForm.resources

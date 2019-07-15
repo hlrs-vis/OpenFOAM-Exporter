@@ -50,7 +50,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         {
             m_Env = env;
             m_CasePath = casePath;
-            m_CommandBat = casePath + @"\Run.bat";
+            //m_CommandBat = casePath + @"\Run.bat";
             CreateEnvConfig();
         }
 
@@ -123,23 +123,24 @@ namespace BIM.OpenFoamExport.OpenFOAM
         }
 
         /// <summary>
-        /// Interface for running given commands in OpenFOAM-Environment.
+        /// Running given commands in OpenFOAM-Environment.
         /// </summary>
         /// <param name="commands">Contains commands as string.</param>
+        /// <returns>True if suceed and false if not.</returns>
         public virtual bool RunCommands(List<string> commands)
         {
             //create initial Environment commands.
-            List<string> envCommands = new List<string>();
-            List<string> runCommands = InitialEnvRunCommands();
-            foreach(string s in runCommands)
+            List<string> runCommands = new List<string>();
+            List<string> envCommands = InitialEnvRunCommands();
+            foreach(string s in envCommands)
             {
-                envCommands.Add(s);
+                runCommands.Add(s);
             }
-            string log = " | tee " + @"log\";
-            if (m_Env == OpenFOAMEnvironment.linux || m_Env == OpenFOAMEnvironment.linuxSubsystem)
-            {
-                log = "";
-            }
+            string log = " | tee " + @"log/";
+            //if (m_Env == OpenFOAMEnvironment.linux || m_Env == OpenFOAMEnvironment.wsl)
+            //{
+            //    log = "";
+            //}
 
             foreach (string command in commands)
             {
@@ -147,24 +148,29 @@ namespace BIM.OpenFoamExport.OpenFOAM
                 {
                     if (command.Equals("snappyHexMesh"))
                     {
-                        envCommands.Add("decomposePar" + log + "decomposepar.log");
-                        envCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -overwrite -parallel " + log + command + ".log");
-                        envCommands.Add("reconstructParMesh -constant" + log + "reconstructParMesh.log");
+                        runCommands.Add("decomposePar" + log + "decomposepar.log");
+                        runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -overwrite -parallel " + log + command + ".log");
+                        runCommands.Add("reconstructParMesh -constant" + log + "reconstructParMesh.log");
                         continue;
                     }
                     else if (command.Equals("simpleFoam"))
                     {
-                        envCommands.Add("decomposePar");
-                        envCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
-                        envCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
-                        envCommands.Add("reconstructPar -latestTime");
+                        runCommands.Add("decomposePar");
+                        runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
+                        runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
+                        runCommands.Add("reconstructPar -latestTime");
                         continue;
                     }
                 }
-                envCommands.Add(command + log + command + ".log");
+                if(command.Equals("\"") || command.Contains("rm -r"))
+                {
+                    runCommands.Add(command);
+                    continue;
+                }
+                runCommands.Add(command + log + command + ".log");
             }
 
-            bool succeed = WriteToCommandBat(envCommands);
+            bool succeed = WriteToCommandBat(runCommands);
 
             if(succeed)
             {
@@ -200,7 +206,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         defaultEnvPath = @"C:\Program Files\blueCFD-Core-2017\setvars.bat";
                         break;
                     }
-                case OpenFOAMEnvironment.linuxSubsystem:
+                case OpenFOAMEnvironment.wsl:
                     {
                         defaultEnvPath = @"C:\Windows\System32\bash.exe";
                         break;
@@ -216,7 +222,6 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         break;
                     }
             }
-
 
             if (!File.Exists(configPath))
             {
@@ -304,6 +309,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
             : base(casePath, env)
         {
             //m_CommandBat = casePath + @"\Run.bat";
+            m_CommandBat = casePath + @"\RunBlueCFD.bat";
             //CreateEnvConfig();
         }
 
@@ -555,31 +561,35 @@ namespace BIM.OpenFoamExport.OpenFOAM
         public RunManagerLinuxSubsystem(string casePath, OpenFOAMEnvironment env)
             : base(casePath, env)
         {
-
+            //windows subsystem for linux
+            m_CommandBat = casePath + @"\RunWSL.bat";
         }
-
-        //public override void CreateEnvConfig()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         /// <summary>
-        /// 
+        /// Initial shell commands for running the windows subsystem for linux environment.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
-            List<string> shellCommands = new List<string>
+            List<string> batCommands = new List<string>
             {
-                "bash -c -i "
+                "bash -c -i \""
             };
-            return shellCommands;
+            return batCommands;
         }
 
-        //public override bool RunCommands(List<string> commands)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// Adjust commands for running in <see cref="T:RunManager:RunCommands"/> method.
+        /// </summary>
+        /// <param name="commands">Contains commands as string.</param>
+        /// <returns>True if suceed and false if not.</returns>
+        public override bool RunCommands(List<string> commands)
+        {
+            commands.Add("\"");
+            commands.Add("pause");
+            bool succeed = base.RunCommands(commands);
+            return succeed;
+        }
 
         /// <summary>
         /// The method writes command in one line into the streamWriter-object.
@@ -588,13 +598,19 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="command">Command as string.</param>
         public override void WriteLine(StreamWriter sw, string command)
         {
-            sw.Write(command + "&& ");
-        }
+            if(command.Equals("\"") || command.Contains("bash") || command.Contains("blockMesh") || command.Equals("pause"))
+            {            
+                if(command.Equals("pause"))
+                {
+                    sw.WriteLine(command);
+                    return;
+                }
+                sw.Write(command);
+                return;
+            }
 
-        //public override bool WriteToCommandBat(List<string> command)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            sw.Write(" && "+ command);
+        }
     }
 
     /// <summary>

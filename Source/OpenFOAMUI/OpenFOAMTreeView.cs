@@ -230,6 +230,9 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             }
         }
 
+        /// <summary>
+        /// Changes value of current OpenFOAMDropDownTreeNode.
+        /// </summary>
         private void ComboBox_ChangeValue()
         {
             if(!m_ChangeValue)
