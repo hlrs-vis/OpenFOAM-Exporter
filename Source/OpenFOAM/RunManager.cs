@@ -158,7 +158,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         continue;
                     }
                 }
-                if (command.Equals("\"") || command.Contains("rm -r") || command.Contains("call"))
+                if (command.Equals("\"") || command.Contains("rm -r") || command.Contains("call") || command.Contains("pause"))
                 {
                     runCommands.Add(command);
                     continue;
@@ -175,7 +175,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                     process.WaitForExit();
                     if(process.ExitCode != 0)
                     {
-                        MessageBox.Show("Run.bat isn't running properly. Please check the simulation parameter or openfoam environment." +
+                        MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment." +
                             "\nProcess ExitCode: " + process.ExitCode,
                             OpenFoamExportResource.MESSAGE_BOX_TITLE); ;
                     }
@@ -365,6 +365,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         {
             //commands.Add("pause");
             commands.Add("\"");
+            commands.Add("pause");
             bool succeed = base.RunCommands(commands);
             return succeed;
         }
