@@ -161,7 +161,7 @@ namespace BIM.OpenFoamExport
                     m_RunManager = new RunManagerLinux(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
                 case OpenFOAMEnvironment.wsl:
-                    m_RunManager = new RunManagerLinuxSubsystem(casePath, m_Settings.OpenFOAMEnvironment);
+                    m_RunManager = new RunManagerWSL(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
             }
         }
