@@ -158,7 +158,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         continue;
                     }
                 }
-                if (command.Equals("\"") || command.Contains("rm -r") || command.Contains("call") || command.Contains("pause"))
+                if (command.Equals("\"") || command.Contains("rm -r") || command.Contains("call") || /*DEBUGGING BATCH*/command.Contains("pause"))
                 {
                     runCommands.Add(command);
                     continue;
@@ -166,7 +166,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
                 runCommands.Add(command + log + command + ".log");
             }
 
+            //write commands into batch file
             bool succeed = WriteToCommandBat(runCommands);
+
             if (succeed)
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo
@@ -312,6 +314,11 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
+            //if casepath is on another drive than openfoam environment => additional tag /d
+            if(m_CasePath.ToCharArray()[0] != m_FOAMEnvPath.ToCharArray()[0])
+            {
+                m_CasePath = "/d " + m_CasePath;
+            }
             List<string> shellCommands = new List<string>
             {
                 "call " + "\"" + m_FOAMEnvPath + "\"",
