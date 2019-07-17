@@ -169,14 +169,20 @@ namespace BIM.OpenFoamExport.OpenFOAM
             bool succeed = WriteToCommandBat(runCommands);
             if (succeed)
             {
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = m_CommandBat,
+                    WorkingDirectory = m_CasePath
+                };
+                
                 //start batch
-                using (Process process = Process.Start(m_CommandBat))
+                using (Process process = Process.Start(startInfo))
                 {
                     process.WaitForExit();
                     if(process.ExitCode != 0)
                     {
                         MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment." +
-                            "\nProcess ExitCode: " + process.ExitCode,
+                            "\nC#-Process ExitCode: " + process.ExitCode,
                             OpenFoamExportResource.MESSAGE_BOX_TITLE); ;
                     }
                 }
@@ -363,9 +369,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <returns>True if suceed and false if not.</returns>
         public override bool RunCommands(List<string> commands)
         {
-            //commands.Add("pause");
             commands.Add("\"");
-            commands.Add("pause");
             bool succeed = base.RunCommands(commands);
             return succeed;
         }
@@ -380,11 +384,6 @@ namespace BIM.OpenFoamExport.OpenFOAM
             if(command.Equals("\"") || command.Contains("bash") || command.Contains("blockMesh"))
             {            
                 sw.Write(command);
-                return;
-            }
-            if(command.Equals("pause"))
-            {
-                sw.WriteLine(command);
                 return;
             }
             sw.Write(" && "+ command);
