@@ -1,6 +1,6 @@
 ﻿//*********************************************************************************************************************************//
 // Source Code: https://www.codeproject.com/Articles/14544/A-TreeView-Control-with-ComboBox-Dropdown-Nodes
-// Additional Code: OpenFOAMDropDownTreeNode(Enum @enum)
+// Additional Code: OpenFOAMDropDownTreeNode(T _value, ref Settings _settings, List<string> _keyPath) 
 // Modified by Marko Djuric
 //*********************************************************************************************************************************//
 

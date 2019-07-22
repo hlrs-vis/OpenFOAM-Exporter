@@ -1,6 +1,8 @@
 ﻿//*********************************************************************************************************************************//
 // Source Code: https://www.codeproject.com/Articles/14544/A-TreeView-Control-with-ComboBox-Dropdown-Nodes
-// Additional Code : m_CurrentOFTreeNode, TextBod_TextChanged, TextBox_Leave, TextBox_Click, HideComboBox, TextBox_ChangeValue, Combobox_ChangeValue
+// Additional Code : m_CurrentOFDropDownNode, m_CurrentOFTextBoxNode, m_ChangeValue, m_Vector3DReg, m_VectorReg, m_SingleReg,
+// TextBox_TextChanged, TextBox_Leave, TextBox_Click, HideComboBox, HideTextBox, 
+// TextBox_ChangeValue, Combobox_ChangeValue, GetListFromVectorString
 // Modified Code: OnNodeMousClick, OnMouseWheel
 // Modified by Marko Djuric
 //*********************************************************************************************************************************//
@@ -47,19 +49,24 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         private bool m_ChangeValue=false;
 
         /// <summary>
+        /// Negative and positive decimal number.
+        /// </summary>
+        private const string d = "(-?\\d*\\.)?(-?\\d+)";
+
+        /// <summary>
         /// Regular Expresion for Vector3D.
         /// </summary>
-        private Regex m_Vector3DReg = new Regex(@"^\d+\s+\d+\s+\d+$");
+        private Regex m_Vector3DReg = new Regex("^"+ d + "\\s+" + d + "\\s+" + d + "$");
 
         /// <summary>
         /// Regular Expression for Vector.
         /// </summary>
-        private Regex m_VectorReg = new Regex(@"^\d+\s+\d+$");
+        private Regex m_VectorReg = new Regex("^" + d + "\\s+" + d + "$");
 
         /// <summary>
         /// Regular Expression for number.
         /// </summary>
-        private Regex m_SingleReg = new Regex(@"^\d+");
+        private Regex m_SingleReg = new Regex("^" + d);
 
         /// <summary>
         /// Occurs when the <see cref="E:System.Windows.Forms.TreeView.NodeMouseClick"></see> event is fired
@@ -249,23 +256,6 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             {
                 return;
             }
-
-            //try
-            //{
-            //    if(m_CurrentOFDropDownNode.Value is Enum)
-            //    {
-            //        m_CurrentOFDropDownNode.Value = m_CurrentOFDropDownNode.ComboBox.SelectedItem as Enum;
-            //    }
-            //    else if(m_CurrentOFDropDownNode.Value is bool)
-            //    {
-
-            //    }
-            //}
-            //catch
-            //{
-
-            //}
-
             m_CurrentOFDropDownNode.Value = m_CurrentOFDropDownNode.ComboBox.SelectedItem as dynamic;
         }
 
@@ -341,12 +331,12 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             double j = 0;
             foreach (string s in vecString.Split(' '))
             {
-                s.Trim();
+                s.Trim(' ');
                 if (s.Equals(""))
                 {
                     continue;
                 }
-                j = Convert.ToDouble(s);
+                j = Convert.ToDouble(s, System.Globalization.CultureInfo.GetCultureInfo("en-US"));
                 entries.Add(j);
             }
             return entries;
