@@ -157,8 +157,8 @@ namespace BIM.OpenFoamExport
                 case OpenFOAMEnvironment.docker:
                     m_RunManager = new RunManagerDocker(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
-                case OpenFOAMEnvironment.linux:
-                    m_RunManager = new RunManagerLinux(casePath, m_Settings.OpenFOAMEnvironment);
+                case OpenFOAMEnvironment.ssh:
+                    m_RunManager = new RunManagerSSH(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
                 case OpenFOAMEnvironment.wsl:
                     m_RunManager = new RunManagerWSL(casePath, m_Settings.OpenFOAMEnvironment);

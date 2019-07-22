@@ -30,14 +30,39 @@ namespace BIM.OpenFoamExport
 {
     public partial class STLExportForm : System.Windows.Forms.Form
     {
+        /// <summary>
+        /// DataGenerator-object.
+        /// </summary>
         private DataGenerator m_Generator = null;
+
+        /// <summary>
+        /// Sorted dictionary for the category-TreeView.
+        /// </summary>
         private SortedDictionary<string, Category> m_CategoryList = new SortedDictionary<string, Category>();
 
+        /// <summary>
+        /// OpenFOAM-TreeView for default simulation parameter
+        /// </summary>
         private OpenFOAMTreeView m_OpenFOAMTreeView = new OpenFOAMTreeView();
 
+        /// <summary>
+        /// Sorted dictionary for the unity properties that can be set in a drop down menu.
+        /// </summary>
         private SortedDictionary<string, DisplayUnitType> m_DisplayUnits = new SortedDictionary<string, DisplayUnitType>();
+
+        /// <summary>
+        /// Selected Unittype in comboBox.
+        /// </summary>
         private static DisplayUnitType m_SelectedDUT = DisplayUnitType.DUT_UNDEFINED;
+
+        /// <summary>
+        /// Project-Settings.
+        /// </summary>
         private Settings m_Settings;
+
+        /// <summary>
+        /// Revit-App.
+        /// </summary>
         readonly Autodesk.Revit.UI.UIApplication m_Revit = null;
 
         /// <summary>

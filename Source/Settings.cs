@@ -475,8 +475,8 @@ namespace BIM.OpenFoamExport
     {
         blueCFD = 0,
         docker, //not implemented yet
-        wsl, //not implemented yet
-        linux //not implemeneted yet
+        wsl, 
+        ssh //not implemeneted yet
     }
 
     /// <summary>

@@ -30,12 +30,20 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         }
         #endregion
 
-        // We'll use this variable to keep track of the current node that is being edited.
-        // This is set to something (non-null) only if the node's ComboBox is being displayed.
+        /// <summary>
+        /// We'll use this variable to keep track of the current node that is being edited.
+        /// This is set to something (non-null) only if the node's ComboBox is being displayed.
+        /// </summary>
         private OpenFOAMDropDownTreeNode<dynamic> m_CurrentOFDropDownNode = null;
 
+        /// <summary>
+        /// This variable is in use for track current textbox-node that is being edited.
+        /// </summary>
         private OpenFOAMTextBoxTreeNode<dynamic> m_CurrentOFTxtBoxTreeNode = null;
 
+        /// <summary>
+        /// True if the current node (OpenFOAMDropDown-/OpenFOAMTextBox-Node) has been changed.
+        /// </summary>
         private bool m_ChangeValue=false;
 
         /// <summary>
@@ -94,12 +102,14 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
 
                 Controls.Add(m_CurrentOFTxtBoxTreeNode.TxtBox);
 
+                //Set location of the TextBox.
                 m_CurrentOFTxtBoxTreeNode.TxtBox.SetBounds(
                     m_CurrentOFTxtBoxTreeNode.Bounds.X - 1,
                     m_CurrentOFTxtBoxTreeNode.Bounds.Y - 2,
                     m_CurrentOFTxtBoxTreeNode.Bounds.Width + 25,
                     m_CurrentOFTxtBoxTreeNode.Bounds.Height);
 
+                //Listen to Click/Leave and TextChanged Event of the TextBox.
                 m_CurrentOFTxtBoxTreeNode.TxtBox.TextChanged += new EventHandler(TextBox_TextChanged);
                 m_CurrentOFTxtBoxTreeNode.TxtBox.Click += new EventHandler(TextBox_Click);
                 m_CurrentOFTxtBoxTreeNode.TxtBox.MouseLeave += new EventHandler(TextBox_Leave);
@@ -240,7 +250,23 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
                 return;
             }
 
-            m_CurrentOFDropDownNode.Value = m_CurrentOFDropDownNode.ComboBox.SelectedItem as Enum;
+            //try
+            //{
+            //    if(m_CurrentOFDropDownNode.Value is Enum)
+            //    {
+            //        m_CurrentOFDropDownNode.Value = m_CurrentOFDropDownNode.ComboBox.SelectedItem as Enum;
+            //    }
+            //    else if(m_CurrentOFDropDownNode.Value is bool)
+            //    {
+
+            //    }
+            //}
+            //catch
+            //{
+
+            //}
+
+            m_CurrentOFDropDownNode.Value = m_CurrentOFDropDownNode.ComboBox.SelectedItem as dynamic;
         }
 
         /// <summary>
@@ -257,33 +283,29 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             try
             {
                 //Vector3D ( d d d )
-                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value/*.TxtBoxValue*/ is Vector3D)
+                if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value is Vector3D)
                 {
                     List<double> entries = GetListFromVectorString(valueString);
-                    //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = new Vector3D(entries[0], entries[1], entries[2]);
                     m_CurrentOFTxtBoxTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
                 }
                 //Vector ( d d )
-                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value/*.TxtBoxValue*/ is Vector)
+                else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value is Vector)
                 {
                     List<double> entries = GetListFromVectorString(valueString);
-                    //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = new Vector(entries[0], entries[1]);
                     m_CurrentOFTxtBoxTreeNode.Value = new Vector(entries[0], entries[1]);
                 }
                 //double / integer ( d )
                 else if (m_SingleReg.IsMatch(valueString))
                 {
                     string value = valueString.Trim();
-                    if(m_CurrentOFTxtBoxTreeNode.Value/*.TxtBoxValue*/ is int)
+                    if(m_CurrentOFTxtBoxTreeNode.Value is int)
                     {
                         int j = Convert.ToInt32(value);
-                        //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = j;
                         m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
                     else
                     {
                         double j = Convert.ToDouble(value);
-                        //m_CurrentOFTxtBoxTreeNode.TxtBoxValue = j;
                         m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
                 }

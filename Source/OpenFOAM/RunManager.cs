@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BIM.OpenFoamExport.OpenFOAMUI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -223,7 +224,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         //implement docker runmanger.
                         break;
                     }
-                case OpenFOAMEnvironment.linux:
+                case OpenFOAMEnvironment.ssh:
                     {
                         //implement linux runmanager.
                         break;
@@ -243,6 +244,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                 else
                 {
                     ///TO-DO: NEW GUI FOR OPENFOAM-ENVIRONMENT USER INPUT
+                    //StartOpenFOAMTextBoxForm();
                     m_FOAMEnvPath = string.Empty;
                 }
                 sw.Close();
@@ -288,6 +290,15 @@ namespace BIM.OpenFoamExport.OpenFOAM
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Initialize OpenFOAMTextBoxForm.
+        /// </summary>
+        private void StartOpenFOAMTextBoxForm()
+        {
+            OpenFOAMTextBoxForm m_OpenFOAMTextBoxForm = new OpenFOAMTextBoxForm();
+            m_OpenFOAMTextBoxForm.Show();
         }
 
     }
@@ -423,9 +434,9 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// <summary>
     /// RunManager that is used for running OpenFOAM in linux.
     /// </summary>
-    public class RunManagerLinux : RunManager
+    public class RunManagerSSH : RunManager
     {
-        public RunManagerLinux(string casePath, OpenFOAMEnvironment env)
+        public RunManagerSSH(string casePath, OpenFOAMEnvironment env)
             :base(casePath, env)
         {
 

@@ -110,7 +110,8 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         #endregion
 
         /// <summary>
-        /// This method is in use to change the attribute in settings.
+        /// This method is in use to change the corresponding attribute of the value
+        /// that is stored in this node in settings.
         /// </summary>
         public virtual void UpdateSettings()
         {

@@ -1,6 +1,6 @@
 ﻿namespace BIM.OpenFoamExport.OpenFOAMUI
 {
-    partial class OpenFOAMEnvironmentForm
+    partial class OpenFOAMTextBoxForm
     {
         /// <summary>
         /// Required designer variable.
