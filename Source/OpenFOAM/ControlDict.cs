@@ -34,6 +34,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
+            FoamFile.Attributes.Add("application", m_Settings.AppIncompressible);
             base.InitAttributes();
             FoamFile.Attributes.Add("functions", m_Functions);
         }

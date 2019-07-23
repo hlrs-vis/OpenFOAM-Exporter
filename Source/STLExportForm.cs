@@ -181,12 +181,33 @@ namespace BIM.OpenFoamExport
             }
 
             // comboBoxEnv
-            var @enum = OpenFOAMEnvironment.blueCFD;
-            foreach (var value in Enum.GetValues(@enum.GetType()))
+            var enumEnv = OpenFOAMEnvironment.blueCFD;
+            foreach (var value in Enum.GetValues(enumEnv.GetType()))
             {
                 comboBoxEnv.Items.Add(value);
             }
-            comboBoxEnv.SelectedItem = @enum;
+            comboBoxEnv.SelectedItem = enumEnv;
+
+            // comboBoxSolver
+            var enumSolver = SolverIncompressible.simpleFoam;
+            foreach (var value in Enum.GetValues(enumSolver.GetType()))
+            {
+                comboBoxSolver.Items.Add(value);
+            }
+            comboBoxSolver.SelectedItem = enumSolver;
+            //To-Do: ADD EVENT FOR CHANGING ENUM AND ALL PARAMETER THAT ARE RELATED TO SOLVER.
+
+            // comboBoxTransportModel
+            var enumTransport = TransportModel.Newtonian;
+            foreach(var value in Enum.GetValues(enumTransport.GetType()))
+            {
+                comboBoxTransportModel.Items.Add(value);
+            }
+            comboBoxTransportModel.SelectedItem = enumTransport;
+
+            // textBoxCPU
+            textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
+            //To-Do: ADD EVENT FOR CHANGING TEXT
         }
 
         /// <summary>
@@ -341,8 +362,29 @@ namespace BIM.OpenFoamExport
                 DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
                 m_SelectedDUT = dup;
 
+                //Set current selected OpenFoam-Environment as active.
                 OpenFOAMEnvironment env = (OpenFOAMEnvironment)comboBoxEnv.SelectedItem;
                 m_Settings.OpenFOAMEnvironment = env;
+
+                //Set current selected incompressible solver
+                SolverIncompressible appInc = (SolverIncompressible)comboBoxSolver.SelectedItem;
+                m_Settings.AppIncompressible = appInc;
+
+                //Set current selected transportModel
+                TransportModel transport = (TransportModel)comboBoxTransportModel.SelectedItem;
+                m_Settings.TransportModel = transport;
+
+                //set number of cpu
+                int cpu = 0;
+                if(int.TryParse(textBoxCPU.Text, out cpu))
+                {
+                    m_Settings.NumberOfSubdomains = cpu;
+                }
+                else
+                {
+                    MessageBox.Show("Please type in the number of subdomains (CPU) for the simulation");
+                    return;
+                }
 
                 // create settings object to save setting information
                 //Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,

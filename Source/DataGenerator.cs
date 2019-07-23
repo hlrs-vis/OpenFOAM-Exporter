@@ -31,6 +31,7 @@ using GeometryInstance = Autodesk.Revit.DB.GeometryInstance;
 using RevitView = Autodesk.Revit.DB.View;
 using BIM.OpenFoamExport.OpenFOAM;
 using Material = Autodesk.Revit.DB.Material;
+using System.Security;
 
 namespace BIM.OpenFoamExport
 {
@@ -405,7 +406,7 @@ namespace BIM.OpenFoamExport
             //try
             //{
 
-            m_StlExportCancel.Show();
+                m_StlExportCancel.Show();
 
                 // save data in certain STL file
                 if (SaveFormat.binary == settings.SaveFormat)
@@ -443,7 +444,7 @@ namespace BIM.OpenFoamExport
                     m_Writer.TriangularNumber = m_TriangularNumber;
                     m_Writer.AddTriangularNumberSection();
                 }
-                //m_Writer.CloseFile();
+            //m_Writer.CloseFile();
             //}
             //catch (SecurityException)
             //{

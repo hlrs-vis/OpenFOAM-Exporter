@@ -49,9 +49,9 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         private bool m_ChangeValue=false;
 
         /// <summary>
-        /// Negative and positive decimal number.
+        /// Negative and positive decimal number regular expression.
         /// </summary>
-        private const string d = "(-?\\d*\\.)?(-?\\d+)";
+        private const string d = @"(-?\d*\.)?(-?\d+)";
 
         /// <summary>
         /// Regular Expresion for Vector3D.
@@ -336,7 +336,17 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
                 {
                     continue;
                 }
-                j = Convert.ToDouble(s, System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                try
+                {
+                    j = Convert.ToDouble(s, System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                }
+                catch (FormatException)
+                {
+                    System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_VECTOR_FORMAT,
+                        OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                        MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                
                 entries.Add(j);
             }
             return entries;

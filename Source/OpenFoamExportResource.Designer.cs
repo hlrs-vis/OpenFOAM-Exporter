@@ -133,6 +133,15 @@ namespace BIM.OpenFoamExport {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The vector entries cannot be converted into double. ähnelt.
+        /// </summary>
+        internal static string ERR_VECTOR_FORMAT {
+            get {
+                return ResourceManager.GetString("ERR_VECTOR_FORMAT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die STL Exporter ähnelt.
         /// </summary>
         internal static string MESSAGE_BOX_TITLE {

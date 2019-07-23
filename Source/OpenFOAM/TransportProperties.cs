@@ -32,7 +32,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_TransportModel = (TransportModel)m_DictFile["transportModel"];/*m_Settings.TransportModel*/;
+            m_TransportModel = /*(TransportModel)m_DictFile["transportModel"];*/m_Settings.TransportModel;
             Dictionary<string, object> transportModelParameterSettings = m_DictFile["transportModelParameter"] as Dictionary<string, object>;
             //nu-Unit = default
             int[] m_Unit = new int[] { 0, 2, -1, 0, 0, 0, 0};

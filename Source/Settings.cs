@@ -179,14 +179,14 @@ namespace BIM.OpenFoamExport
     {
         //Paramter that has to be set in FvSolitonDict
         Smoother smoother;
-        Solver solver;
+        SolverFV solver;
         double relTol;
         double tolerance;
         int nSweeps;
 
         //Getter-Setter for Parameter
         public Smoother Smoother { get => smoother; set => smoother = value; }
-        public Solver Solver { get => solver; set => solver = value; }
+        public SolverFV Solver { get => solver; set => solver = value; }
         public double RelTol { get => relTol; set => relTol = value; }
         public double Tolerance { get => tolerance; set => tolerance = value; }
         public int NSweeps { get => nSweeps; set => nSweeps = value; }
@@ -503,7 +503,7 @@ namespace BIM.OpenFoamExport
     /// <summary>
     /// Solver for fvSolution.
     /// </summary>
-    public enum Solver
+    public enum SolverFV
     {
         PCG = 0,
         PBiCGStab,
@@ -583,6 +583,23 @@ namespace BIM.OpenFoamExport
         general
     }
 
+    public enum SolverIncompressible
+    {
+        simpleFoam = 0,
+        //other than simpleFoam not implemented yet
+        adjointShapeOptimizationFoam,
+        boundaryFoam,
+        icoFoam,
+        nonNewtonianIcoFoam,
+        pimpleDyMFoam,
+        pimpleFoam,
+        pisoFoam,
+        porousSimpleFoam,
+        shallowWaterFoam,
+        SRFPimpleFoam,
+        SRFSimpleFoam
+    }
+
     /// <summary>
     /// The file format of STL.
     /// </summary>
@@ -620,18 +637,6 @@ namespace BIM.OpenFoamExport
         private Dictionary<string, object> m_System;
         private Dictionary<string, object> m_Constant;
         private Dictionary<string, object> m_Null;
-
-        //private Dictionary<string, object> m_ControlDict;
-        //private Dictionary<string, object> m_BlockMeshDict;
-        //private Dictionary<string, object> m_DecomposeParDict;
-        //private Dictionary<string, object> m_FvSchemes;
-        //private Dictionary<string, object> m_FvSolution;
-        //private Dictionary<string, object> m_SnappyHexMeshDict;
-        //private Dictionary<string, object> m_UDict;
-        //private Dictionary<string, object> m_EpsilonDict;
-        //private Dictionary<string, object> m_NutDict;
-        //private Dictionary<string, object> m_KDict;
-        //private Dictionary<string, object> m_PDict;
         
         private SaveFormat m_SaveFormat;
         private ElementsExportRange m_ExportRange;
@@ -644,6 +649,7 @@ namespace BIM.OpenFoamExport
         private Vector3D m_CellSize;
 
         //ControlDict
+        private SolverIncompressible m_AppIncompressible;
         private StartFrom m_StartFrom;
         private StopAt m_StopAt;
         private WriteControl m_WriteControl;
@@ -840,7 +846,8 @@ namespace BIM.OpenFoamExport
         public Vector3D CellSize { get => m_CellSize; set => m_CellSize = value; }
 
 
-        //Getter-Setter ControlDict
+        //Getter-Setter ControlDict        
+        public SolverIncompressible AppIncompressible { get => m_AppIncompressible; set => m_AppIncompressible = value; }
         public TimeFormat _TimeFormat { get => m_TimeFormat; set => m_TimeFormat = value; }
         public WriteFormat _WriteFormat { get => m_WriteFormat; set => m_WriteFormat = value; }
         public WriteControl _WriteControl { get => m_WriteControl; set => m_WriteControl = value; }
@@ -1114,6 +1121,8 @@ namespace BIM.OpenFoamExport
         }
 
 
+
+
         /// <summary>
         /// General Constructor for Test.
         /// </summary>
@@ -1125,10 +1134,11 @@ namespace BIM.OpenFoamExport
         /// <param name="writeControl"></param>
         /// <param name="writeFormat"></param>
         /// <param name="timeFormat"></param>
-        public Settings(SaveFormat saveFormat = SaveFormat.ascii, ElementsExportRange exportRange = ElementsExportRange.OnlyVisibleOnes, MeshType mesh = MeshType.Snappy, OpenFOAMEnvironment openFOAMEnv = OpenFOAMEnvironment.blueCFD, StartFrom startFrom = StartFrom.latestTime,
+        public Settings(SaveFormat saveFormat = SaveFormat.ascii, ElementsExportRange exportRange = ElementsExportRange.OnlyVisibleOnes, MeshType mesh = MeshType.Snappy, OpenFOAMEnvironment openFOAMEnv = OpenFOAMEnvironment.blueCFD,
+            StartFrom startFrom = StartFrom.latestTime, SolverIncompressible appInc = SolverIncompressible.simpleFoam,
             StopAt stopAt = StopAt.endTime, WriteControl writeControl = WriteControl.timeStep, WriteFormat writeFormat = WriteFormat.ascii, WriteCompression writeCompression = WriteCompression.off,
-            TimeFormat timeFormat = TimeFormat.general, ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface, MethodDecompose methodDecompose = MethodDecompose.simple, Agglomerator agglomerator = Agglomerator.faceAreaPair, CacheAgglomeration cacheAgglomeration = CacheAgglomeration.on, Solver solverP = Solver.GAMG,
-            Solver solverU = Solver.smoothSolver, Solver solverK = Solver.smoothSolver, Solver solverEpsilon = Solver.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
+            TimeFormat timeFormat = TimeFormat.general, ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface, MethodDecompose methodDecompose = MethodDecompose.simple, Agglomerator agglomerator = Agglomerator.faceAreaPair, CacheAgglomeration cacheAgglomeration = CacheAgglomeration.on, SolverFV solverP = SolverFV.GAMG,
+            SolverFV solverU = SolverFV.smoothSolver, SolverFV solverK = SolverFV.smoothSolver, SolverFV solverEpsilon = SolverFV.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
             Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
         {
             //Dictionary for setting default values in OpenFOAM-Tab
@@ -1144,10 +1154,13 @@ namespace BIM.OpenFoamExport
             m_openFOAMEnvironment = openFOAMEnv;
 
             //blockMeshDict
+
             m_CellSize = new Vector3D(0, 0, 0);
             m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
 
             //controlDict
+
+            m_AppIncompressible = appInc;
             m_StartFrom = startFrom;
             m_StartTime = 0;
             m_StopAt = stopAt;
@@ -1172,6 +1185,7 @@ namespace BIM.OpenFoamExport
 
 
             //decomposeParDict
+
             m_NumberOfSubdomains = 4;
             m_MethodDecompose = methodDecompose;
 
@@ -1428,7 +1442,6 @@ namespace BIM.OpenFoamExport
         /// <param name="includeLinkedModels"></param>
         /// <param name="exportColor"></param>
         /// <param name="exportSharedCoordinates"></param>
-        /// <param name="writeCompression"></param>
         /// <param name="runTimeModifiable"></param>
         /// <param name="startTime"></param>
         /// <param name="endTime"></param>
@@ -1437,20 +1450,38 @@ namespace BIM.OpenFoamExport
         /// <param name="purgeWrite"></param>
         /// <param name="writePrecision"></param>
         /// <param name="timePrecision"></param>
+        /// <param name="numberOfSubdomains"></param>
         /// <param name="selectedCategories"></param>
         /// <param name="units"></param>
         /// <param name="mesh"></param>
+        /// <param name="windowsFOAMEnv"></param>
         /// <param name="startFrom"></param>
+        /// <param name="appInc"></param>
         /// <param name="stopAt"></param>
         /// <param name="writeControl"></param>
         /// <param name="writeFormat"></param>
+        /// <param name="writeCompression"></param>
         /// <param name="timeFormat"></param>
+        /// <param name="extractionMethod"></param>
+        /// <param name="methodDecompose"></param>
+        /// <param name="agglomerator"></param>
+        /// <param name="cacheAgglomeration"></param>
+        /// <param name="solverP"></param>
+        /// <param name="solverU"></param>
+        /// <param name="solverK"></param>
+        /// <param name="solverEpsilon"></param>
+        /// <param name="smootherU"></param>
+        /// <param name="smootherK"></param>
+        /// <param name="smootherEpsilon"></param>
+        /// <param name="transportModel"></param>
+        /// <param name="simulationType"></param>
         public Settings(SaveFormat saveFormat, ElementsExportRange exportRange, bool openFoam, bool includeLinkedModels, bool exportColor, bool exportSharedCoordinates, bool runTimeModifiable,
             double startTime, double endTime, double deltaT, double writeInterval, double purgeWrite, double writePrecision, double timePrecision, int numberOfSubdomains,
-            List<Category> selectedCategories, DisplayUnitType units, MeshType mesh = MeshType.Snappy, OpenFOAMEnvironment windowsFOAMEnv = OpenFOAMEnvironment.blueCFD, StartFrom startFrom = StartFrom.latestTime,
+            List<Category> selectedCategories, DisplayUnitType units, MeshType mesh = MeshType.Snappy, OpenFOAMEnvironment windowsFOAMEnv = OpenFOAMEnvironment.blueCFD,
+            StartFrom startFrom = StartFrom.latestTime, SolverIncompressible appInc = SolverIncompressible.simpleFoam,
             StopAt stopAt = StopAt.endTime, WriteControl writeControl = WriteControl.timeStep, WriteFormat writeFormat = WriteFormat.ascii, WriteCompression writeCompression = WriteCompression.off,
-            TimeFormat timeFormat = TimeFormat.general, ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface, MethodDecompose methodDecompose = MethodDecompose.simple, Agglomerator agglomerator = Agglomerator.faceAreaPair, CacheAgglomeration cacheAgglomeration = CacheAgglomeration.on, Solver solverP = Solver.GAMG,
-            Solver solverU = Solver.smoothSolver, Solver solverK = Solver.smoothSolver, Solver solverEpsilon = Solver.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
+            TimeFormat timeFormat = TimeFormat.general, ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface, MethodDecompose methodDecompose = MethodDecompose.simple, Agglomerator agglomerator = Agglomerator.faceAreaPair, CacheAgglomeration cacheAgglomeration = CacheAgglomeration.on, SolverFV solverP = SolverFV.GAMG,
+            SolverFV solverU = SolverFV.smoothSolver, SolverFV solverK = SolverFV.smoothSolver, SolverFV solverEpsilon = SolverFV.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
             Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
         {
             //Dictionary for setting default values in OpenFOAM-Tab
@@ -1463,8 +1494,7 @@ namespace BIM.OpenFoamExport
             m_SaveFormat = saveFormat;
             m_ExportRange = exportRange;
             m_Mesh = mesh;
-            //m_openFOAMEnvironment = windowsFOAMEnv;
-            m_openFOAMEnvironment = OpenFOAMEnvironment.wsl;
+            m_openFOAMEnvironment = windowsFOAMEnv;
 
 
             //blockMeshDict
@@ -1475,6 +1505,7 @@ namespace BIM.OpenFoamExport
 
             //ControlDict
 
+            m_AppIncompressible = appInc;
             m_StartFrom = startFrom;
             m_StartTime = startTime;
             m_StopAt = stopAt;
@@ -1759,11 +1790,30 @@ namespace BIM.OpenFoamExport
         /// </summary>
         private void InitNullDictionary()
         {
-            CreateFoamParameterDictionary("U", m_InternalFieldU, m_WallU, m_InletU, m_OutletU);
-            CreateFoamParameterDictionary("epsilon", m_InternalFieldEpsilon, m_WallEpsilon, m_InletEpsilon, m_OutletEpsilon);
-            CreateFoamParameterDictionary("nut", m_InternalFieldNut, m_WallNut, m_InletNut, m_OutletNut);
-            CreateFoamParameterDictionary("p", m_InternalFieldP, m_WallP, m_InletP, m_OutletP);
-            CreateFoamParameterDictionary("k", m_InternalFieldK, m_WallK, m_InletK, m_OutletK);
+            switch(m_AppIncompressible)
+            {
+                case SolverIncompressible.simpleFoam:
+                {
+                        CreateFoamParameterDictionary("U", m_InternalFieldU, m_WallU, m_InletU, m_OutletU);
+                        CreateFoamParameterDictionary("epsilon", m_InternalFieldEpsilon, m_WallEpsilon, m_InletEpsilon, m_OutletEpsilon);
+                        CreateFoamParameterDictionary("nut", m_InternalFieldNut, m_WallNut, m_InletNut, m_OutletNut);
+                        CreateFoamParameterDictionary("p", m_InternalFieldP, m_WallP, m_InletP, m_OutletP);
+                        CreateFoamParameterDictionary("k", m_InternalFieldK, m_WallK, m_InletK, m_OutletK);
+                        break;
+                }
+                case SolverIncompressible.adjointShapeOptimizationFoam:
+                case SolverIncompressible.boundaryFoam:
+                case SolverIncompressible.icoFoam:
+                case SolverIncompressible.nonNewtonianIcoFoam:
+                case SolverIncompressible.pimpleDyMFoam:
+                case SolverIncompressible.pimpleFoam:
+                case SolverIncompressible.pisoFoam:
+                case SolverIncompressible.porousSimpleFoam:
+                case SolverIncompressible.shallowWaterFoam:
+                case SolverIncompressible.SRFPimpleFoam:
+                case SolverIncompressible.SRFSimpleFoam:
+                    break;
+            }
 
             m_SimulationDefaultList.Add("0", m_Null);
         }
@@ -1800,6 +1850,8 @@ namespace BIM.OpenFoamExport
         {
             Dictionary<string, object> m_ControlDict = new Dictionary<string, object>();
 
+            //solver in general-container of simulation-tab
+            //m_ControlDict.Add("application", m_AppIncompressible);
             m_ControlDict.Add("startFrom", m_StartFrom);
             m_ControlDict.Add("startTime", m_StartTime);
             m_ControlDict.Add("stopAt", m_StopAt);

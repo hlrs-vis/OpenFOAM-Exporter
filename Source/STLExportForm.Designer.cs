@@ -69,9 +69,15 @@ namespace BIM.OpenFoamExport
             this.tbOpenFOAM = new System.Windows.Forms.TabPage();
             this.gbDefault = new System.Windows.Forms.GroupBox();
             this.gbGeneral = new System.Windows.Forms.GroupBox();
-            this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
-            this.lblEnv = new System.Windows.Forms.Label();
+            this.textBoxCPU = new System.Windows.Forms.TextBox();
+            this.lblCPU = new System.Windows.Forms.Label();
+            this.comboBoxSolver = new System.Windows.Forms.ComboBox();
+            this.lblSolver = new System.Windows.Forms.Label();
             this.comboBoxEnv = new System.Windows.Forms.ComboBox();
+            this.lblEnv = new System.Windows.Forms.Label();
+            this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
+            this.comboBoxTransportModel = new System.Windows.Forms.ComboBox();
+            this.lblTransportModel = new System.Windows.Forms.Label();
             this.tpCategories.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.gbSTLFormat.SuspendLayout();
@@ -228,6 +234,12 @@ namespace BIM.OpenFoamExport
             // 
             // gbGeneral
             // 
+            this.gbGeneral.Controls.Add(this.lblTransportModel);
+            this.gbGeneral.Controls.Add(this.comboBoxTransportModel);
+            this.gbGeneral.Controls.Add(this.textBoxCPU);
+            this.gbGeneral.Controls.Add(this.lblCPU);
+            this.gbGeneral.Controls.Add(this.comboBoxSolver);
+            this.gbGeneral.Controls.Add(this.lblSolver);
             this.gbGeneral.Controls.Add(this.comboBoxEnv);
             this.gbGeneral.Controls.Add(this.lblEnv);
             this.gbGeneral.Controls.Add(this.vScrollBar1);
@@ -235,21 +247,53 @@ namespace BIM.OpenFoamExport
             this.gbGeneral.Name = "gbGeneral";
             this.gbGeneral.TabStop = false;
             // 
-            // vScrollBar1
+            // textBoxCPU
             // 
-            resources.ApplyResources(this.vScrollBar1, "vScrollBar1");
-            this.vScrollBar1.Name = "vScrollBar1";
+            resources.ApplyResources(this.textBoxCPU, "textBoxCPU");
+            this.textBoxCPU.Name = "textBoxCPU";
             // 
-            // lblEnv
+            // lblCPU
             // 
-            resources.ApplyResources(this.lblEnv, "lblEnv");
-            this.lblEnv.Name = "lblEnv";
+            resources.ApplyResources(this.lblCPU, "lblCPU");
+            this.lblCPU.Name = "lblCPU";
+            // 
+            // comboBoxSolver
+            // 
+            this.comboBoxSolver.FormattingEnabled = true;
+            resources.ApplyResources(this.comboBoxSolver, "comboBoxSolver");
+            this.comboBoxSolver.Name = "comboBoxSolver";
+            // 
+            // lblSolver
+            // 
+            resources.ApplyResources(this.lblSolver, "lblSolver");
+            this.lblSolver.Name = "lblSolver";
             // 
             // comboBoxEnv
             // 
             this.comboBoxEnv.FormattingEnabled = true;
             resources.ApplyResources(this.comboBoxEnv, "comboBoxEnv");
             this.comboBoxEnv.Name = "comboBoxEnv";
+            // 
+            // lblEnv
+            // 
+            resources.ApplyResources(this.lblEnv, "lblEnv");
+            this.lblEnv.Name = "lblEnv";
+            // 
+            // vScrollBar1
+            // 
+            resources.ApplyResources(this.vScrollBar1, "vScrollBar1");
+            this.vScrollBar1.Name = "vScrollBar1";
+            // 
+            // comboBoxTransportModel
+            // 
+            this.comboBoxTransportModel.FormattingEnabled = true;
+            resources.ApplyResources(this.comboBoxTransportModel, "comboBoxTransportModel");
+            this.comboBoxTransportModel.Name = "comboBoxTransportModel";
+            // 
+            // lblTransportModel
+            // 
+            resources.ApplyResources(this.lblTransportModel, "lblTransportModel");
+            this.lblTransportModel.Name = "lblTransportModel";
             // 
             // STLExportForm
             // 
@@ -301,5 +345,11 @@ namespace BIM.OpenFoamExport
         private System.Windows.Forms.ComboBox comboBoxEnv;
         private System.Windows.Forms.Label lblEnv;
         private System.Windows.Forms.VScrollBar vScrollBar1;
+        private System.Windows.Forms.ComboBox comboBoxSolver;
+        private System.Windows.Forms.Label lblSolver;
+        private System.Windows.Forms.TextBox textBoxCPU;
+        private System.Windows.Forms.Label lblCPU;
+        private System.Windows.Forms.Label lblTransportModel;
+        private System.Windows.Forms.ComboBox comboBoxTransportModel;
     }
 }

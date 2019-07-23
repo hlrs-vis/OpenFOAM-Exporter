@@ -141,6 +141,9 @@
   <data name="ERR_SECURITY_EXCEPTION" xml:space="preserve">
     <value>Make sure you have the required permission to read or write files.</value>
   </data>
+  <data name="ERR_VECTOR_FORMAT" xml:space="preserve">
+    <value>The vector entries cannot be converted into double.</value>
+  </data>
   <data name="MESSAGE_BOX_TITLE" xml:space="preserve">
     <value>STL Exporter</value>
   </data>
