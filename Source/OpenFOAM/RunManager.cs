@@ -219,14 +219,14 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         defaultEnvPath = @"C:\Windows\System32\bash.exe";
                         break;
                     }
-                case OpenFOAMEnvironment.docker:
-                    {
-                        //implement docker runmanger.
-                        break;
-                    }
+                //case OpenFOAMEnvironment.docker:
+                //    {
+                //        //implement docker runmanger.
+                //        break;
+                //    }
                 case OpenFOAMEnvironment.ssh:
                     {
-                        //implement linux runmanager.
+                        defaultEnvPath = @"C:\Windows\System32\OpenSSH\ssh.exe";
                         break;
                     }
             }
@@ -373,11 +373,11 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
-            List<string> batCommands = new List<string>
+            List<string> shellCommands = new List<string>
             {
                 "bash -c -i \""
             };
-            return batCommands;
+            return shellCommands;
         }
 
         /// <summary>
@@ -432,24 +432,102 @@ namespace BIM.OpenFoamExport.OpenFOAM
     }
 
     /// <summary>
-    /// RunManager that is used for running OpenFOAM in linux.
+    /// RunManager that is used for running OpenFOAM via SSH.
     /// </summary>
     public class RunManagerSSH : RunManager
     {
+        /// <summary>
+        /// User on ssh server.
+        /// </summary>
+        string m_User = string.Empty;
+
+        /// <summary>
+        /// Server ip.
+        /// </summary>
+        string m_ServerIP = string.Empty;
+
+        /// <summary>
+        /// Alias to start openfoam-environment.
+        /// </summary>
+        string m_OpenFoamAlias = string.Empty;
+
+        /// <summary>
+        /// Destination path for simulation case folder on server.
+        /// </summary>
+        string m_ServerCasePath = string.Empty;
+
+        /// <summary>
+        /// If true, the server will send caseFolder back to client after simulation.
+        /// </summary>
+        bool m_SendBack = false;
+
+        /// <summary>
+        /// Constructor needs the casePath of the openFoam-case and environment.
+        /// </summary>
+        /// <param name="casePath">Path to openFfoam-case.</param>
+        /// <param name="env">Enum that specifies the environment.</param>
         public RunManagerSSH(string casePath, OpenFOAMEnvironment env)
             :base(casePath, env)
         {
-
+            m_CommandBat = casePath + @"\RunSSH.bat";
         }
 
+        /// <summary>
+        /// Initial shell commands for running OpenFOAM via ssh remote server.
+        /// </summary>
+        /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
-            throw new NotImplementedException();
+            //string regex in textbox => host@server-ip
+            //System.Text.RegularExpressions.Regex m_Vector3DReg = new System.Text.RegularExpressions.Regex("^\\S+@\\S+$");
+            m_User = "mdjur";
+            m_ServerIP = "192.168.2.102";
+            //TO-DO: OpenFOAMTextBoxForm benutzen um user und server vom User zu erfragen.
+            //OPENFOAMTEXTBOXFORM
+            //upload directory to Server: scp -r /path/to/local/source user@ssh.example.com:/path/to/remote/destination 
+            m_ServerCasePath = "/home/" + m_User + "/OpenFoamRemote";
+            m_SendBack = true;
+            //-t for print out all outputs from remote server to client.
+            List<string> shellCommands = new List<string>
+            {
+                "ssh " + m_User + "@" + m_ServerIP + " -t ",
+                "\"scp -r " + m_CasePath + " " + m_User + "@" + m_ServerIP + ":" + m_ServerCasePath + " && ",
+                "cd " + m_ServerCasePath,
+                //m_OpenFoamAlias
+            };
+            return shellCommands;
         }
 
+        /// <summary>
+        /// Adjust commands for running in <see cref="T:RunManager:RunCommands"/> method.
+        /// </summary>
+        /// <param name="commands">Contains commands as string.</param>
+        /// <returns>True if suceed and false if not.</returns>
+        public override bool RunCommands(List<string> commands)
+        {
+            //Download directory from Server: scp -r user@ssh.example.com:/path/to/remote/source /path/to/local/destination
+            if(m_SendBack)
+            {
+                commands.Add("scp -r " + m_User + "@" + m_ServerIP + ":" + m_ServerCasePath + m_CasePath);
+            }
+            commands.Add("\"");
+            bool succeed = base.RunCommands(commands);
+            return succeed;
+        }
+
+        /// <summary>
+        /// The method writes the command into the streamWriter-object.
+        /// </summary>
+        /// <param name="sw">StreamWriter object.</param>
+        /// <param name="command">Command as string.</param>
         public override void WriteLine(StreamWriter sw, string command)
         {
-            throw new NotImplementedException();
+            if (command.Equals("\"") || command.Contains("ssh"))
+            {
+                sw.Write(command);
+                return;
+            }
+            sw.Write(" && " + command);
         }
     }
 }

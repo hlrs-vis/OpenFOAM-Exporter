@@ -474,7 +474,7 @@ namespace BIM.OpenFoamExport
     public enum OpenFOAMEnvironment
     {
         blueCFD = 0,
-        docker, //not implemented yet
+        //docker, //not implemented yet
         wsl, 
         ssh //not implemeneted yet
     }
