@@ -532,6 +532,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <returns>True if suceed and false if not.</returns>
         public override bool RunCommands(List<string> commands)
         {
+            //for testing runmanager
             m_User = "mdjur";
             m_ServerIP = "192.168.2.102";
 

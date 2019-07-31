@@ -73,7 +73,9 @@ namespace BIM.OpenFoamExport
         {
             InitializeComponent();
             m_Revit = revit;
+            tabSSH.Enabled = false;
 
+            //set size for OpenFOAMTreeView
             Size sizeOpenFoamTreeView = gbDefault.Size;
             sizeOpenFoamTreeView.Height -= 20;
             sizeOpenFoamTreeView.Width -= 20;
@@ -96,13 +98,14 @@ namespace BIM.OpenFoamExport
                 if (treeNode != null)
                     tvCategories.Nodes.Add(treeNode);                               
             }
-            
+
+            //intialize unit
             string unitName = "Use Internal: Feet";
             m_DisplayUnits.Add(unitName, DisplayUnitType.DUT_UNDEFINED);
             int selectedIndex = comboBox_DUT.Items.Add(unitName);
             if (m_SelectedDUT == DisplayUnitType.DUT_UNDEFINED)
                comboBox_DUT.SelectedIndex = selectedIndex;
-
+            
             Units currentUnits = m_Revit.ActiveUIDocument.Document.GetUnits();
             DisplayUnitType currentDut = currentUnits.GetFormatOptions(UnitType.UT_Length).DisplayUnits;
             unitName = "Use Current: " + LabelUtils.GetLabelFor(currentDut);
@@ -131,6 +134,7 @@ namespace BIM.OpenFoamExport
                 btnCheckNone.Enabled = false;
 
             }
+
             SaveFormat saveFormat;
             if (rbBinary.Checked)
             {
