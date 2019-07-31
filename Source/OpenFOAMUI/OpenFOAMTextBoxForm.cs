@@ -56,6 +56,15 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             
         }
 
+        public void SetLBLText(string txt)
+        {
+            lblTxt.Text = txt;
+        }
+
+        public void SetLBLVariable(string txt)
+        {
+            lblEnvironmentVariable.Text = txt;
+        }
         /// <summary>
         /// Getter-Setter for textBox.
         /// </summary>
