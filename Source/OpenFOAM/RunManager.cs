@@ -439,46 +439,20 @@ namespace BIM.OpenFoamExport.OpenFOAM
     public class RunManagerSSH : RunManager
     {
         /// <summary>
-        /// User on ssh server.
+        /// Settings-object contains ssh details.
         /// </summary>
-        string m_User = string.Empty;
-
-        /// <summary>
-        /// Server ip.
-        /// </summary>
-        string m_ServerIP = string.Empty;
-
-        /// <summary>
-        /// Alias to start openfoam-environment.
-        /// </summary>
-        string m_OpenFoamAlias = string.Empty;
-
-        /// <summary>
-        /// Destination path for simulation case folder on server.
-        /// </summary>
-        string m_ServerCasePath = string.Empty;
-
-        /// <summary>
-        /// If true, the server will send caseFolder back to client after simulation.
-        /// </summary>
-        bool m_SendBack = false;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        OpenFOAMTextBoxForm m_SSHGUI;
+        Settings m_Settings;
 
         /// <summary>
         /// Constructor needs the casePath of the openFoam-case and environment.
         /// </summary>
         /// <param name="casePath">Path to openFfoam-case.</param>
         /// <param name="env">Enum that specifies the environment.</param>
-        public RunManagerSSH(string casePath, OpenFOAMEnvironment env)
+        public RunManagerSSH(string casePath, OpenFOAMEnvironment env, Settings settings)
             :base(casePath, env)
         {
             m_CommandBat = casePath + @"\RunSSH.bat";
-            m_User = "mdjur";
-            m_ServerIP = "192.168.2.102";
+            m_Settings = settings;
         }
 
         /// <summary>
@@ -487,42 +461,15 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
-            //string regex in textbox => host@server-ip
-            System.Text.RegularExpressions.Regex m_SSHReg = new System.Text.RegularExpressions.Regex("^\\S+@\\S+$");
-            //TO-DO: OpenFOAMTextBoxForm benutzen um user und server vom User zu erfragen.
-            //OPENFOAMTEXTBOXFORM
-            //m_SSHGUI = new OpenFOAMTextBoxForm(m_SSHReg);
-            //InitSSHForm();
             //-t for print out all outputs from remote server to client.
             List<string> shellCommands = new List<string>
             {
-                "scp -r " + m_CasePath + " " + m_User + "@" + m_ServerIP + ":" + m_ServerCasePath,
-                "ssh " + m_User + "@" + m_ServerIP + " -t ",
-                m_OpenFoamAlias,
-                "cd " + m_ServerCasePath
-                //m_OpenFoamAlias
+                "scp -P "+ m_Settings.SSH.Port + " -r " + m_CasePath + " " + m_Settings.SSH.ConnectionString() + ":" + m_Settings.SSH.ServerCaseFolder,
+                "ssh -p " + m_Settings.SSH.Port + " -t " + m_Settings.SSH.ConnectionString(),
+                " \"" + m_Settings.SSH.OfAlias,
+                "cd " + m_Settings.SSH.ServerCaseFolder
             };
             return shellCommands;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private void InitSSHForm()
-        {
-            if(m_SSHGUI != null)
-            {
-                CheckBox cbSend = new CheckBox();
-                cbSend.Name = "cbSend";
-                //cbSend.Parent = m_SSHGUI;
-                cbSend.Padding = new Padding(m_SSHGUI.TxtBox.Left, m_SSHGUI.TxtBox.Top + 10, m_SSHGUI.Right, m_SSHGUI.Bottom);
-                cbSend.Show();
-
-                m_SSHGUI.Controls.Add(cbSend);
-                m_SSHGUI.SetLBLText("user@host-ip");
-                m_SSHGUI.SetLBLVariable("1. Step for SSH: Please type in user and server-ip.");
-                m_SSHGUI.Show();
-            }
         }
 
         /// <summary>
@@ -532,24 +479,17 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <returns>True if suceed and false if not.</returns>
         public override bool RunCommands(List<string> commands)
         {
-            //for testing runmanager
-            m_User = "mdjur";
-            m_ServerIP = "192.168.2.102";
-
-            //upload directory to Server: scp -r /path/to/local/source user@ssh.example.com:/path/to/remote/destination 
-            m_ServerCasePath = "/home/" + m_User + "/OpenFoamRemote";
-
-            //initial environment variable for openFoam
-            m_OpenFoamAlias = "\"source /opt/openfoam6/etc/bashrc";
-            m_SendBack = true;
-
             commands.Add("\"");
+
             //Download directory from Server: scp -r user@ssh.example.com:/path/to/remote/source /path/to/local/destination
-            if (m_SendBack)
+            if (m_Settings.SSH.Download)
             {
-                commands.Add("scp -r " + m_User + "@" + m_ServerIP + ":" + m_ServerCasePath + "/. " + m_CasePath);
+                commands.Add("scp -P " + m_Settings.SSH.Port + " -r " + m_Settings.SSH.ConnectionString()+ ":" + m_Settings.SSH.ServerCaseFolder + "/. " + m_CasePath);
             }
-            commands.Add("ssh " + m_User + "@" + m_ServerIP + " -t \"rm -rf " + m_ServerCasePath + "\"");
+            if(m_Settings.SSH.Delete)
+            {
+                commands.Add("ssh -p " + m_Settings.SSH.Port + " -t " + m_Settings.SSH.ConnectionString() +  " \"rm -rf " + m_Settings.SSH.ServerCaseFolder);
+            }
             bool succeed = base.RunCommands(commands);
             return succeed;
         }
@@ -562,7 +502,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         public override void WriteLine(StreamWriter sw, string command)
         {
             //add \" as command to show the end of the commands for one bash operation
-            if(command.Contains("scp") || command.Equals("\""))
+            if(command.Contains("scp")||command.Equals("\""))
             {
                 sw.WriteLine(command);
                 return;

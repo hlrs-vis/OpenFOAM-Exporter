@@ -24,9 +24,46 @@ using System.Collections;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System;
+using System.Xml.Linq;
+using System.IO;
 
 namespace BIM.OpenFoamExport
 {
+    public struct SSH
+    {
+        string user;
+        string serverIP;
+        string ofAlias;
+        string serverCaseFolder;
+        int port;
+        bool download;
+        bool delete;
+
+        public SSH(string _user, string _ip, string _alias, string _caseFolder, bool _download, bool _delete, int _port)
+        {
+            user = _user;
+            serverIP = _ip;
+            ofAlias = _alias;
+            serverCaseFolder = _caseFolder;
+            download = _download;
+            delete = _delete;
+            port = _port;
+        }
+
+        public string User { get => user; set => user = value; }
+        public string ServerIP { get => serverIP; set => serverIP = value; }
+        public string OfAlias { get => ofAlias; set => ofAlias = value; }
+        public string ServerCaseFolder { get => serverCaseFolder; set => serverCaseFolder = value; }
+        public bool Download { get => download; set => download = value; }
+        public bool Delete { get => delete; set => delete = value; }
+        public int Port { get => port; set => port = value; }
+
+        public string ConnectionString()
+        {
+            return user + "@" + serverIP;
+        }
+    }
+
     /// <summary>
     /// Patch for boundaryField in Parameter-Dictionaries.
     /// </summary>
@@ -829,6 +866,9 @@ namespace BIM.OpenFoamExport
         private TurbulenceParameter m_TurbulenceParameter;
 
 
+        //SSH
+        private SSH m_SSH;
+
         //General
         private bool m_OpenFOAM;
         private bool m_IncludeLinkedModels;
@@ -1004,7 +1044,10 @@ namespace BIM.OpenFoamExport
 
         //Getter-Setter-TurbulenceProperties
         public TurbulenceParameter TurbulenceParameter { get => m_TurbulenceParameter; set => m_TurbulenceParameter = value; }
-        
+
+        //Getter-Setter-SSH
+        public SSH SSH { get => m_SSH; set => m_SSH = value; }
+
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1013,6 +1056,10 @@ namespace BIM.OpenFoamExport
             get
             {
                 return m_SaveFormat;
+            }
+            set
+            {
+                m_SaveFormat = value;
             }
         }
 
@@ -1024,6 +1071,10 @@ namespace BIM.OpenFoamExport
             get
             {
                 return m_ExportRange;
+            }
+            set
+            {
+                m_ExportRange = value;
             }
         }
 
@@ -1062,6 +1113,10 @@ namespace BIM.OpenFoamExport
             {
                 return m_IncludeLinkedModels;
             }
+            set
+            {
+                m_IncludeLinkedModels = value;
+            }
         }
 
         /// <summary>
@@ -1072,6 +1127,10 @@ namespace BIM.OpenFoamExport
             get
             {
                 return m_exportColor;
+            }
+            set
+            {
+                m_exportColor = value;
             }
         }
 
@@ -1084,6 +1143,10 @@ namespace BIM.OpenFoamExport
             {
                 return m_exportSharedCoordinates;
             }
+            set
+            {
+                m_exportSharedCoordinates = value;
+            }
         }
 
         /// <summary>
@@ -1095,6 +1158,10 @@ namespace BIM.OpenFoamExport
             {
                 return m_SelectedCategories;
             }
+            set
+            {
+                m_SelectedCategories = value;
+            }
         }
 
         /// <summary>
@@ -1102,10 +1169,14 @@ namespace BIM.OpenFoamExport
         /// </summary>
         public DisplayUnitType Units
         {
-           get
-              {
-                 return m_Units;
-              }
+            get
+            {
+                return m_Units;
+            }
+            set
+            {
+                m_Units = value;
+            }
         }
 
         public Dictionary<string, object> SimulationDefault
@@ -1119,7 +1190,6 @@ namespace BIM.OpenFoamExport
                 this.SimulationDefault = value;
             }
         }
-
 
 
 
@@ -1422,6 +1492,9 @@ namespace BIM.OpenFoamExport
             InitSystemDictionary();
             InitConstantDictionary();
             InitNullDictionary();
+
+            //SSH
+            m_SSH = new SSH("mdjur", "192.168.2.102", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
 
             //General
             m_OpenFOAM = false;
@@ -1760,6 +1833,9 @@ namespace BIM.OpenFoamExport
             InitNullDictionary();
             InitConstantDictionary();
 
+            //SSH
+            m_SSH = new SSH("mdjur", "192.168.2.102", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
+
             //General
             m_OpenFOAM = openFoam;
             m_IncludeLinkedModels = includeLinkedModels;
@@ -1767,6 +1843,8 @@ namespace BIM.OpenFoamExport
             m_exportSharedCoordinates = exportSharedCoordinates;
             m_SelectedCategories = selectedCategories;
             m_Units = units;
+
+            CreateConfig();
         }
 
         /// <summary>
@@ -2116,6 +2194,92 @@ namespace BIM.OpenFoamExport
         private void CreateTurbulencePropertiesDictionary()
         {
             m_Constant.Add("turbulenceProperties", m_TurbulenceParameter.ToDictionary());
+        }
+
+        /// <summary>
+        /// Create config file if it doesn't exist.
+        /// </summary>
+        private void CreateConfig()
+        {
+            string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
+            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFoamExport.dll"), 18).Replace("/", "\\");
+            string configPath = assemblyDirCorrect + "openfoamExporter.config";
+            if (!File.Exists(configPath))
+            {
+                var config = new XDocument();
+                var elements = new XElement("OpenFoamConfig",
+                    new XElement("OpenFoamEnv"),
+                    new XElement("SSH")
+                );
+                var defaultElement = new XElement("DefaultParameter");
+                CreateXMLTree(defaultElement, m_SimulationDefaultList);
+                elements.Add(defaultElement);
+
+                config.Add(elements);
+
+                XElement ssh = config.Root.Element("SSH");
+                ssh.Add(
+                        new XElement("user", "mdjur"),
+                        new XElement("host", "192.168.2.102"),
+                        new XElement("serverCasePath", "/home/mdjur/OpenFOAMRemote/"),
+                        new XElement("ofAlias", "source/opt/openfoam6/etc/bashrc")
+                );
+                config.Save(configPath);
+            }
+        }
+
+        /// <summary>
+        /// Creates a XML-tree from given dict.
+        /// </summary>
+        /// <param name="e">XElement xml will be attached to.</param>
+        /// <param name="dict">Source for XML-tree.</param>
+        private void CreateXMLTree(XElement e, Dictionary<string,object> dict)
+        { 
+            foreach (var element in dict)
+            {
+                string nameNode = element.Key;
+                nameNode = PrepareXMLString(nameNode);
+                var elem = new XElement(nameNode);
+                if (element.Value is Dictionary<string, object>)
+                {
+                    CreateXMLTree(elem, element.Value as Dictionary<string, object>);
+                }
+                else
+                {
+                    elem.Value = element.Value.ToString();
+                }
+                e.Add(elem);
+            }
+        }
+
+        /// <summary>
+        /// Removes critical strings for xml.
+        /// </summary>
+        /// <param name="nameNode">String which will be prepared.</param>
+        /// <returns>Prepared string.</returns>
+        private static string PrepareXMLString(string nameNode)
+        {
+            if (nameNode.Equals("0"))
+            {
+                nameNode = "null";
+                return nameNode;
+            }
+
+            var criticalXMLCharacters = new Dictionary<string, string>()
+            {
+                { "(", "lpar" },
+                { ")", "rpar" },
+                { ",", "comma" },
+                { "*", "ast" },
+                { " ", "nbsp" }
+            };
+
+            foreach(var critical in criticalXMLCharacters)
+            {
+                nameNode = nameNode.Replace(critical.Key, critical.Value);
+            }
+
+            return nameNode;
         }
     }
 }

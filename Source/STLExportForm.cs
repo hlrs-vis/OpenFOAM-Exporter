@@ -25,6 +25,7 @@ using System.Windows.Forms;
 
 using Category = Autodesk.Revit.DB.Category;
 using Autodesk.Revit.DB;
+using System.Text.RegularExpressions;
 
 namespace BIM.OpenFoamExport
 {
@@ -73,7 +74,8 @@ namespace BIM.OpenFoamExport
         {
             InitializeComponent();
             m_Revit = revit;
-            tabSSH.Enabled = false;
+            tbSSH.Enabled = false;
+            tbOpenFOAM.Enabled = false;
 
             //set size for OpenFOAMTreeView
             Size sizeOpenFoamTreeView = gbDefault.Size;
@@ -212,6 +214,13 @@ namespace BIM.OpenFoamExport
             // textBoxCPU
             textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
             //To-Do: ADD EVENT FOR CHANGING TEXT
+
+            txtBoxUserIP.Text = m_Settings.SSH.ConnectionString();
+            txtBoxAlias.Text = m_Settings.SSH.OfAlias;
+            txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
+            txtBoxPort.Text = m_Settings.SSH.Port.ToString();
+            cbDelete.Checked = m_Settings.SSH.Delete;
+            cbDownload.Checked = m_Settings.SSH.Download;
         }
 
         /// <summary>
@@ -346,10 +355,11 @@ namespace BIM.OpenFoamExport
                 {
                     saveFormat = SaveFormat.ascii;
                 }
+                m_Settings.SaveFormat = saveFormat;
 
                 ElementsExportRange exportRange;
-
                 exportRange = ElementsExportRange.OnlyVisibleOnes;
+                m_Settings.ExportRange = exportRange;
 
                 // get selected categories from the category list
                 List<Category> selectedCategories = new List<Category>();
@@ -363,8 +373,10 @@ namespace BIM.OpenFoamExport
                     }
                 }
 
+                //Set current selected unit
                 DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
                 m_SelectedDUT = dup;
+                m_Settings.Units = dup;
 
                 //Set current selected OpenFoam-Environment as active.
                 OpenFOAMEnvironment env = (OpenFOAMEnvironment)comboBoxEnv.SelectedItem;
@@ -509,24 +521,188 @@ namespace BIM.OpenFoamExport
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void rbExportFormat_CheckedChanged(object sender, EventArgs e)
         {
             cbExportColor.Enabled = rbBinary.Checked;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void cbOpenFOAM_CheckedChanged(object sender, EventArgs e)
         {
             if (cbOpenFOAM.Checked == true)
             {
                 rbBinary.Enabled = false;
+                comboBox_DUT.SelectedIndex = comboBox_DUT.Items.IndexOf("Meter");
+                tbOpenFOAM.Enabled = true;
                 m_Settings.OpenFOAM = true;
+                cbExportColor.Enabled = false;
+                cbExportSharedCoordinates.Enabled = false;
+                cbIncludeLinked.Enabled = false;
                 rbAscii.Select();
             }
             else
             {
+                tbOpenFOAM.Enabled = false;
+                cbExportColor.Enabled = true;
+                cbExportSharedCoordinates.Enabled = true;
+                cbIncludeLinked.Enabled = true;
                 m_Settings.OpenFOAM = false;
                 rbBinary.Enabled = true;
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void comboBoxEnv_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if((OpenFOAMEnvironment)comboBoxEnv.SelectedItem == OpenFOAMEnvironment.ssh)
+            {
+                tbSSH.Enabled = true;
+            }
+            else
+            {
+                tbSSH.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtBoxUserIP_ValueChanged(object sender, EventArgs e)
+        {
+            string txtUser = string.Empty;
+            string txtIP = string.Empty;
+            string txtBox = txtBoxUserIP.Text;
+
+            Regex reg = new Regex("^\\S+@\\S+$");
+
+            if(reg.IsMatch(txtBox))
+            {
+                txtUser = txtBox.Split('@')[0];
+                txtIP = txtBox.Split('@')[1];
+                SSH ssh = m_Settings.SSH;
+                ssh.User = txtUser;
+                ssh.ServerIP = txtIP;
+                m_Settings.SSH = ssh;
+            }
+            else
+            {
+                MessageBox.Show(OpenFoamExportResource.ERR_FORMAT + " " + txtBox, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtBoxAlias_ValueChanged(object sender, EventArgs e)
+        {
+            string txt = txtBoxAlias.Text;
+            SSH ssh = m_Settings.SSH;
+            ssh.OfAlias = txt;
+            m_Settings.SSH = ssh;
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtBoxServerCaseFolder_ValueChanged(object sender, EventArgs e)
+        {
+            string txt = string.Empty;
+            string txtBox = txtBoxCaseFolder.Text;
+            Regex reg = new Regex("^\\S+$");
+
+            if (reg.IsMatch(txtBox))
+            {
+                txt = txtBox;
+                SSH ssh = m_Settings.SSH;
+                ssh.ServerCaseFolder = txt;
+                m_Settings.SSH = ssh;
+            }
+            else
+            {
+                MessageBox.Show(OpenFoamExportResource.ERR_FORMAT + " " + txtBox, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtBoxPort_ValueChanged(object sender, EventArgs e)
+        {
+            string txt = string.Empty;
+            string txtBox = txtBoxPort.Text;
+            Regex reg = new Regex("^\\d+$");
+
+            if (reg.IsMatch(txtBox))
+            {
+                txt = txtBox;
+                SSH ssh = m_Settings.SSH;
+                ssh.Port = Convert.ToInt32(txt);
+                m_Settings.SSH = ssh;
+            }
+            else
+            {
+                MessageBox.Show(OpenFoamExportResource.ERR_FORMAT + " " + txtBox, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cbDownload_ValueChanged(object sender, EventArgs e)
+        {
+            SSH ssh = m_Settings.SSH;
+            ssh.Download = cbDownload.Checked;
+            m_Settings.SSH = ssh;
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cbDelete_ValueChanged(object sender, EventArgs e)
+        {
+            SSH ssh = m_Settings.SSH;
+            ssh.Delete = cbDelete.Checked;
+            m_Settings.SSH = ssh;
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
     }
 }

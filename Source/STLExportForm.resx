@@ -295,7 +295,7 @@
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;tpCategories.Parent" xml:space="preserve">
-    <value>tabOpenFOAM</value>
+    <value>tabControlExporter</value>
   </data>
   <data name="&gt;&gt;tpCategories.ZOrder" xml:space="preserve">
     <value>1</value>
@@ -307,13 +307,13 @@
     <value>23, 109</value>
   </data>
   <data name="cbOpenFOAM.Size" type="System.Drawing.Size, System.Drawing">
-    <value>193, 17</value>
+    <value>115, 17</value>
   </data>
   <data name="cbOpenFOAM.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
   </data>
   <data name="cbOpenFOAM.Text" xml:space="preserve">
-    <value>Export OpenFOAM with Inlet/Outlet</value>
+    <value>Export OpenFOAM</value>
   </data>
   <data name="&gt;&gt;cbOpenFOAM.Name" xml:space="preserve">
     <value>cbOpenFOAM</value>
@@ -559,7 +559,7 @@
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;tpGeneral.Parent" xml:space="preserve">
-    <value>tabOpenFOAM</value>
+    <value>tabControlExporter</value>
   </data>
   <data name="&gt;&gt;tpGeneral.ZOrder" xml:space="preserve">
     <value>0</value>
@@ -865,10 +865,58 @@
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;tbOpenFOAM.Parent" xml:space="preserve">
-    <value>tabOpenFOAM</value>
+    <value>tabControlExporter</value>
   </data>
   <data name="&gt;&gt;tbOpenFOAM.ZOrder" xml:space="preserve">
     <value>2</value>
+  </data>
+  <data name="txtBoxPort.Location" type="System.Drawing.Point, System.Drawing">
+    <value>122, 127</value>
+  </data>
+  <data name="txtBoxPort.Size" type="System.Drawing.Size, System.Drawing">
+    <value>228, 20</value>
+  </data>
+  <data name="txtBoxPort.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="&gt;&gt;txtBoxPort.Name" xml:space="preserve">
+    <value>txtBoxPort</value>
+  </data>
+  <data name="&gt;&gt;txtBoxPort.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;txtBoxPort.Parent" xml:space="preserve">
+    <value>tbSSH</value>
+  </data>
+  <data name="&gt;&gt;txtBoxPort.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="lblPort.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblPort.Location" type="System.Drawing.Point, System.Drawing">
+    <value>20, 130</value>
+  </data>
+  <data name="lblPort.Size" type="System.Drawing.Size, System.Drawing">
+    <value>26, 13</value>
+  </data>
+  <data name="lblPort.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="lblPort.Text" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="&gt;&gt;lblPort.Name" xml:space="preserve">
+    <value>lblPort</value>
+  </data>
+  <data name="&gt;&gt;lblPort.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblPort.Parent" xml:space="preserve">
+    <value>tbSSH</value>
+  </data>
+  <data name="&gt;&gt;lblPort.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <data name="cbDelete.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -877,7 +925,7 @@
     <value>NoControl</value>
   </data>
   <data name="cbDelete.Location" type="System.Drawing.Point, System.Drawing">
-    <value>20, 200</value>
+    <value>20, 220</value>
   </data>
   <data name="cbDelete.Size" type="System.Drawing.Size, System.Drawing">
     <value>114, 17</value>
@@ -895,16 +943,16 @@
     <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;cbDelete.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;cbDelete.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>2</value>
   </data>
   <data name="cbDownload.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="cbDownload.Location" type="System.Drawing.Point, System.Drawing">
-    <value>20, 150</value>
+    <value>20, 170</value>
   </data>
   <data name="cbDownload.Size" type="System.Drawing.Size, System.Drawing">
     <value>149, 17</value>
@@ -922,10 +970,10 @@
     <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;cbDownload.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;cbDownload.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>3</value>
   </data>
   <data name="txtBoxCaseFolder.Location" type="System.Drawing.Point, System.Drawing">
     <value>122, 92</value>
@@ -943,10 +991,10 @@
     <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;txtBoxCaseFolder.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxCaseFolder.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>4</value>
   </data>
   <data name="txtBoxAlias.Location" type="System.Drawing.Point, System.Drawing">
     <value>122, 57</value>
@@ -964,10 +1012,10 @@
     <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;txtBoxAlias.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxAlias.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>5</value>
   </data>
   <data name="txtBoxUserIP.Location" type="System.Drawing.Point, System.Drawing">
     <value>122, 22</value>
@@ -985,10 +1033,10 @@
     <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;txtBoxUserIP.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxUserIP.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>6</value>
   </data>
   <data name="lblCaseFolder.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1015,10 +1063,10 @@
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;lblCaseFolder.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblCaseFolder.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>7</value>
   </data>
   <data name="lblAlias.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1042,10 +1090,10 @@
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;lblAlias.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblAlias.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>8</value>
   </data>
   <data name="lblUserHost.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1069,57 +1117,57 @@
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;lblUserHost.Parent" xml:space="preserve">
-    <value>tabSSH</value>
+    <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblUserHost.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>9</value>
   </data>
-  <data name="tabSSH.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="tbSSH.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
   </data>
-  <data name="tabSSH.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+  <data name="tbSSH.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 3</value>
   </data>
-  <data name="tabSSH.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="tbSSH.Size" type="System.Drawing.Size, System.Drawing">
     <value>367, 352</value>
   </data>
-  <data name="tabSSH.TabIndex" type="System.Int32, mscorlib">
+  <data name="tbSSH.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <data name="tabSSH.Text" xml:space="preserve">
+  <data name="tbSSH.Text" xml:space="preserve">
     <value>SSH</value>
   </data>
-  <data name="&gt;&gt;tabSSH.Name" xml:space="preserve">
-    <value>tabSSH</value>
+  <data name="&gt;&gt;tbSSH.Name" xml:space="preserve">
+    <value>tbSSH</value>
   </data>
-  <data name="&gt;&gt;tabSSH.Type" xml:space="preserve">
+  <data name="&gt;&gt;tbSSH.Type" xml:space="preserve">
     <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;tabSSH.Parent" xml:space="preserve">
-    <value>tabOpenFOAM</value>
+  <data name="&gt;&gt;tbSSH.Parent" xml:space="preserve">
+    <value>tabControlExporter</value>
   </data>
-  <data name="&gt;&gt;tabSSH.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;tbSSH.ZOrder" xml:space="preserve">
     <value>3</value>
   </data>
-  <data name="tabOpenFOAM.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="tabControlExporter.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 12</value>
   </data>
-  <data name="tabOpenFOAM.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="tabControlExporter.Size" type="System.Drawing.Size, System.Drawing">
     <value>375, 378</value>
   </data>
-  <data name="tabOpenFOAM.TabIndex" type="System.Int32, mscorlib">
+  <data name="tabControlExporter.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <data name="&gt;&gt;tabOpenFOAM.Name" xml:space="preserve">
-    <value>tabOpenFOAM</value>
+  <data name="&gt;&gt;tabControlExporter.Name" xml:space="preserve">
+    <value>tabControlExporter</value>
   </data>
-  <data name="&gt;&gt;tabOpenFOAM.Type" xml:space="preserve">
+  <data name="&gt;&gt;tabControlExporter.Type" xml:space="preserve">
     <value>System.Windows.Forms.TabControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;tabOpenFOAM.Parent" xml:space="preserve">
+  <data name="&gt;&gt;tabControlExporter.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;tabOpenFOAM.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;tabControlExporter.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">

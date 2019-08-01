@@ -65,7 +65,7 @@ namespace BIM.OpenFoamExport
             this.gbSTLFormat = new System.Windows.Forms.GroupBox();
             this.rbAscii = new System.Windows.Forms.RadioButton();
             this.rbBinary = new System.Windows.Forms.RadioButton();
-            this.tabOpenFOAM = new System.Windows.Forms.TabControl();
+            this.tabControlExporter = new System.Windows.Forms.TabControl();
             this.tbOpenFOAM = new System.Windows.Forms.TabPage();
             this.gbDefault = new System.Windows.Forms.GroupBox();
             this.gbGeneral = new System.Windows.Forms.GroupBox();
@@ -78,22 +78,24 @@ namespace BIM.OpenFoamExport
             this.comboBoxEnv = new System.Windows.Forms.ComboBox();
             this.lblEnv = new System.Windows.Forms.Label();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
-            this.tabSSH = new System.Windows.Forms.TabPage();
-            this.lblUserHost = new System.Windows.Forms.Label();
-            this.lblAlias = new System.Windows.Forms.Label();
-            this.lblCaseFolder = new System.Windows.Forms.Label();
-            this.txtBoxUserIP = new System.Windows.Forms.TextBox();
-            this.txtBoxAlias = new System.Windows.Forms.TextBox();
-            this.txtBoxCaseFolder = new System.Windows.Forms.TextBox();
-            this.cbDownload = new System.Windows.Forms.CheckBox();
+            this.tbSSH = new System.Windows.Forms.TabPage();
             this.cbDelete = new System.Windows.Forms.CheckBox();
+            this.cbDownload = new System.Windows.Forms.CheckBox();
+            this.txtBoxCaseFolder = new System.Windows.Forms.TextBox();
+            this.txtBoxAlias = new System.Windows.Forms.TextBox();
+            this.txtBoxUserIP = new System.Windows.Forms.TextBox();
+            this.lblCaseFolder = new System.Windows.Forms.Label();
+            this.lblAlias = new System.Windows.Forms.Label();
+            this.lblUserHost = new System.Windows.Forms.Label();
+            this.lblPort = new System.Windows.Forms.Label();
+            this.txtBoxPort = new System.Windows.Forms.TextBox();
             this.tpCategories.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.gbSTLFormat.SuspendLayout();
-            this.tabOpenFOAM.SuspendLayout();
+            this.tabControlExporter.SuspendLayout();
             this.tbOpenFOAM.SuspendLayout();
             this.gbGeneral.SuspendLayout();
-            this.tabSSH.SuspendLayout();
+            this.tbSSH.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnCancel
@@ -219,15 +221,15 @@ namespace BIM.OpenFoamExport
             this.rbBinary.UseVisualStyleBackColor = true;
             this.rbBinary.CheckedChanged += new System.EventHandler(this.rbExportFormat_CheckedChanged);
             // 
-            // tabOpenFOAM
+            // tabControlExporter
             // 
-            this.tabOpenFOAM.Controls.Add(this.tpGeneral);
-            this.tabOpenFOAM.Controls.Add(this.tpCategories);
-            this.tabOpenFOAM.Controls.Add(this.tbOpenFOAM);
-            this.tabOpenFOAM.Controls.Add(this.tabSSH);
-            resources.ApplyResources(this.tabOpenFOAM, "tabOpenFOAM");
-            this.tabOpenFOAM.Name = "tabOpenFOAM";
-            this.tabOpenFOAM.SelectedIndex = 0;
+            this.tabControlExporter.Controls.Add(this.tpGeneral);
+            this.tabControlExporter.Controls.Add(this.tpCategories);
+            this.tabControlExporter.Controls.Add(this.tbOpenFOAM);
+            this.tabControlExporter.Controls.Add(this.tbSSH);
+            resources.ApplyResources(this.tabControlExporter, "tabControlExporter");
+            this.tabControlExporter.Name = "tabControlExporter";
+            this.tabControlExporter.SelectedIndex = 0;
             // 
             // tbOpenFOAM
             // 
@@ -295,6 +297,7 @@ namespace BIM.OpenFoamExport
             this.comboBoxEnv.FormattingEnabled = true;
             resources.ApplyResources(this.comboBoxEnv, "comboBoxEnv");
             this.comboBoxEnv.Name = "comboBoxEnv";
+            this.comboBoxEnv.SelectedValueChanged += new System.EventHandler(this.comboBoxEnv_SelectedValueChanged);
             // 
             // lblEnv
             // 
@@ -306,57 +309,21 @@ namespace BIM.OpenFoamExport
             resources.ApplyResources(this.vScrollBar1, "vScrollBar1");
             this.vScrollBar1.Name = "vScrollBar1";
             // 
-            // tabSSH
+            // tbSSH
             // 
-            this.tabSSH.BackColor = System.Drawing.SystemColors.Control;
-            this.tabSSH.Controls.Add(this.cbDelete);
-            this.tabSSH.Controls.Add(this.cbDownload);
-            this.tabSSH.Controls.Add(this.txtBoxCaseFolder);
-            this.tabSSH.Controls.Add(this.txtBoxAlias);
-            this.tabSSH.Controls.Add(this.txtBoxUserIP);
-            this.tabSSH.Controls.Add(this.lblCaseFolder);
-            this.tabSSH.Controls.Add(this.lblAlias);
-            this.tabSSH.Controls.Add(this.lblUserHost);
-            resources.ApplyResources(this.tabSSH, "tabSSH");
-            this.tabSSH.Name = "tabSSH";
-            // 
-            // lblUserHost
-            // 
-            resources.ApplyResources(this.lblUserHost, "lblUserHost");
-            this.lblUserHost.Name = "lblUserHost";
-            // 
-            // lblAlias
-            // 
-            resources.ApplyResources(this.lblAlias, "lblAlias");
-            this.lblAlias.Name = "lblAlias";
-            // 
-            // lblCaseFolder
-            // 
-            resources.ApplyResources(this.lblCaseFolder, "lblCaseFolder");
-            this.lblCaseFolder.Name = "lblCaseFolder";
-            // 
-            // txtBoxUserIP
-            // 
-            resources.ApplyResources(this.txtBoxUserIP, "txtBoxUserIP");
-            this.txtBoxUserIP.Name = "txtBoxUserIP";
-            // 
-            // txtBoxAlias
-            // 
-            resources.ApplyResources(this.txtBoxAlias, "txtBoxAlias");
-            this.txtBoxAlias.Name = "txtBoxAlias";
-            // 
-            // txtBoxCaseFolder
-            // 
-            resources.ApplyResources(this.txtBoxCaseFolder, "txtBoxCaseFolder");
-            this.txtBoxCaseFolder.Name = "txtBoxCaseFolder";
-            // 
-            // cbDownload
-            // 
-            resources.ApplyResources(this.cbDownload, "cbDownload");
-            this.cbDownload.Checked = true;
-            this.cbDownload.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbDownload.Name = "cbDownload";
-            this.cbDownload.UseVisualStyleBackColor = true;
+            this.tbSSH.BackColor = System.Drawing.SystemColors.Control;
+            this.tbSSH.Controls.Add(this.txtBoxPort);
+            this.tbSSH.Controls.Add(this.lblPort);
+            this.tbSSH.Controls.Add(this.cbDelete);
+            this.tbSSH.Controls.Add(this.cbDownload);
+            this.tbSSH.Controls.Add(this.txtBoxCaseFolder);
+            this.tbSSH.Controls.Add(this.txtBoxAlias);
+            this.tbSSH.Controls.Add(this.txtBoxUserIP);
+            this.tbSSH.Controls.Add(this.lblCaseFolder);
+            this.tbSSH.Controls.Add(this.lblAlias);
+            this.tbSSH.Controls.Add(this.lblUserHost);
+            resources.ApplyResources(this.tbSSH, "tbSSH");
+            this.tbSSH.Name = "tbSSH";
             // 
             // cbDelete
             // 
@@ -365,12 +332,66 @@ namespace BIM.OpenFoamExport
             this.cbDelete.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbDelete.Name = "cbDelete";
             this.cbDelete.UseVisualStyleBackColor = true;
+            this.cbDelete.CheckedChanged += new System.EventHandler(this.cbDelete_ValueChanged);
+            // 
+            // cbDownload
+            // 
+            resources.ApplyResources(this.cbDownload, "cbDownload");
+            this.cbDownload.Checked = true;
+            this.cbDownload.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbDownload.Name = "cbDownload";
+            this.cbDownload.UseVisualStyleBackColor = true;
+            this.cbDownload.CheckedChanged += new System.EventHandler(this.cbDownload_ValueChanged);
+            // 
+            // txtBoxCaseFolder
+            // 
+            resources.ApplyResources(this.txtBoxCaseFolder, "txtBoxCaseFolder");
+            this.txtBoxCaseFolder.Name = "txtBoxCaseFolder";
+            this.txtBoxCaseFolder.TextChanged += new System.EventHandler(this.txtBoxServerCaseFolder_ValueChanged);
+            // 
+            // txtBoxAlias
+            // 
+            resources.ApplyResources(this.txtBoxAlias, "txtBoxAlias");
+            this.txtBoxAlias.Name = "txtBoxAlias";
+            this.txtBoxAlias.TextChanged += new System.EventHandler(this.txtBoxAlias_ValueChanged);
+            // 
+            // txtBoxUserIP
+            // 
+            resources.ApplyResources(this.txtBoxUserIP, "txtBoxUserIP");
+            this.txtBoxUserIP.Name = "txtBoxUserIP";
+            this.txtBoxUserIP.TextChanged += new System.EventHandler(this.txtBoxUserIP_ValueChanged);
+            // 
+            // lblCaseFolder
+            // 
+            resources.ApplyResources(this.lblCaseFolder, "lblCaseFolder");
+            this.lblCaseFolder.Name = "lblCaseFolder";
+            // 
+            // lblAlias
+            // 
+            resources.ApplyResources(this.lblAlias, "lblAlias");
+            this.lblAlias.Name = "lblAlias";
+            // 
+            // lblUserHost
+            // 
+            resources.ApplyResources(this.lblUserHost, "lblUserHost");
+            this.lblUserHost.Name = "lblUserHost";
+            // 
+            // lblPort
+            // 
+            resources.ApplyResources(this.lblPort, "lblPort");
+            this.lblPort.Name = "lblPort";
+            // 
+            // txtBoxPort
+            // 
+            resources.ApplyResources(this.txtBoxPort, "txtBoxPort");
+            this.txtBoxPort.Name = "txtBoxPort";
+            this.txtBoxPort.TextChanged += new System.EventHandler(this.txtBoxPort_ValueChanged);
             // 
             // STLExportForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.Controls.Add(this.tabOpenFOAM);
+            this.Controls.Add(this.tabControlExporter);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnHelp);
             this.Controls.Add(this.btnCancel);
@@ -382,12 +403,12 @@ namespace BIM.OpenFoamExport
             this.tpGeneral.ResumeLayout(false);
             this.tpGeneral.PerformLayout();
             this.gbSTLFormat.ResumeLayout(false);
-            this.tabOpenFOAM.ResumeLayout(false);
+            this.tabControlExporter.ResumeLayout(false);
             this.tbOpenFOAM.ResumeLayout(false);
             this.gbGeneral.ResumeLayout(false);
             this.gbGeneral.PerformLayout();
-            this.tabSSH.ResumeLayout(false);
-            this.tabSSH.PerformLayout();
+            this.tbSSH.ResumeLayout(false);
+            this.tbSSH.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -410,7 +431,7 @@ namespace BIM.OpenFoamExport
         private System.Windows.Forms.GroupBox gbSTLFormat;
         private System.Windows.Forms.RadioButton rbAscii;
         private System.Windows.Forms.RadioButton rbBinary;
-        private System.Windows.Forms.TabControl tabOpenFOAM;
+        private System.Windows.Forms.TabControl tabControlExporter;
         private System.Windows.Forms.CheckBox cbOpenFOAM;
         private System.Windows.Forms.TabPage tbOpenFOAM;
         private System.Windows.Forms.GroupBox gbDefault;
@@ -424,7 +445,7 @@ namespace BIM.OpenFoamExport
         private System.Windows.Forms.Label lblCPU;
         private System.Windows.Forms.Label lblTransportModel;
         private System.Windows.Forms.ComboBox comboBoxTransportModel;
-        private System.Windows.Forms.TabPage tabSSH;
+        private System.Windows.Forms.TabPage tbSSH;
         private System.Windows.Forms.CheckBox cbDelete;
         private System.Windows.Forms.CheckBox cbDownload;
         private System.Windows.Forms.TextBox txtBoxCaseFolder;
@@ -433,5 +454,7 @@ namespace BIM.OpenFoamExport
         private System.Windows.Forms.Label lblCaseFolder;
         private System.Windows.Forms.Label lblAlias;
         private System.Windows.Forms.Label lblUserHost;
+        private System.Windows.Forms.TextBox txtBoxPort;
+        private System.Windows.Forms.Label lblPort;
     }
 }
