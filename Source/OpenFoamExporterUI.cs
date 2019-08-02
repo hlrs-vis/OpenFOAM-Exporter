@@ -35,7 +35,7 @@ namespace BIM.OpenFoamExport
             string directoryName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             PushButtonData data = new PushButtonData("OpenFoam Exporter for Revit", "OpenFoam Exporter for Revit", directoryName + @"\OpenFoamExport.dll", "BIM.OpenFoamExport.OpenFoamExportCommand");
             PushButton button = panel.AddItem(data) as PushButton;
-            button.LargeImage = LoadPNGImageFromResource("BIM.OpenFoamExport.Resources.wind_32_reworked.png");
+            button.LargeImage = LoadPNGImageFromResource("BIM.OpenFoamExport.Resources.openfoam_32.png");
             button.ToolTip = "The OpenFoam Exporter for Revit is designed to produce a stereolithography file (STL) of your building model and a OpenFoam-Config.";
             button.LongDescription = "The OpenFoam Exporter for the Autodesk Revit Platform is a project designed to create an STL file from a 3D building information model for OpenFoam with a Config-File that includes the boundary conditions for airflow simulation.";
             ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, directoryName + @"\Resources\ADSKSTLExporterHelp.htm");
