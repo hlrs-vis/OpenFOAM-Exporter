@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// The BlockMeshDict-Class contains all attributes for blockMesh in Openfoam.
     /// </summary>
-    public class BlockMeshDict : FoamDict
+    public class BlockMeshDict : FOAMDict
     {
         /// <summary>
         /// Cellsize for the boundingbox
@@ -33,27 +33,27 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Vertices for Boundingbox
         /// </summary>
-        private ArrayList m_Vertices;
+        private readonly ArrayList m_Vertices;
 
         /// <summary>
         /// Edges-Dict
         /// </summary>
-        private ArrayList m_Edges;
+        private readonly ArrayList m_Edges;
 
         /// <summary>
         /// MergePatchPair-Dict
         /// </summary>        
-        private ArrayList m_MergePatchPair;
+        private readonly ArrayList m_MergePatchPair;
 
         /// <summary>
         /// Blocks-Dict
         /// </summary>
-        private ArrayList m_Blocks;
+        private readonly ArrayList m_Blocks;
 
         /// <summary>
         /// Boundary
         /// </summary>        
-        private ArrayList m_Boundary;
+        private readonly ArrayList m_Boundary;
 
         /// <summary>
         /// Contructor.

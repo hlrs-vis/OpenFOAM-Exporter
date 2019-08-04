@@ -24,7 +24,7 @@ using System.Security;
 using System.Windows.Forms;
 using Autodesk.Revit.DB;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
     /// <summary>
     /// Base class providing interface to save data to STL file.
@@ -155,7 +155,7 @@ namespace BIM.OpenFoamExport
                     FileAttributes tempAtt = fileAttribute & FileAttributes.ReadOnly;
                     if (FileAttributes.ReadOnly == tempAtt)
                     {
-                        MessageBox.Show(OpenFoamExportResource.ERR_FILE_READONLY, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FILE_READONLY, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                               MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
@@ -184,19 +184,19 @@ namespace BIM.OpenFoamExport
             }
             catch (SecurityException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
@@ -259,19 +259,19 @@ namespace BIM.OpenFoamExport
             }
             catch (SecurityException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
@@ -294,19 +294,19 @@ namespace BIM.OpenFoamExport
             }
             catch (SecurityException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
@@ -357,7 +357,7 @@ namespace BIM.OpenFoamExport
                     FileAttributes tempAtt = fileAttribute & FileAttributes.ReadOnly;
                     if (FileAttributes.ReadOnly == tempAtt)
                     {
-                        MessageBox.Show(OpenFoamExportResource.ERR_FILE_READONLY, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FILE_READONLY, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                               MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
@@ -372,19 +372,19 @@ namespace BIM.OpenFoamExport
             }
             catch (SecurityException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
@@ -491,19 +491,19 @@ namespace BIM.OpenFoamExport
             }
             catch (SecurityException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Epsilon parameter for SimpleFoam.
     /// </summary>
-    public class Epsilon : FoamParameter<double>
+    public class Epsilon : FOAMParameter<double>
     {
         ///// <summary>
         ///// InternalField-entry

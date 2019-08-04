@@ -24,14 +24,14 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
     /// <summary>
     /// Class STLExportCommand is the entry of the AddIn program and contains the method to save STL file.
     /// </summary>
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.ReadOnly)]
-    public class OpenFoamExportCommand : IExternalCommand
+    public class OpenFOAMExportCommand : IExternalCommand
     {
         /// <summary>
         /// The application object for the active instance of Autodesk Revit.
@@ -59,7 +59,7 @@ namespace BIM.OpenFoamExport
             m_Revit = commandData.Application;
 
             ///pop up the STL export form
-            using (STLExportForm exportForm = new STLExportForm(m_Revit))
+            using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
             {
                 if (DialogResult.Cancel == exportForm.ShowDialog())
                 {

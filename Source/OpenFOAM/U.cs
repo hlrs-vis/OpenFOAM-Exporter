@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Media.Media3D;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Represents velocity parameter in CFD-Simulation in OpenFOAM.
     /// </summary>
-    public class U : FoamParameter<Vector3D>
+    public class U : FOAMParameter<Vector3D>
     {
         ///// <summary>
         ///// InternalField-entry

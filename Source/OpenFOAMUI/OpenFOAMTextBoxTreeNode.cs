@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Media3D;
 
-namespace BIM.OpenFoamExport.OpenFOAMUI
+namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     /// <summary>
     /// The class OpenFOAMTextBoxTreeNode is an child class from TreeNode and offers a additional Textbox.
@@ -18,7 +18,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <summary>
         /// Format of type as string.
         /// </summary>
-        private string m_Format;
+        private readonly string m_Format;
 
         /// <summary>
         /// Textbox-Object.

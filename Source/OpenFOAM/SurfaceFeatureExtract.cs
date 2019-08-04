@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// The class SurfaceFeatureExtract represents the Dictionary for extracting eMesh.
     /// </summary>
-    public class SurfaceFeatureExtract : FoamDict
+    public class SurfaceFeatureExtract : FOAMDict
     {
         /// <summary>
         /// Dictionary for SurfaceFeatures

@@ -4,12 +4,12 @@ using Autodesk.Revit.DB;
 using System.Windows.Media.Media3D;
 using System.Collections;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// The class SnappyHexMeshDict heritates from abstract class FoamDict and contains all default attributes for this openFOAM-File.
     /// </summary>
-    public class SnappyHexMeshDict : FoamDict
+    public class SnappyHexMeshDict : FOAMDict
     {
         ///Constant strings
         private const string nameGeometry = "name";
@@ -19,7 +19,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Name of the STL
         /// </summary>
-        private string m_STLName;
+        private readonly string m_STLName;
 
         /// <summary>
         /// Point in 3d-Space that is used to seperate between outer and inner mesh in the snappyHexMesh-algorithmn
@@ -29,7 +29,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Contains inlet and outlet as Faces
         /// </summary>
-        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
+        private readonly Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
 
         private Dictionary<string, object> m_SettingsCMC;
 

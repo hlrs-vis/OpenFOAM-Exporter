@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace BIM.OpenFoamExport.OpenFOAMUI
+namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     /// <summary>
     /// This class is in use for list OpenFOAM-Parameter as a dropdownlist.

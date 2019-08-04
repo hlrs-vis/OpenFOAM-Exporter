@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// This class is used for initialize the turbulence properties for the OpenFOAM simulation.
     /// </summary>
-    public class TurbulenceProperties : FoamDict
+    public class TurbulenceProperties : FOAMDict
     {
         /// <summary>
         /// Contructor.

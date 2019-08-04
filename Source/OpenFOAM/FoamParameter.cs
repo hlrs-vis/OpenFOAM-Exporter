@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Windows.Media.Media3D;
+﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
 
 
@@ -11,7 +8,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// Abstract base class for simulation parameter that vary with used simulation-model.
     /// </summary>
     /// <typeparam name="T">Type of value.</typeparam>
-    public abstract class FoamParameter<T> : FoamDict
+    public abstract class FOAMParameter<T> : FOAMDict
     {
         /// <summary>
         /// Name of the patch wall
@@ -86,7 +83,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="_wallName">Name of the patch wall.</param>
         /// <param name="_InletNames">Patchnames of the inlets as string-array.</param>
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
-        public FoamParameter(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _class, string _object, string _wallName,
+        public FOAMParameter(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _class, string _object, string _wallName,
             List<string> _InletNames, List<string> _OutletNames)
             : base(_class, _object, version, path, attributes, format, settings)
         {

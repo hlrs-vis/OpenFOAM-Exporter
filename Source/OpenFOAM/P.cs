@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// This class represents the pressure for a simulation in OpenFOAM.
     /// </summary>
-    public class P : FoamParameter<double>
+    public class P : FOAMParameter<double>
     {
         ///// <summary>
         ///// InternalField entry

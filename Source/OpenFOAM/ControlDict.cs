@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// The ControlDict-Class represents the controlDict in the OpenFOAM-System folder.
     /// </summary>
-    public class ControlDict : FoamDict
+    public class ControlDict : FOAMDict
     {
         /// <summary>
         /// additional functions
         /// </summary>
-        private Dictionary<string, object> m_Functions;
+        private readonly Dictionary<string, object> m_Functions;
 
         /// <summary>
         /// Constructor.

@@ -21,12 +21,12 @@ using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
    /// <summary>
    /// Manager class for dialogs in the project.
    /// </summary>
-   public class OpenFoamDialogManager
+   public class OpenFOAMDialogManager
    {
       /// <summary>
       /// Pop up a standard SaveAs dialog.
@@ -39,8 +39,8 @@ namespace BIM.OpenFoamExport
          {
             saveDialog.OverwritePrompt = true;
             saveDialog.AddExtension = true;
-            saveDialog.DefaultExt = OpenFoamExportResource.SAVE_DIALOG_DEFAULT_FILE_EXTEND;
-            saveDialog.Filter = OpenFoamExportResource.SAVE_DIALOG_FILE_FILTER;
+            saveDialog.DefaultExt = OpenFOAMExportResource.SAVE_DIALOG_DEFAULT_FILE_EXTEND;
+            saveDialog.Filter = OpenFOAMExportResource.SAVE_DIALOG_FILE_FILTER;
 
             if (System.Windows.Forms.DialogResult.OK != saveDialog.ShowDialog())
             {
@@ -57,7 +57,7 @@ namespace BIM.OpenFoamExport
       [Conditional("DEBUG")]
       public static void ShowDebug(string exception)
       {
-         MessageBox.Show(exception, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+         MessageBox.Show(exception, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                         MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
       }
    }

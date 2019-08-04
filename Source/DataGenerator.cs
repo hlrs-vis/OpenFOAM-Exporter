@@ -29,11 +29,10 @@ using GeometryElement = Autodesk.Revit.DB.GeometryElement;
 using GeometryOptions = Autodesk.Revit.DB.Options;
 using GeometryInstance = Autodesk.Revit.DB.GeometryInstance;
 using RevitView = Autodesk.Revit.DB.View;
-using BIM.OpenFoamExport.OpenFOAM;
+using BIM.OpenFOAMExport.OpenFOAM;
 using Material = Autodesk.Revit.DB.Material;
-using System.Security;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
     /// <summary>
     /// Generate triangular data and save them in a temporary file.
@@ -76,7 +75,7 @@ namespace BIM.OpenFoamExport
         /// <summary>
         /// Current View-Options
         /// </summary>
-        private GeometryOptions m_ViewOptions;
+        private readonly GeometryOptions m_ViewOptions;
 
         /// <summary>
         /// Categories which will be included in STL
@@ -91,7 +90,7 @@ namespace BIM.OpenFoamExport
         /// <summary>
         /// Cancel GUI
         /// </summary>
-        private STLExportCancelForm m_StlExportCancel = new STLExportCancelForm();
+        private readonly OpenFOAMExportCancelForm m_StlExportCancel = new OpenFOAMExportCancelForm();
 
         /// <summary>
         /// Materials from inlet/outlet
@@ -106,7 +105,7 @@ namespace BIM.OpenFoamExport
         /// <summary>
         /// OpenFOAM-Dictionaries
         /// </summary>
-        private List<FoamDict> openFOAMDictionaries;
+        private List<FOAMDict> openFOAMDictionaries;
 
         /// <summary>
         /// Faces of the inlet/outlet for openFOAM-Simulation
@@ -209,14 +208,14 @@ namespace BIM.OpenFoamExport
 
             //generate files
             OpenFOAM.Version version = new OpenFOAM.Version();
-            openFOAMDictionaries = new List<FoamDict>();
+            openFOAMDictionaries = new List<FOAMDict>();
 
             //Init folders
             InitSystemFolder(version, system);
             InitNullFolder(version, nullFolder);
             InitConstantFolder(version, constant);
 
-            foreach (FoamDict openFOAMDictionary in openFOAMDictionaries)
+            foreach (FOAMDict openFOAMDictionary in openFOAMDictionaries)
             {
                 openFOAMDictionary.Init();
             }
@@ -295,10 +294,9 @@ namespace BIM.OpenFoamExport
             //Extract inlet/outlet-names
             List<string> inletNames = new List<string>();
             List<string> outletNames = new List<string>();
-            string name = string.Empty;
             foreach (var face in faces)
             {
-                name = face.Key.Key.Replace(" ", "_");
+                string name = face.Key.Key.Replace(" ", "_");
                 if (name.Contains("Zuluft") || name.Contains("Inlet"))
                 {
                     inletNames.Add(name);
@@ -431,7 +429,7 @@ namespace BIM.OpenFoamExport
 
                 if (0 == m_TriangularNumber)
                 {
-                    MessageBox.Show(OpenFoamExportResource.ERR_NOSOLID, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                    MessageBox.Show(OpenFOAMExportResource.ERR_NOSOLID, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                     m_StlExportCancel.Close();
@@ -986,14 +984,14 @@ namespace BIM.OpenFoamExport
             {
                 MeshTriangle triangular = mesh.get_Triangle(ii);
                 double[] xyz = new double[9];
-                Autodesk.Revit.DB.XYZ normal = new Autodesk.Revit.DB.XYZ();
+                XYZ normal = new XYZ();
                 try
                 {
-                    Autodesk.Revit.DB.XYZ[] triPnts = new Autodesk.Revit.DB.XYZ[3];
+                    XYZ[] triPnts = new XYZ[3];
                     for (int n = 0; n < 3; ++n)
                     {
                         double x, y, z;
-                        Autodesk.Revit.DB.XYZ point = triangular.get_Vertex(n);
+                        XYZ point = triangular.get_Vertex(n);
                         if (hasTransform)
                         {
                             point = transform.OfPoint(point);
@@ -1029,13 +1027,13 @@ namespace BIM.OpenFoamExport
                         triPnts[n] = mypoint;
                     }
 
-                    Autodesk.Revit.DB.XYZ pnt1 = triPnts[1] - triPnts[0];
+                    XYZ pnt1 = triPnts[1] - triPnts[0];
                     normal = pnt1.CrossProduct(triPnts[2] - triPnts[1]);
                 }
                 catch (Exception ex)
                 {
                     m_TriangularNumber--;
-                    OpenFoamDialogManager.ShowDebug(ex.Message);
+                    OpenFOAMDialogManager.ShowDebug(ex.Message);
                     continue;
                 }
 
@@ -1113,7 +1111,7 @@ namespace BIM.OpenFoamExport
             }
             catch (Exception ex)
             {
-                OpenFoamDialogManager.ShowDebug(ex.Message);
+                OpenFOAMDialogManager.ShowDebug(ex.Message);
             }
 
             return linkedDocs;
@@ -1137,13 +1135,13 @@ namespace BIM.OpenFoamExport
             return linkElements;
         }
 
-        /// <summary>
-        /// Initializes the Cancel form.
-        /// </summary>
-        private void StartCancelForm()
-        {
-            STLExportCancelForm stlCancel = new STLExportCancelForm();
-            stlCancel.Show();
-        }
+        ///// <summary>
+        ///// Initializes the Cancel form.
+        ///// </summary>
+        //private void StartCancelForm()
+        //{
+        //    OpenFOAMExportCancelForm stlCancel = new OpenFOAMExportCancelForm();
+        //    stlCancel.Show();
+        //}
     }
 }

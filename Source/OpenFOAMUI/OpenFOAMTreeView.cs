@@ -14,7 +14,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Media3D;
 
-namespace BIM.OpenFoamExport.OpenFOAMUI
+namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     /// <summary>
     /// Use this class for list <see cref="T:OpenFOAMTreeNode"/> and <see cref="T:OpenFOAMDropDownTreeNode"/> in a <see cref="T:TreeView"/>.
@@ -56,17 +56,17 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <summary>
         /// Regular Expresion for Vector3D.
         /// </summary>
-        private Regex m_Vector3DReg = new Regex("^"+ d + "\\s+" + d + "\\s+" + d + "$");
+        private readonly Regex m_Vector3DReg = new Regex("^"+ d + "\\s+" + d + "\\s+" + d + "$");
 
         /// <summary>
         /// Regular Expression for Vector.
         /// </summary>
-        private Regex m_VectorReg = new Regex("^" + d + "\\s+" + d + "$");
+        private readonly Regex m_VectorReg = new Regex("^" + d + "\\s+" + d + "$");
 
         /// <summary>
         /// Regular Expression for number.
         /// </summary>
-        private Regex m_SingleReg = new Regex("^" + d);
+        private readonly Regex m_SingleReg = new Regex("^" + d);
 
         /// <summary>
         /// Occurs when the <see cref="E:System.Windows.Forms.TreeView.NodeMouseClick"></see> event is fired
@@ -307,9 +307,9 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
             }
             catch (FormatException)
             {
-                System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_FORMAT
+                System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT
                     + " " + valueString + "\nFormat: " + m_CurrentOFTxtBoxTreeNode.Format
-                    , OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                    , OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
@@ -342,8 +342,8 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
                 }
                 catch (FormatException)
                 {
-                    System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_VECTOR_FORMAT,
-                        OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                    System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_VECTOR_FORMAT,
+                        OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                         MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
                 

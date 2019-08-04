@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Windows.Media.Media3D;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Nut-Parameter for Simplefoam.
     /// </summary>
-    public class Nut : FoamParameter<double>
+    public class Nut : FOAMParameter<double>
     {
         ///// <summary>
         ///// InternalField entry

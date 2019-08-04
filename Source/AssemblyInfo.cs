@@ -25,11 +25,11 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("OpenFoam Exporter")]
-[assembly: AssemblyDescription("Export STL file with Patches and a OpenFoam Config for HVAC-Simulation for a Revit model")]
+[assembly: AssemblyTitle("OpenFOAM Exporter")]
+[assembly: AssemblyDescription("Export STL file with Patches and a OpenFOAM Config for HVAC-Simulation for a Revit model")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HLRS Stuttgart")]
-[assembly: AssemblyProduct("OpenFoam Exporter")]
+[assembly: AssemblyProduct("OpenFOAM Exporter")]
 [assembly: AssemblyCopyright("©2019 HLRS, Inc. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

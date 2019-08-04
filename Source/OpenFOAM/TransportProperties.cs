@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// TransportProperties-Dictionary in Constant-Folder.
     /// </summary>
-    public class TransportProperties : FoamDict
+    public class TransportProperties : FOAMDict
     {
         /// <summary>
         /// Transportmodel that has to be set in Settings.

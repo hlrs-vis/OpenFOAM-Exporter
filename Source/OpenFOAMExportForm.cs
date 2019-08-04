@@ -20,16 +20,16 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using BIM.OpenFoamExport.OpenFOAMUI;
+using BIM.OpenFOAMExport.OpenFOAMUI;
 using System.Windows.Forms;
 
 using Category = Autodesk.Revit.DB.Category;
 using Autodesk.Revit.DB;
 using System.Text.RegularExpressions;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
-    public partial class STLExportForm : System.Windows.Forms.Form
+    public partial class OpenFOAMExportForm : System.Windows.Forms.Form
     {
         /// <summary>
         /// DataGenerator-object.
@@ -44,12 +44,12 @@ namespace BIM.OpenFoamExport
         /// <summary>
         /// OpenFOAM-TreeView for default simulation parameter
         /// </summary>
-        private OpenFOAMTreeView m_OpenFOAMTreeView = new OpenFOAMTreeView();
+        private readonly OpenFOAMTreeView m_OpenFOAMTreeView = new OpenFOAMTreeView();
 
         /// <summary>
         /// Sorted dictionary for the unity properties that can be set in a drop down menu.
         /// </summary>
-        private SortedDictionary<string, DisplayUnitType> m_DisplayUnits = new SortedDictionary<string, DisplayUnitType>();
+        private readonly SortedDictionary<string, DisplayUnitType> m_DisplayUnits = new SortedDictionary<string, DisplayUnitType>();
 
         /// <summary>
         /// Selected Unittype in comboBox.
@@ -67,10 +67,25 @@ namespace BIM.OpenFoamExport
         readonly Autodesk.Revit.UI.UIApplication m_Revit = null;
 
         /// <summary>
+        /// Regular Expression for txtBoxUserIP.
+        /// </summary>
+        private readonly Regex m_RegUserIP = new Regex("^\\S+@\\S+$");
+
+        /// <summary>
+        /// Regular Expression for txtBoxServerCaseFolder.
+        /// </summary>
+        private readonly Regex m_RegServerCasePath = new Regex("^\\S+$");
+
+        /// <summary>
+        /// Regular Expression for txtBoxPort.
+        /// </summary>
+        private readonly Regex m_RegPort = new Regex("^\\d+$");
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="revit">The revit application.</param>
-        public STLExportForm(Autodesk.Revit.UI.UIApplication revit)
+        public OpenFOAMExportForm(Autodesk.Revit.UI.UIApplication revit)
         {
             InitializeComponent();
             m_Revit = revit;
@@ -78,54 +93,19 @@ namespace BIM.OpenFoamExport
             tbOpenFOAM.Enabled = false;
 
             //set size for OpenFOAMTreeView
-            Size sizeOpenFoamTreeView = gbDefault.Size;
-            sizeOpenFoamTreeView.Height -= 20;
-            sizeOpenFoamTreeView.Width -= 20;
-            m_OpenFOAMTreeView.Bounds = gbDefault.Bounds;
-            m_OpenFOAMTreeView.Size = sizeOpenFoamTreeView;
-            m_OpenFOAMTreeView.Top += 10;
-
-            //add OpenFOAMTreeView to container default
-            gbDefault.Controls.Add(m_OpenFOAMTreeView);
+            InitializeOFTreeViewSize();
 
             // get new data generator
             m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
 
-            // scan for categories to populate category list
-            m_CategoryList = m_Generator.ScanCategories(true);
+            //add OpenFOAMTreeView to container default
+            gbDefault.Controls.Add(m_OpenFOAMTreeView);
 
-            foreach (Category category in m_CategoryList.Values)
-            {
-                TreeNode treeNode = GetChildNode(category,m_Revit.ActiveUIDocument.Document.ActiveView);
-                if (treeNode != null)
-                    tvCategories.Nodes.Add(treeNode);                               
-            }
+            // scan for categories to populate category list
+            InitializeCategoryList();
 
             //intialize unit
-            string unitName = "Use Internal: Feet";
-            m_DisplayUnits.Add(unitName, DisplayUnitType.DUT_UNDEFINED);
-            int selectedIndex = comboBox_DUT.Items.Add(unitName);
-            if (m_SelectedDUT == DisplayUnitType.DUT_UNDEFINED)
-               comboBox_DUT.SelectedIndex = selectedIndex;
-            
-            Units currentUnits = m_Revit.ActiveUIDocument.Document.GetUnits();
-            DisplayUnitType currentDut = currentUnits.GetFormatOptions(UnitType.UT_Length).DisplayUnits;
-            unitName = "Use Current: " + LabelUtils.GetLabelFor(currentDut);
-            m_DisplayUnits.Add(unitName, currentDut);
-            selectedIndex = comboBox_DUT.Items.Add(unitName);
-            if (m_SelectedDUT == currentDut)
-               comboBox_DUT.SelectedIndex = selectedIndex;
-
-            foreach (DisplayUnitType dut in UnitUtils.GetValidDisplayUnits(UnitType.UT_Length))
-            {
-               if (currentDut == dut)
-                  continue;
-               unitName = LabelUtils.GetLabelFor(dut);
-               m_DisplayUnits.Add(unitName, dut);
-               selectedIndex = comboBox_DUT.Items.Add(unitName);
-               if (m_SelectedDUT == dut)
-                  comboBox_DUT.SelectedIndex = selectedIndex;
-            }
+            InitializeUnitsForSTL();
 
             // initialize the UI differently for Families
             if (revit.ActiveUIDocument.Document.IsFamilyDocument)
@@ -137,54 +117,11 @@ namespace BIM.OpenFoamExport
 
             }
 
-            SaveFormat saveFormat;
-            if (rbBinary.Checked)
-            {
-                saveFormat = SaveFormat.binary;
-            }
-            else
-            {
-                saveFormat = SaveFormat.ascii;
-            }
-            ElementsExportRange exportRange;
+            // initialize settings
+            InitializeSettings();
 
-            exportRange = ElementsExportRange.OnlyVisibleOnes;
-
-            // get selected categories from the category list
-            List<Category> selectedCategories = new List<Category>();
-
-            // only for projects
-            if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
-            {
-                foreach (TreeNode treeNode in tvCategories.Nodes)
-                {
-                    AddSelectedTreeNode(treeNode, selectedCategories);
-                }
-            }
-
-            DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
-            m_SelectedDUT = dup;
-
-            saveFormat = SaveFormat.ascii;
-
-            // create settings object to save setting information
-            m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
-
-            List<string> keyPath = new List<string>();
-
-            foreach (var att in m_Settings.SimulationDefault)
-            {
-                keyPath.Add(att.Key);
-                TreeNode treeNodeSimulation = new TreeNode(att.Key);
-                if (att.Value is Dictionary<string, object>)
-                {
-                    treeNodeSimulation = GetChildNode(att.Key, att.Value as Dictionary<string, object>, keyPath);
-                }
-                keyPath.Remove(att.Key);
-                if (treeNodeSimulation != null)
-                    m_OpenFOAMTreeView.Nodes.Add(treeNodeSimulation);
-            }
+            // initialize openfoam treeview openfoam
+            InitializeDefaultParameterOpenFOAM();
 
             // comboBoxEnv
             var enumEnv = OpenFOAMEnvironment.blueCFD;
@@ -205,7 +142,7 @@ namespace BIM.OpenFoamExport
 
             // comboBoxTransportModel
             var enumTransport = TransportModel.Newtonian;
-            foreach(var value in Enum.GetValues(enumTransport.GetType()))
+            foreach (var value in Enum.GetValues(enumTransport.GetType()))
             {
                 comboBoxTransportModel.Items.Add(value);
             }
@@ -215,12 +152,140 @@ namespace BIM.OpenFoamExport
             textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
             //To-Do: ADD EVENT FOR CHANGING TEXT
 
+            InitializeSSH();
+        }
+
+        /// <summary>
+        /// Initialize settings.
+        /// </summary>
+        private void InitializeSettings()
+        {
+            SaveFormat saveFormat;
+            if (rbBinary.Checked)
+            {
+                saveFormat = SaveFormat.binary;
+            }
+            else
+            {
+                saveFormat = SaveFormat.ascii;
+            }
+
+            ElementsExportRange exportRange;
+
+            exportRange = ElementsExportRange.OnlyVisibleOnes;
+
+            // get selected categories from the category list
+            List<Category> selectedCategories = new List<Category>();
+
+            // only for projects
+            if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
+            {
+                foreach (TreeNode treeNode in tvCategories.Nodes)
+                {
+                    AddSelectedTreeNode(treeNode, selectedCategories);
+                }
+            }
+
+            DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
+
+            saveFormat = SaveFormat.ascii;
+
+            // create settings object to save setting information
+            m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
+                false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
+        }
+
+        /// <summary>
+        /// Initialize SSH-Tab.
+        /// </summary>
+        private void InitializeSSH()
+        {
             txtBoxUserIP.Text = m_Settings.SSH.ConnectionString();
             txtBoxAlias.Text = m_Settings.SSH.OfAlias;
             txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
             txtBoxPort.Text = m_Settings.SSH.Port.ToString();
             cbDelete.Checked = m_Settings.SSH.Delete;
             cbDownload.Checked = m_Settings.SSH.Download;
+        }
+
+        /// <summary>
+        /// Initialize OpenFOAM-TreeView with default parameter from settings.
+        /// </summary>
+        private void InitializeDefaultParameterOpenFOAM()
+        {
+            List<string> keyPath = new List<string>();
+
+            foreach (var att in m_Settings.SimulationDefault)
+            {
+                keyPath.Add(att.Key);
+                TreeNode treeNodeSimulation = new TreeNode(att.Key);
+                if (att.Value is Dictionary<string, object>)
+                {
+                    treeNodeSimulation = GetChildNode(att.Key, att.Value as Dictionary<string, object>, keyPath);
+                }
+                keyPath.Remove(att.Key);
+                if (treeNodeSimulation != null)
+                    m_OpenFOAMTreeView.Nodes.Add(treeNodeSimulation);
+            }
+        }
+
+        /// <summary>
+        /// Initialize comboBox for Units.
+        /// </summary>
+        private void InitializeUnitsForSTL()
+        {
+            string unitName = "Use Internal: Feet";
+            m_DisplayUnits.Add(unitName, DisplayUnitType.DUT_UNDEFINED);
+            int selectedIndex = comboBox_DUT.Items.Add(unitName);
+            if (m_SelectedDUT == DisplayUnitType.DUT_UNDEFINED)
+                comboBox_DUT.SelectedIndex = selectedIndex;
+
+            Units currentUnits = m_Revit.ActiveUIDocument.Document.GetUnits();
+            DisplayUnitType currentDut = currentUnits.GetFormatOptions(UnitType.UT_Length).DisplayUnits;
+            unitName = "Use Current: " + LabelUtils.GetLabelFor(currentDut);
+            m_DisplayUnits.Add(unitName, currentDut);
+            selectedIndex = comboBox_DUT.Items.Add(unitName);
+            if (m_SelectedDUT == currentDut)
+                comboBox_DUT.SelectedIndex = selectedIndex;
+
+            foreach (DisplayUnitType dut in UnitUtils.GetValidDisplayUnits(UnitType.UT_Length))
+            {
+                if (currentDut == dut)
+                    continue;
+                unitName = LabelUtils.GetLabelFor(dut);
+                m_DisplayUnits.Add(unitName, dut);
+                selectedIndex = comboBox_DUT.Items.Add(unitName);
+                if (m_SelectedDUT == dut)
+                    comboBox_DUT.SelectedIndex = selectedIndex;
+            }
+        }
+
+        /// <summary>
+        /// Initialize category-tab.
+        /// </summary>
+        private void InitializeCategoryList()
+        {
+            m_CategoryList = m_Generator.ScanCategories(true);
+
+            foreach (Category category in m_CategoryList.Values)
+            {
+                TreeNode treeNode = GetChildNode(category, m_Revit.ActiveUIDocument.Document.ActiveView);
+                if (treeNode != null)
+                    tvCategories.Nodes.Add(treeNode);
+            }
+        }
+
+        /// <summary>
+        /// Initialize OpenFOAM-TreeView.
+        /// </summary>
+        private void InitializeOFTreeViewSize()
+        {
+            Size sizeOpenFoamTreeView = gbDefault.Size;
+            sizeOpenFoamTreeView.Height -= 20;
+            sizeOpenFoamTreeView.Width -= 20;
+            m_OpenFOAMTreeView.Bounds = gbDefault.Bounds;
+            m_OpenFOAMTreeView.Size = sizeOpenFoamTreeView;
+            m_OpenFOAMTreeView.Top += 10;
         }
 
         /// <summary>
@@ -234,8 +299,10 @@ namespace BIM.OpenFoamExport
             if (parent == null)
                 return null;
 
-            TreeNode treeNode = new TreeNode(parent);
-            treeNode.Tag = parent;
+            TreeNode treeNode = new TreeNode(parent)
+            {
+                Tag = parent
+            };
 
             if (dict == null)
                 return treeNode;
@@ -269,7 +336,6 @@ namespace BIM.OpenFoamExport
                 }
                 else
                 {
-
                     OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value, ref m_Settings, keyPath);
                     child.Nodes.Add(txtBoxNode);
                 }
@@ -296,11 +362,13 @@ namespace BIM.OpenFoamExport
             if (!category.get_AllowsVisibilityControl(view))
                 return null;
 
-            TreeNode treeNode = new TreeNode(category.Name);
-            treeNode.Tag = category;
-            treeNode.Checked = true;
+            TreeNode treeNode = new TreeNode(category.Name)
+            {
+                Tag = category,
+                Checked = true
+            };
 
-            if(category.SubCategories.Size == 0)
+            if (category.SubCategories.Size == 0)
             {                
                 return treeNode;
             }
@@ -320,10 +388,10 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void btnHelp_Click(object sender, EventArgs e)
+        private void BtnHelp_Click(object sender, EventArgs e)
         {
             string helpfile = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            helpfile = System.IO.Path.Combine(helpfile, "OpenFoam_Export.chm");
+            helpfile = System.IO.Path.Combine(helpfile, "OpenFOAM_Export.chm");
 
             if (System.IO.File.Exists(helpfile) == false)
             {
@@ -340,9 +408,9 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void btnSave_Click(object sender, EventArgs e)
+        private void BtnSave_Click(object sender, EventArgs e)
         {
-            string fileName = OpenFoamDialogManager.SaveDialog();
+            string fileName = OpenFOAMDialogManager.SaveDialog();
 
             if (!string.IsNullOrEmpty(fileName))
             {
@@ -359,6 +427,7 @@ namespace BIM.OpenFoamExport
 
                 ElementsExportRange exportRange;
                 exportRange = ElementsExportRange.OnlyVisibleOnes;
+
                 m_Settings.ExportRange = exportRange;
 
                 // get selected categories from the category list
@@ -391,8 +460,7 @@ namespace BIM.OpenFoamExport
                 m_Settings.TransportModel = transport;
 
                 //set number of cpu
-                int cpu = 0;
-                if(int.TryParse(textBoxCPU.Text, out cpu))
+                if (int.TryParse(textBoxCPU.Text, out int cpu))
                 {
                     m_Settings.NumberOfSubdomains = cpu;
                 }
@@ -402,10 +470,6 @@ namespace BIM.OpenFoamExport
                     return;
                 }
 
-                // create settings object to save setting information
-                //Settings aSetting = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                //    false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
-
                 // save Revit document's triangular data in a temporary file
                 m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
                 DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, m_Settings/*aSetting*/);
@@ -413,13 +477,13 @@ namespace BIM.OpenFoamExport
                 if (succeed == DataGenerator.GeneratorStatus.FAILURE)
                 {
                     this.DialogResult = DialogResult.Cancel;
-                    MessageBox.Show(OpenFoamExportResource.ERR_SAVE_FILE_FAILED, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                    MessageBox.Show(OpenFOAMExportResource.ERR_SAVE_FILE_FAILED, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
                 else if (succeed == DataGenerator.GeneratorStatus.CANCEL)
                 {
                     this.DialogResult = DialogResult.Cancel;
-                    MessageBox.Show(OpenFoamExportResource.CANCEL_FILE_NOT_SAVED, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                    MessageBox.Show(OpenFOAMExportResource.CANCEL_FILE_NOT_SAVED, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
 
@@ -429,7 +493,7 @@ namespace BIM.OpenFoamExport
             }
             else
             {
-                MessageBox.Show(OpenFoamExportResource.CANCEL_FILE_NOT_SAVED, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.CANCEL_FILE_NOT_SAVED, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
@@ -458,7 +522,7 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void BtnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
@@ -469,7 +533,7 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void btnCheckAll_Click(object sender, EventArgs e)
+        private void BtnCheckAll_Click(object sender, EventArgs e)
         {
             foreach (TreeNode treeNode in tvCategories.Nodes)
             {
@@ -482,7 +546,7 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void btnCheckNone_Click(object sender, EventArgs e)
+        private void BtnCheckNone_Click(object sender, EventArgs e)
         {
             foreach (TreeNode treeNode in tvCategories.Nodes)
             {
@@ -512,31 +576,31 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void cbIncludeLinked_CheckedChanged(object sender, EventArgs e)
+        private void CbIncludeLinked_CheckedChanged(object sender, EventArgs e)
         {
             if (cbIncludeLinked.Checked == true)
             {
-                MessageBox.Show(OpenFoamExportResource.WARN_PROJECT_POSITION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.WARN_PROJECT_POSITION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
         /// <summary>
-        /// 
+        /// ExportFormat click event.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void rbExportFormat_CheckedChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void RbExportFormat_CheckedChanged(object sender, EventArgs e)
         {
             cbExportColor.Enabled = rbBinary.Checked;
         }
 
         /// <summary>
-        /// 
+        /// OpenFOAM checked event.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbOpenFOAM_CheckedChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void CbOpenFOAM_CheckedChanged(object sender, EventArgs e)
         {
             if (cbOpenFOAM.Checked == true)
             {
@@ -561,11 +625,11 @@ namespace BIM.OpenFoamExport
         }
 
         /// <summary>
-        /// 
+        /// ValueChanged event for comboBoxEnv.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void comboBoxEnv_SelectedValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void ComboBoxEnv_SelectedValueChanged(object sender, EventArgs e)
         {
             if((OpenFOAMEnvironment)comboBoxEnv.SelectedItem == OpenFOAMEnvironment.ssh)
             {
@@ -578,30 +642,24 @@ namespace BIM.OpenFoamExport
         }
 
         /// <summary>
-        /// 
+        /// ValueChanged event for txtBoxUserIP.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void txtBoxUserIP_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void TxtBoxUserIP_ValueChanged(object sender, EventArgs e)
         {
-            string txtUser = string.Empty;
-            string txtIP = string.Empty;
             string txtBox = txtBoxUserIP.Text;
 
-            Regex reg = new Regex("^\\S+@\\S+$");
-
-            if(reg.IsMatch(txtBox))
+            if(m_RegUserIP.IsMatch(txtBox))
             {
-                txtUser = txtBox.Split('@')[0];
-                txtIP = txtBox.Split('@')[1];
                 SSH ssh = m_Settings.SSH;
-                ssh.User = txtUser;
-                ssh.ServerIP = txtIP;
+                ssh.User = txtBox.Split('@')[0];
+                ssh.ServerIP = txtBox.Split('@')[1];
                 m_Settings.SSH = ssh;
             }
             else
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_FORMAT + " " + txtBox, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
@@ -610,40 +668,38 @@ namespace BIM.OpenFoamExport
         }
 
         /// <summary>
-        /// 
+        /// ValueChanged event for txtBoxAlias.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void txtBoxAlias_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void TxtBoxAlias_ValueChanged(object sender, EventArgs e)
         {
             string txt = txtBoxAlias.Text;
             SSH ssh = m_Settings.SSH;
             ssh.OfAlias = txt;
             m_Settings.SSH = ssh;
+
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
 
         /// <summary>
-        /// 
+        /// ValueChanged for txtBoxServerCaseFolder.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void txtBoxServerCaseFolder_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void TxtBoxServerCaseFolder_ValueChanged(object sender, EventArgs e)
         {
-            string txt = string.Empty;
             string txtBox = txtBoxCaseFolder.Text;
-            Regex reg = new Regex("^\\S+$");
 
-            if (reg.IsMatch(txtBox))
+            if (m_RegServerCasePath.IsMatch(txtBox))
             {
-                txt = txtBox;
                 SSH ssh = m_Settings.SSH;
-                ssh.ServerCaseFolder = txt;
+                ssh.ServerCaseFolder = txtBox;
                 m_Settings.SSH = ssh;
             }
             else
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_FORMAT + " " + txtBox, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
@@ -652,26 +708,23 @@ namespace BIM.OpenFoamExport
         }
 
         /// <summary>
-        /// 
+        /// ValueChanged event for txtBoxPort.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void txtBoxPort_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void TxtBoxPort_ValueChanged(object sender, EventArgs e)
         {
-            string txt = string.Empty;
             string txtBox = txtBoxPort.Text;
-            Regex reg = new Regex("^\\d+$");
 
-            if (reg.IsMatch(txtBox))
+            if (m_RegPort.IsMatch(txtBox))
             {
-                txt = txtBox;
                 SSH ssh = m_Settings.SSH;
-                ssh.Port = Convert.ToInt32(txt);
+                ssh.Port = Convert.ToInt32(txtBox);
                 m_Settings.SSH = ssh;
             }
             else
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_FORMAT + " " + txtBox, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
@@ -680,28 +733,30 @@ namespace BIM.OpenFoamExport
         }
 
         /// <summary>
-        /// 
+        /// Checked event for cbDownload.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbDownload_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void CbDownload_CheckedChanged(object sender, EventArgs e)
         {
             SSH ssh = m_Settings.SSH;
             ssh.Download = cbDownload.Checked;
             m_Settings.SSH = ssh;
+
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
 
         /// <summary>
-        /// 
+        /// Checked event for cbDelete.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void cbDelete_ValueChanged(object sender, EventArgs e)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void CbDelete_CheckedChanged(object sender, EventArgs e)
         {
             SSH ssh = m_Settings.SSH;
             ssh.Delete = cbDelete.Checked;
             m_Settings.SSH = ssh;
+
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace BIM.OpenFoamExport.OpenFOAMUI
+﻿namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     partial class OpenFOAMTextBoxForm
     {

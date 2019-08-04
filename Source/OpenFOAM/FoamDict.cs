@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Interface for OpenFOAM-Dictionaries.
     /// </summary>
-    public abstract class FoamDict
+    public abstract class FOAMDict
     {
         /// <summary>
         /// Name of the dictionary
@@ -35,12 +35,12 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// FoamFile-Object
         /// </summary>
-        private FoamFile foamFile;
+        private readonly FOAMFile foamFile;
 
         /// <summary>
         /// Getter for the FoamFile.
         /// </summary>
-        public FoamFile FoamFile { get => foamFile;}
+        public FOAMFile FoamFile { get => foamFile;}
 
         /// <summary>
         /// Constructor.
@@ -52,7 +52,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-object</param>
-        public FoamDict(string _name, string m_class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
+        public FOAMDict(string _name, string m_class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
         {
             name = _name;
             _class = m_class;

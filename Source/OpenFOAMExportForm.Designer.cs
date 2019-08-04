@@ -17,9 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
-    partial class STLExportForm
+    partial class OpenFOAMExportForm
     {
         /// <summary>
         /// Required designer variable.
@@ -47,7 +47,7 @@ namespace BIM.OpenFoamExport
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(STLExportForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OpenFOAMExportForm));
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnHelp = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
@@ -103,21 +103,21 @@ namespace BIM.OpenFoamExport
             resources.ApplyResources(this.btnCancel, "btnCancel");
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.btnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // btnHelp
             // 
             resources.ApplyResources(this.btnHelp, "btnHelp");
             this.btnHelp.Name = "btnHelp";
             this.btnHelp.UseVisualStyleBackColor = true;
-            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
+            this.btnHelp.Click += new System.EventHandler(this.BtnHelp_Click);
             // 
             // btnSave
             // 
             resources.ApplyResources(this.btnSave, "btnSave");
             this.btnSave.Name = "btnSave";
             this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnSave.Click += new System.EventHandler(this.BtnSave_Click);
             // 
             // tpCategories
             // 
@@ -139,14 +139,14 @@ namespace BIM.OpenFoamExport
             resources.ApplyResources(this.btnCheckNone, "btnCheckNone");
             this.btnCheckNone.Name = "btnCheckNone";
             this.btnCheckNone.UseVisualStyleBackColor = true;
-            this.btnCheckNone.Click += new System.EventHandler(this.btnCheckNone_Click);
+            this.btnCheckNone.Click += new System.EventHandler(this.BtnCheckNone_Click);
             // 
             // btnCheckAll
             // 
             resources.ApplyResources(this.btnCheckAll, "btnCheckAll");
             this.btnCheckAll.Name = "btnCheckAll";
             this.btnCheckAll.UseVisualStyleBackColor = true;
-            this.btnCheckAll.Click += new System.EventHandler(this.btnCheckAll_Click);
+            this.btnCheckAll.Click += new System.EventHandler(this.BtnCheckAll_Click);
             // 
             // tpGeneral
             // 
@@ -166,7 +166,7 @@ namespace BIM.OpenFoamExport
             resources.ApplyResources(this.cbOpenFOAM, "cbOpenFOAM");
             this.cbOpenFOAM.Name = "cbOpenFOAM";
             this.cbOpenFOAM.UseVisualStyleBackColor = true;
-            this.cbOpenFOAM.CheckedChanged += new System.EventHandler(this.cbOpenFOAM_CheckedChanged);
+            this.cbOpenFOAM.CheckedChanged += new System.EventHandler(this.CbOpenFOAM_CheckedChanged);
             // 
             // cbExportSharedCoordinates
             // 
@@ -196,7 +196,7 @@ namespace BIM.OpenFoamExport
             resources.ApplyResources(this.cbIncludeLinked, "cbIncludeLinked");
             this.cbIncludeLinked.Name = "cbIncludeLinked";
             this.cbIncludeLinked.UseVisualStyleBackColor = true;
-            this.cbIncludeLinked.CheckedChanged += new System.EventHandler(this.cbIncludeLinked_CheckedChanged);
+            this.cbIncludeLinked.CheckedChanged += new System.EventHandler(this.CbIncludeLinked_CheckedChanged);
             // 
             // gbSTLFormat
             // 
@@ -219,7 +219,7 @@ namespace BIM.OpenFoamExport
             this.rbBinary.Name = "rbBinary";
             this.rbBinary.TabStop = true;
             this.rbBinary.UseVisualStyleBackColor = true;
-            this.rbBinary.CheckedChanged += new System.EventHandler(this.rbExportFormat_CheckedChanged);
+            this.rbBinary.CheckedChanged += new System.EventHandler(this.RbExportFormat_CheckedChanged);
             // 
             // tabControlExporter
             // 
@@ -297,7 +297,7 @@ namespace BIM.OpenFoamExport
             this.comboBoxEnv.FormattingEnabled = true;
             resources.ApplyResources(this.comboBoxEnv, "comboBoxEnv");
             this.comboBoxEnv.Name = "comboBoxEnv";
-            this.comboBoxEnv.SelectedValueChanged += new System.EventHandler(this.comboBoxEnv_SelectedValueChanged);
+            this.comboBoxEnv.SelectedValueChanged += new System.EventHandler(this.ComboBoxEnv_SelectedValueChanged);
             // 
             // lblEnv
             // 
@@ -332,7 +332,7 @@ namespace BIM.OpenFoamExport
             this.cbDelete.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbDelete.Name = "cbDelete";
             this.cbDelete.UseVisualStyleBackColor = true;
-            this.cbDelete.CheckedChanged += new System.EventHandler(this.cbDelete_ValueChanged);
+            this.cbDelete.CheckedChanged += new System.EventHandler(this.CbDelete_CheckedChanged);
             // 
             // cbDownload
             // 
@@ -341,25 +341,25 @@ namespace BIM.OpenFoamExport
             this.cbDownload.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbDownload.Name = "cbDownload";
             this.cbDownload.UseVisualStyleBackColor = true;
-            this.cbDownload.CheckedChanged += new System.EventHandler(this.cbDownload_ValueChanged);
+            this.cbDownload.CheckedChanged += new System.EventHandler(this.CbDownload_CheckedChanged);
             // 
             // txtBoxCaseFolder
             // 
             resources.ApplyResources(this.txtBoxCaseFolder, "txtBoxCaseFolder");
             this.txtBoxCaseFolder.Name = "txtBoxCaseFolder";
-            this.txtBoxCaseFolder.TextChanged += new System.EventHandler(this.txtBoxServerCaseFolder_ValueChanged);
+            this.txtBoxCaseFolder.TextChanged += new System.EventHandler(this.TxtBoxServerCaseFolder_ValueChanged);
             // 
             // txtBoxAlias
             // 
             resources.ApplyResources(this.txtBoxAlias, "txtBoxAlias");
             this.txtBoxAlias.Name = "txtBoxAlias";
-            this.txtBoxAlias.TextChanged += new System.EventHandler(this.txtBoxAlias_ValueChanged);
+            this.txtBoxAlias.TextChanged += new System.EventHandler(this.TxtBoxAlias_ValueChanged);
             // 
             // txtBoxUserIP
             // 
             resources.ApplyResources(this.txtBoxUserIP, "txtBoxUserIP");
             this.txtBoxUserIP.Name = "txtBoxUserIP";
-            this.txtBoxUserIP.TextChanged += new System.EventHandler(this.txtBoxUserIP_ValueChanged);
+            this.txtBoxUserIP.TextChanged += new System.EventHandler(this.TxtBoxUserIP_ValueChanged);
             // 
             // lblCaseFolder
             // 
@@ -385,7 +385,7 @@ namespace BIM.OpenFoamExport
             // 
             resources.ApplyResources(this.txtBoxPort, "txtBoxPort");
             this.txtBoxPort.Name = "txtBoxPort";
-            this.txtBoxPort.TextChanged += new System.EventHandler(this.txtBoxPort_ValueChanged);
+            this.txtBoxPort.TextChanged += new System.EventHandler(this.TxtBoxPort_ValueChanged);
             // 
             // STLExportForm
             // 

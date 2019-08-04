@@ -1,12 +1,11 @@
-﻿using BIM.OpenFoamExport.OpenFOAMUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security;
 using System.Windows.Forms;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Abstract base-class runmanager contains functions which have to be implemented for each OpenFOAM-Run-Environment itselfs.
@@ -31,7 +30,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Environment selection.
         /// </summary>
-        private OpenFOAMEnvironment m_Env;
+        private readonly OpenFOAMEnvironment m_Env;
 
         /// <summary>
         /// DecomposPar-Dict for NumberOfSubdomains.
@@ -84,7 +83,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                     FileAttributes tempAtt = fileAttribute & FileAttributes.ReadOnly;
                     if (FileAttributes.ReadOnly == tempAtt)
                     {
-                        MessageBox.Show(OpenFoamExportResource.ERR_FILE_READONLY, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FILE_READONLY, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                               MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
@@ -104,19 +103,19 @@ namespace BIM.OpenFoamExport.OpenFOAM
             }
             catch (SecurityException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
@@ -159,6 +158,8 @@ namespace BIM.OpenFoamExport.OpenFOAM
                         continue;
                     }
                 }
+
+                //commands that have no log function.
                 if (command.Equals("\"") || command.Contains("rm -r") 
                     || command.Contains("call") || /*USEFUL FOR DEBUGGING BATCH*/command.Contains("pause")
                     || command.Contains("scp") || command.Contains("ssh"))
@@ -188,7 +189,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                     {
                         MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment." +
                             "\nC#-Process ExitCode: " + process.ExitCode,
-                            OpenFoamExportResource.MESSAGE_BOX_TITLE); ;
+                            OpenFOAMExportResource.MESSAGE_BOX_TITLE); ;
                     }
                 }
             }
@@ -200,14 +201,14 @@ namespace BIM.OpenFoamExport.OpenFOAM
         }
 
         /// <summary>
-        /// Interface for initialize config.
+        /// Initialize config.
         /// </summary>
         public virtual void CreateEnvConfig()
         {
             string defaultEnvPath = "None";
             string envTag = "<" + m_Env + ">"; ;
             string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
-            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFoamExport.dll"), 18).Replace("/", "\\");
+            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
             string configPath = assemblyDirCorrect + "openfoam_env_config.config";
             switch (m_Env)
             {
@@ -293,16 +294,6 @@ namespace BIM.OpenFoamExport.OpenFOAM
                 }
             }
         }
-
-        /// <summary>
-        /// Initialize OpenFOAMTextBoxForm.
-        /// </summary>
-        private void StartOpenFOAMTextBoxForm()
-        {
-            OpenFOAMTextBoxForm m_OpenFOAMTextBoxForm = new OpenFOAMTextBoxForm();
-            m_OpenFOAMTextBoxForm.Show();
-        }
-
     }
 
     /// <summary>
@@ -441,7 +432,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// Settings-object contains ssh details.
         /// </summary>
-        Settings m_Settings;
+        readonly Settings m_Settings;
 
         /// <summary>
         /// Constructor needs the casePath of the openFoam-case and environment.

@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BIM.OpenFoamExport.OpenFOAMUI
+namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     /// <summary>
     /// Class that uses Form as base class combined with a textBox.
@@ -24,7 +24,7 @@ namespace BIM.OpenFoamExport.OpenFOAMUI
         /// <summary>
         /// Regular expression for text in textBox.
         /// </summary>
-        private Regex m_RegTxt;
+        private readonly Regex m_RegTxt;
 
         #region Constructor.
 

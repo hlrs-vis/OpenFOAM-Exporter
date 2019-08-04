@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BIM.OpenFoamExport {
+namespace BIM.OpenFOAMExport {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace BIM.OpenFoamExport {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class OpenFoamExportResource {
+    internal class OpenFOAMExportResource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal OpenFoamExportResource() {
+        internal OpenFOAMExportResource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace BIM.OpenFoamExport {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BIM.OpenFoamExport.OpenFoamExportResource", typeof(OpenFoamExportResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BIM.OpenFOAMExport.OpenFOAMExportResource", typeof(OpenFOAMExportResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

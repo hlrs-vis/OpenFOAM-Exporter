@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// The DecomposParDict-Class contains all attributes for decomposing case for parallel computing in Openfoam.
     /// </summary>
-    public class DecomposeParDict : FoamDict
+    public class DecomposeParDict : FOAMDict
     {
         /// <summary>
         /// Number of cpu cores
@@ -15,17 +15,17 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <summary>
         /// SimpleCoeffs-Dictionary
         /// </summary>
-        private Dictionary<string, object> m_SimpleCoeffs;
+        private readonly Dictionary<string, object> m_SimpleCoeffs;
 
         /// <summary>
         /// HierarchicalCoeffs-Dictionary
         /// </summary>
-        private Dictionary<string, object> m_HierarchicalCoeffs;
+        private readonly Dictionary<string, object> m_HierarchicalCoeffs;
 
         /// <summary>
         /// ManualCoeffs-Dicitonary
         /// </summary>
-        private Dictionary<string, object> m_ManualCoeffs;
+        private readonly Dictionary<string, object> m_ManualCoeffs;
         
         /// <summary>
         /// Getter for numberOfSubdomains

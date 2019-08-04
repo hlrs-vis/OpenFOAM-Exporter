@@ -7,12 +7,12 @@ using System.Security;
 using System.Collections;
 using System.Windows;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Interface for FoamFiles.
     /// </summary>
-    public abstract class FoamFile : IDisposable
+    public abstract class FOAMFile : IDisposable
     {
         /// <summary>
         /// Name of the file
@@ -84,7 +84,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
         /// <param name="path">Path to the foamfile.</param>
         /// <param name="attributes">Additional attributes besides default.</param>
         /// <param name="format">Ascii or Binary.</param>
-        public FoamFile(string name, Version version, string path, string _class, Dictionary<string, object> attributes, SaveFormat format)
+        public FOAMFile(string name, Version version, string path, string _class, Dictionary<string, object> attributes, SaveFormat format)
         {
             m_Name = name;
             m_Path = path;
@@ -213,10 +213,10 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// <summary>
     /// FoamFile as Binary.
     /// </summary>
-    public class FoamFileAsBinary : FoamFile
+    public class FoamFileAsBinary : FOAMFile
     {
         //
-        private BinaryWriter binaryWriter = null;
+        private readonly BinaryWriter binaryWriter = null;
 
         /// <summary>
         /// Contructor.
@@ -324,7 +324,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
     /// <summary>
     /// FoamFile as AscII.
     /// </summary>
-    public class FoamFileAsAscII : FoamFile
+    public class FoamFileAsAscII : FOAMFile
     {
         //foamfile
         StreamWriter foamFile = null;
@@ -361,7 +361,7 @@ namespace BIM.OpenFoamExport.OpenFOAM
                     FileAttributes tempAtt = fileAttribute & FileAttributes.ReadOnly;
                     if (FileAttributes.ReadOnly == tempAtt)
                     {
-                        System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_FILE_READONLY, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                        System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_FILE_READONLY, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                               MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
@@ -374,19 +374,19 @@ namespace BIM.OpenFoamExport.OpenFOAM
             }
             catch (SecurityException)
             {
-                System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (IOException)
             {
-                System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_IO_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }
             catch (Exception)
             {
-                System.Windows.Forms.MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+                System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 succeed = false;
             }

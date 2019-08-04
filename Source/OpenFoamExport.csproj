@@ -11,7 +11,7 @@
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>OpenFoamExport</AssemblyName>
+    <AssemblyName>OpenFOAMExport</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
@@ -19,7 +19,7 @@
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
     <OutputType>Library</OutputType>
-    <RootNamespace>BIM.OpenFoamExport</RootNamespace>
+    <RootNamespace>BIM.OpenFOAMExport</RootNamespace>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
@@ -162,9 +162,9 @@
     <Compile Include="OpenFOAM\BlockMeshDict.cs" />
     <Compile Include="OpenFOAM\ControlDict.cs" />
     <Compile Include="OpenFOAM\Epsilon.cs" />
-    <Compile Include="OpenFOAM\FoamDict.cs" />
-    <Compile Include="OpenFOAM\FoamFile.cs" />
-    <Compile Include="OpenFOAM\FoamParameter.cs" />
+    <Compile Include="OpenFOAM\FOAMDict.cs" />
+    <Compile Include="OpenFOAM\FOAMFile.cs" />
+    <Compile Include="OpenFOAM\FOAMParameter.cs" />
     <Compile Include="OpenFOAM\FvSchemes.cs" />
     <Compile Include="OpenFOAM\FvSolution.cs" />
     <Compile Include="OpenFOAM\G.cs" />
@@ -188,29 +188,29 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="OpenFoamDialogManager.cs">
+    <Compile Include="OpenFOAMDialogManager.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="STLExportCancelForm.cs">
+    <Compile Include="OpenFOAMExportCancelForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="STLExportCancelForm.Designer.cs">
-      <DependentUpon>STLExportCancelForm.cs</DependentUpon>
+    <Compile Include="OpenFOAMExportCancelForm.Designer.cs">
+      <DependentUpon>OpenFOAMExportCancelForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OpenFoamExportCommand.cs">
+    <Compile Include="OpenFOAMExportCommand.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="OpenFoamExporterUI.cs" />
-    <Compile Include="STLExportForm.cs">
+    <Compile Include="OpenFOAMExporterUI.cs" />
+    <Compile Include="OpenFOAMExportForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="STLExportForm.Designer.cs">
-      <DependentUpon>STLExportForm.cs</DependentUpon>
+    <Compile Include="OpenFOAMExportForm.Designer.cs">
+      <DependentUpon>OpenFOAMExportForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OpenFoamExportResource.Designer.cs">
+    <Compile Include="OpenFOAMExportResource1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>OpenFoamExportResource.resx</DependentUpon>
+      <DependentUpon>OpenFOAMExportResource.resx</DependentUpon>
     </Compile>
     <EmbeddedResource Include="OpenFOAMUI\OpenFOAMTextBoxForm.resx">
       <DependentUpon>OpenFOAMTextBoxForm.cs</DependentUpon>
@@ -220,16 +220,16 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="STLExportCancelForm.resx">
-      <DependentUpon>STLExportCancelForm.cs</DependentUpon>
+    <EmbeddedResource Include="OpenFOAMExportCancelForm.resx">
+      <DependentUpon>OpenFOAMExportCancelForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="STLExportForm.resx">
-      <DependentUpon>STLExportForm.cs</DependentUpon>
+    <EmbeddedResource Include="OpenFOAMExportForm.resx">
+      <DependentUpon>OpenFOAMExportForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="OpenFoamExportResource.resx">
+    <EmbeddedResource Include="OpenFOAMExportResource.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenFoamExportResource.Designer.cs</LastGenOutput>
+      <LastGenOutput>OpenFOAMExportResource1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -264,13 +264,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\ADSKSTLExporterHelp.htm" />
+    <EmbeddedResource Include="Resources\logo_64.png" />
     <Content Include="Resources\OpenFoamExport.addin">
       <SubType>Designer</SubType>
     </Content>
-    <EmbeddedResource Include="Resources\openfoam_32.png" />
-    <Content Include="Resources\openfoam_64.ico" />
-    <EmbeddedResource Include="Resources\openfoam_64.png" />
-    <None Include="Resources\openfoam_64_Test.png" />
     <Content Include="Resources\wind_64.ico" />
     <None Include="Resources\wind_32_reworked.png" />
   </ItemGroup>
@@ -280,6 +277,6 @@
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>if exist "$(AppData)\Autodesk\REVIT\Addins\2019" copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2019"
-if exist "$(AppData)\Autodesk\REVIT\Addins\2019" copy "$(ProjectDir)bin\Debug\OpenFoamExport.dll" "$(AppData)\Autodesk\REVIT\Addins\2019"</PostBuildEvent>
+if exist "$(AppData)\Autodesk\REVIT\Addins\2019" copy "$(ProjectDir)bin\Debug\OpenFOAMExport.dll" "$(AppData)\Autodesk\REVIT\Addins\2019"</PostBuildEvent>
   </PropertyGroup>
 </Project>

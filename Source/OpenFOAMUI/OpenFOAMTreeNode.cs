@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BIM.OpenFoamExport.OpenFOAMUI
+namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     /// <summary>
     /// A treeNode that is used to store values inside the node in a OpenFOAMTreeView.

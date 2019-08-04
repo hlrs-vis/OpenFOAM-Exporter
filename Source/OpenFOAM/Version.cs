@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BIM.OpenFoamExport.OpenFOAM
+﻿namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// Represents the OpenFoam-Version.

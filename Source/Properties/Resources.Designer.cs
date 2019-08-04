@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BIM.OpenFoamExport.Properties {
+namespace BIM.OpenFOAMExport.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace BIM.OpenFoamExport.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BIM.OpenFoamExport.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BIM.OpenFOAMExport.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace BIM.OpenFoamExport.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap openfoam_32 {
+        internal static System.Drawing.Bitmap logo_64 {
             get {
-                object obj = ResourceManager.GetObject("openfoam_32", resourceCulture);
+                object obj = ResourceManager.GetObject("logo_64", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

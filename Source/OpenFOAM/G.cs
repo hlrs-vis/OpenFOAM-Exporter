@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Media.Media3D;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// This class is for the parameter g file in constant folder.
     /// </summary>
-    public class G : FoamDict
+    public class G : FOAMDict
     {
         /// <summary>
         /// Constructor.

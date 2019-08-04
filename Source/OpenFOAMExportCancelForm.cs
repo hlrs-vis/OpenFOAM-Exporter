@@ -26,9 +26,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
-    public partial class STLExportCancelForm : Form
+    public partial class OpenFOAMExportCancelForm : Form
     {
         private bool m_CancelProcess = false;
 
@@ -41,7 +41,7 @@ namespace BIM.OpenFoamExport
         /// <summary>
         /// Constructor.
         /// </summary>
-        public STLExportCancelForm()
+        public OpenFOAMExportCancelForm()
         {
             InitializeComponent();
         }
@@ -51,7 +51,7 @@ namespace BIM.OpenFoamExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void BtnCancel_Click(object sender, EventArgs e)
         {
             m_CancelProcess = !m_CancelProcess;
 

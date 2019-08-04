@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Windows.Media.Media3D;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// K-Parameter for SimpleFoam.
     /// </summary>
-    public class K : FoamParameter<double>
+    public class K : FOAMParameter<double>
     {
         ///// <summary>
         ///// Internalfield entry

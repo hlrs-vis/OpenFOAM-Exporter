@@ -17,9 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
-    partial class STLExportCancelForm
+    partial class OpenFOAMExportCancelForm
     {
         /// <summary>
         /// Required designer variable.
@@ -47,7 +47,7 @@ namespace BIM.OpenFoamExport
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(STLExportCancelForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OpenFOAMExportCancelForm));
             this.btnCancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -56,7 +56,7 @@ namespace BIM.OpenFoamExport
             resources.ApplyResources(this.btnCancel, "btnCancel");
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.btnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // STLExportCancelForm
             // 

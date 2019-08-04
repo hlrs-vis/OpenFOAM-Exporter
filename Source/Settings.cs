@@ -27,18 +27,58 @@ using System;
 using System.Xml.Linq;
 using System.IO;
 
-namespace BIM.OpenFoamExport
+namespace BIM.OpenFOAMExport
 {
+    /// <summary>
+    /// SSH struct contains all informations about the tunnel-connection.
+    /// </summary>
     public struct SSH
     {
+        /// <summary>
+        /// User-name.
+        /// </summary>
         string user;
+
+        /// <summary>
+        /// IP of the server (/local computer-name)
+        /// </summary>
         string serverIP;
+
+        /// <summary>
+        /// Alias to start openFOAM-Environment on the server.
+        /// </summary>
         string ofAlias;
+
+        /// <summary>
+        /// Folder on server openfoam case will be copied to.
+        /// </summary>
         string serverCaseFolder;
+
+        /// <summary>
+        /// Port server.
+        /// </summary>
         int port;
+
+        /// <summary>
+        /// Download after simulation.
+        /// </summary>
         bool download;
+
+        /// <summary>
+        /// Delete after simulation.
+        /// </summary>
         bool delete;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="_user">The user to login.</param>
+        /// <param name="_ip">IP of the server.</param>
+        /// <param name="_alias">Alias for starting openfoam.</param>
+        /// <param name="_caseFolder">Casefolder on server.</param>
+        /// <param name="_download">if true, case folder will be downloaded from server after simulation.</param>
+        /// <param name="_delete">if true, case folder will be deleted after simulation.</param>
+        /// <param name="_port">SSH Port.</param>
         public SSH(string _user, string _ip, string _alias, string _caseFolder, bool _download, bool _delete, int _port)
         {
             user = _user;
@@ -50,14 +90,39 @@ namespace BIM.OpenFoamExport
             port = _port;
         }
 
+        /// <summary>
+        /// Getter-Setter for user.
+        /// </summary>
         public string User { get => user; set => user = value; }
+        /// <summary>
+        /// Getter-Setter for serverIP.
+        /// </summary>
         public string ServerIP { get => serverIP; set => serverIP = value; }
+        /// <summary>
+        /// Getter-Setter for ofAlias.
+        /// </summary>
         public string OfAlias { get => ofAlias; set => ofAlias = value; }
+        /// <summary>
+        /// Getter-Setter for serverCaseFolder.
+        /// </summary>
         public string ServerCaseFolder { get => serverCaseFolder; set => serverCaseFolder = value; }
+        /// <summary>
+        /// Getter-Setter for download.
+        /// </summary>
         public bool Download { get => download; set => download = value; }
+        /// <summary>
+        /// Getter-Setter for delete.
+        /// </summary>
         public bool Delete { get => delete; set => delete = value; }
+        /// <summary>
+        /// Getter-Setter for port.
+        /// </summary>
         public int Port { get => port; set => port = value; }
 
+        /// <summary>
+        /// Connection string.
+        /// </summary>
+        /// <returns>user + @ + serverIP as string.</returns>
         public string ConnectionString()
         {
             return user + "@" + serverIP;
@@ -1844,7 +1909,7 @@ namespace BIM.OpenFoamExport
             m_SelectedCategories = selectedCategories;
             m_Units = units;
 
-            CreateConfig();
+            //CreateConfig();
         }
 
         /// <summary>
@@ -2196,90 +2261,91 @@ namespace BIM.OpenFoamExport
             m_Constant.Add("turbulenceProperties", m_TurbulenceParameter.ToDictionary());
         }
 
-        /// <summary>
-        /// Create config file if it doesn't exist.
-        /// </summary>
-        private void CreateConfig()
-        {
-            string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
-            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFoamExport.dll"), 18).Replace("/", "\\");
-            string configPath = assemblyDirCorrect + "openfoamExporter.config";
-            if (!File.Exists(configPath))
-            {
-                var config = new XDocument();
-                var elements = new XElement("OpenFoamConfig",
-                    new XElement("OpenFoamEnv"),
-                    new XElement("SSH")
-                );
-                var defaultElement = new XElement("DefaultParameter");
-                CreateXMLTree(defaultElement, m_SimulationDefaultList);
-                elements.Add(defaultElement);
+        /**********************TO-DO: IMPLEMENT READ FOR XML-CONFIG BEFORE INSERT THIS**********************/
+        ///// <summary>
+        ///// Create config file if it doesn't exist.
+        ///// </summary>
+        //private void CreateConfig()
+        //{
+        //    string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
+        //    string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFoamExport.dll"), 18).Replace("/", "\\");
+        //    string configPath = assemblyDirCorrect + "openfoamExporter.config";
+        //    if (!File.Exists(configPath))
+        //    {
+        //        var config = new XDocument();
+        //        var elements = new XElement("OpenFoamConfig",
+        //            new XElement("OpenFoamEnv"),
+        //            new XElement("SSH")
+        //        );
+        //        var defaultElement = new XElement("DefaultParameter");
+        //        CreateXMLTree(defaultElement, m_SimulationDefaultList);
+        //        elements.Add(defaultElement);
 
-                config.Add(elements);
+        //        config.Add(elements);
 
-                XElement ssh = config.Root.Element("SSH");
-                ssh.Add(
-                        new XElement("user", "mdjur"),
-                        new XElement("host", "192.168.2.102"),
-                        new XElement("serverCasePath", "/home/mdjur/OpenFOAMRemote/"),
-                        new XElement("ofAlias", "source/opt/openfoam6/etc/bashrc")
-                );
-                config.Save(configPath);
-            }
-        }
+        //        XElement ssh = config.Root.Element("SSH");
+        //        ssh.Add(
+        //                new XElement("user", "mdjur"),
+        //                new XElement("host", "192.168.2.102"),
+        //                new XElement("serverCasePath", "/home/mdjur/OpenFOAMRemote/"),
+        //                new XElement("ofAlias", "source/opt/openfoam6/etc/bashrc")
+        //        );
+        //        config.Save(configPath);
+        //    }
+        //}
 
-        /// <summary>
-        /// Creates a XML-tree from given dict.
-        /// </summary>
-        /// <param name="e">XElement xml will be attached to.</param>
-        /// <param name="dict">Source for XML-tree.</param>
-        private void CreateXMLTree(XElement e, Dictionary<string,object> dict)
-        { 
-            foreach (var element in dict)
-            {
-                string nameNode = element.Key;
-                nameNode = PrepareXMLString(nameNode);
-                var elem = new XElement(nameNode);
-                if (element.Value is Dictionary<string, object>)
-                {
-                    CreateXMLTree(elem, element.Value as Dictionary<string, object>);
-                }
-                else
-                {
-                    elem.Value = element.Value.ToString();
-                }
-                e.Add(elem);
-            }
-        }
+        ///// <summary>
+        ///// Creates a XML-tree from given dict.
+        ///// </summary>
+        ///// <param name="e">XElement xml will be attached to.</param>
+        ///// <param name="dict">Source for XML-tree.</param>
+        //private void CreateXMLTree(XElement e, Dictionary<string,object> dict)
+        //{ 
+        //    foreach (var element in dict)
+        //    {
+        //        string nameNode = element.Key;
+        //        nameNode = PrepareXMLString(nameNode);
+        //        var elem = new XElement(nameNode);
+        //        if (element.Value is Dictionary<string, object>)
+        //        {
+        //            CreateXMLTree(elem, element.Value as Dictionary<string, object>);
+        //        }
+        //        else
+        //        {
+        //            elem.Value = element.Value.ToString();
+        //        }
+        //        e.Add(elem);
+        //    }
+        //}
 
-        /// <summary>
-        /// Removes critical strings for xml.
-        /// </summary>
-        /// <param name="nameNode">String which will be prepared.</param>
-        /// <returns>Prepared string.</returns>
-        private static string PrepareXMLString(string nameNode)
-        {
-            if (nameNode.Equals("0"))
-            {
-                nameNode = "null";
-                return nameNode;
-            }
+        ///// <summary>
+        ///// Removes critical strings for xml.
+        ///// </summary>
+        ///// <param name="nameNode">String which will be prepared.</param>
+        ///// <returns>Prepared string.</returns>
+        //private static string PrepareXMLString(string nameNode)
+        //{
+        //    if (nameNode.Equals("0"))
+        //    {
+        //        nameNode = "null";
+        //        return nameNode;
+        //    }
 
-            var criticalXMLCharacters = new Dictionary<string, string>()
-            {
-                { "(", "lpar" },
-                { ")", "rpar" },
-                { ",", "comma" },
-                { "*", "ast" },
-                { " ", "nbsp" }
-            };
+        //    var criticalXMLCharacters = new Dictionary<string, string>()
+        //    {
+        //        { "(", "lpar" },
+        //        { ")", "rpar" },
+        //        { ",", "comma" },
+        //        { "*", "ast" },
+        //        { " ", "nbsp" }
+        //    };
 
-            foreach(var critical in criticalXMLCharacters)
-            {
-                nameNode = nameNode.Replace(critical.Key, critical.Value);
-            }
+        //    foreach(var critical in criticalXMLCharacters)
+        //    {
+        //        nameNode = nameNode.Replace(critical.Key, critical.Value);
+        //    }
 
-            return nameNode;
-        }
+        //    return nameNode;
+        //}
     }
 }

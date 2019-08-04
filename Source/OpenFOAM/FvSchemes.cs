@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace BIM.OpenFoamExport.OpenFOAM
+namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
     /// This class is represantive for the fvSchemes-Dictionary in the system folder of the openFOAM-case-folder.
     /// </summary>
-    public class FvSchemes : FoamDict
+    public class FvSchemes : FOAMDict
     {
         /// <summary>
         /// Constructor.
