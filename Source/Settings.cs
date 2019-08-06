@@ -30,6 +30,90 @@ using System.IO;
 namespace BIM.OpenFOAMExport
 {
     /// <summary>
+    /// Represents an initial parameter from the null folder.
+    /// </summary>
+    public struct InitialParameter
+    {
+        /// <summary>
+        /// Name of Parameter.
+        /// </summary>
+        string name;
+
+        /// <summary>
+        /// Value of internalField.
+        /// </summary>
+        dynamic internalField;
+
+        /// <summary>
+        /// List of inlet-, outlet-, wall-patches.
+        /// </summary>
+        List<FOAMParameterPatch<dynamic>> patches;
+
+        /// <summary>
+        /// Solver for incompressible CFD.
+        /// </summary>
+        SolverIncompressible solverInc;
+
+        /// <summary>
+        /// Turbulence simulationType.
+        /// </summary>
+        SimulationType simulationType;
+
+        /// <summary>
+        /// Turbulence-model.
+        /// </summary>
+        dynamic turbulenceModel;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="_name">Name for parameter.</param>
+        /// <param name="_internalField">Value for internalfield.</param>
+        /// <param name="_turbulenceModel">Turbulence-model.</param>
+        /// <param name="_solverInc">Incompressible-Solver</param>
+        /// <param name="_stype">Turbulence-type.</param>
+        public InitialParameter(string _name, dynamic _internalField , dynamic _turbulenceModel, SolverIncompressible _solverInc = SolverIncompressible.simpleFoam, SimulationType _stype = SimulationType.RAS)
+        {
+            name = _name;
+            turbulenceModel = _turbulenceModel;
+            simulationType = _stype;
+            patches = new List<FOAMParameterPatch<dynamic>>();
+            internalField = _internalField;
+            solverInc = _solverInc;
+        }
+
+        /// <summary>
+        /// Getter-Setter for name of parameter.
+        /// </summary>
+        public string Name { get => name; set => name = value; }
+
+        /// <summary>
+        /// Getter-Setter for internalfield.
+        /// </summary>
+        public dynamic InternalField { get => internalField; set => internalField = value; }
+
+        /// <summary>
+        /// Getter-Setter for Patches that contains inlets, outlets and the wall.
+        /// </summary>
+        public List<FOAMParameterPatch<dynamic>> Patches { get => patches; }
+
+        /// <summary>
+        /// Getter-Setter for incompressible solver.
+        /// </summary>
+        public SolverIncompressible SolverInc { get => solverInc; set => solverInc = value; }
+
+        /// <summary>
+        /// Getter-Setter for turbulence simulationType.
+        /// </summary>
+        public SimulationType SimulationType { get => simulationType; set => simulationType = value; }
+
+        /// <summary>
+        /// Getter-Setter for turbulence model.
+        /// </summary>
+        public dynamic TurbulenceModel { get => turbulenceModel; set => turbulenceModel = value; }
+    }
+
+    /// <summary>
     /// SSH struct contains all informations about the tunnel-connection.
     /// </summary>
     public struct SSH
@@ -137,8 +221,10 @@ namespace BIM.OpenFOAMExport
     {
         //Attributes for Parameter-Dictionaries in 0 folder.
         string type;
+        PatchType patchType;
         Dictionary<string, object> attributes;
         T value;
+
 
         /// <summary>
         /// Constructor.
@@ -146,10 +232,12 @@ namespace BIM.OpenFOAMExport
         /// <param name="_type">Type of Patch</param>
         /// <param name="_uniform">uniform or nonuniform.</param>
         /// <param name="_value">Vector3D or double.</param>
-        public FOAMParameterPatch(string _type, string _uniform, T _value)
+        public FOAMParameterPatch(string _type, string _uniform, T _value, PatchType _patchType)
         {
             value = _value;
             type = _type;
+            patchType = _patchType;
+
             if(_value != null)
             {
                 attributes = new Dictionary<string, object>
@@ -168,15 +256,19 @@ namespace BIM.OpenFOAMExport
 
         }
 
-        public FOAMParameterPatch(string _type)
+        public FOAMParameterPatch(string _type, PatchType _patchType)
         {
             type = _type;
             value = default(T);
+            patchType = _patchType;
+
             attributes = new Dictionary<string, object>
             {
                 { "type", type }
             };
         }
+
+        public PatchType Type { get => patchType; }
 
         //Getter for Attributes.
         public Dictionary<string, object> Attributes { get => attributes; }
@@ -370,6 +462,10 @@ namespace BIM.OpenFOAMExport
             }
         }
 
+        public SimulationType SimType { get => simulationType; }
+
+        public ValueType StructModel { get => _structModel;  }
+
         /// <summary>
         /// This methode creates and returns the attributes as dictionary<string, object>.
         /// </summary>
@@ -444,6 +540,7 @@ namespace BIM.OpenFOAMExport
             }
         }
 
+        public RASModel RASModel { get => rasModel; }
         /// <summary>
         /// Returns all attributes as Dictionary<string,object>
         /// </summary>
@@ -470,6 +567,8 @@ namespace BIM.OpenFOAMExport
         {
             lesModel = _lesModel;
         }
+
+        public LESModel LESModel { get => lesModel; }
         //TO-DO: implement LES
     }
 
@@ -481,6 +580,19 @@ namespace BIM.OpenFOAMExport
         //SimulationType typeL;
         //TO-DO: Implement laminar
     }
+
+
+
+
+    public enum PatchType
+    {
+        wall = 0,
+        inlet,
+        outlet
+    }
+
+
+
 
     /// <summary>
     /// Enum-Objects for simulationmodel LES.
@@ -1258,317 +1370,317 @@ namespace BIM.OpenFOAMExport
 
 
 
-        /// <summary>
-        /// General Constructor for Test.
-        /// </summary>
-        /// <param name="saveFormat">Save format for stl.</param>
-        /// <param name="exportRange"></param>
-        /// <param name="mesh"></param>
-        /// <param name="startFrom"></param>
-        /// <param name="stopAt"></param>
-        /// <param name="writeControl"></param>
-        /// <param name="writeFormat"></param>
-        /// <param name="timeFormat"></param>
-        public Settings(SaveFormat saveFormat = SaveFormat.ascii, ElementsExportRange exportRange = ElementsExportRange.OnlyVisibleOnes, MeshType mesh = MeshType.Snappy, OpenFOAMEnvironment openFOAMEnv = OpenFOAMEnvironment.blueCFD,
-            StartFrom startFrom = StartFrom.latestTime, SolverIncompressible appInc = SolverIncompressible.simpleFoam,
-            StopAt stopAt = StopAt.endTime, WriteControl writeControl = WriteControl.timeStep, WriteFormat writeFormat = WriteFormat.ascii, WriteCompression writeCompression = WriteCompression.off,
-            TimeFormat timeFormat = TimeFormat.general, ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface, MethodDecompose methodDecompose = MethodDecompose.simple, Agglomerator agglomerator = Agglomerator.faceAreaPair, CacheAgglomeration cacheAgglomeration = CacheAgglomeration.on, SolverFV solverP = SolverFV.GAMG,
-            SolverFV solverU = SolverFV.smoothSolver, SolverFV solverK = SolverFV.smoothSolver, SolverFV solverEpsilon = SolverFV.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
-            Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
-        {
-            //Dictionary for setting default values in OpenFOAM-Tab
-            m_SimulationDefaultList = new Dictionary<string, object>();
+        ///// <summary>
+        ///// General Constructor for Test.
+        ///// </summary>
+        ///// <param name="saveFormat">Save format for stl.</param>
+        ///// <param name="exportRange"></param>
+        ///// <param name="mesh"></param>
+        ///// <param name="startFrom"></param>
+        ///// <param name="stopAt"></param>
+        ///// <param name="writeControl"></param>
+        ///// <param name="writeFormat"></param>
+        ///// <param name="timeFormat"></param>
+        //public Settings(SaveFormat saveFormat = SaveFormat.ascii, ElementsExportRange exportRange = ElementsExportRange.OnlyVisibleOnes, MeshType mesh = MeshType.Snappy, OpenFOAMEnvironment openFOAMEnv = OpenFOAMEnvironment.blueCFD,
+        //    StartFrom startFrom = StartFrom.latestTime, SolverIncompressible appInc = SolverIncompressible.simpleFoam,
+        //    StopAt stopAt = StopAt.endTime, WriteControl writeControl = WriteControl.timeStep, WriteFormat writeFormat = WriteFormat.ascii, WriteCompression writeCompression = WriteCompression.off,
+        //    TimeFormat timeFormat = TimeFormat.general, ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface, MethodDecompose methodDecompose = MethodDecompose.simple, Agglomerator agglomerator = Agglomerator.faceAreaPair, CacheAgglomeration cacheAgglomeration = CacheAgglomeration.on, SolverFV solverP = SolverFV.GAMG,
+        //    SolverFV solverU = SolverFV.smoothSolver, SolverFV solverK = SolverFV.smoothSolver, SolverFV solverEpsilon = SolverFV.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
+        //    Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
+        //{
+        //    //Dictionary for setting default values in OpenFOAM-Tab
+        //    m_SimulationDefaultList = new Dictionary<string, object>();
 
-            m_System = new Dictionary<string, object>();
-            m_Constant = new Dictionary<string, object>();
-            m_Null = new Dictionary<string, object>();
+        //    m_System = new Dictionary<string, object>();
+        //    m_Constant = new Dictionary<string, object>();
+        //    m_Null = new Dictionary<string, object>();
 
-            m_SaveFormat = saveFormat;
-            m_ExportRange = exportRange;
-            m_Mesh = mesh;
-            m_openFOAMEnvironment = openFOAMEnv;
+        //    m_SaveFormat = saveFormat;
+        //    m_ExportRange = exportRange;
+        //    m_Mesh = mesh;
+        //    m_openFOAMEnvironment = openFOAMEnv;
 
-            //blockMeshDict
+        //    //blockMeshDict
 
-            m_CellSize = new Vector3D(0, 0, 0);
-            m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
+        //    m_CellSize = new Vector3D(0, 0, 0);
+        //    m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
 
-            //controlDict
+        //    //controlDict
 
-            m_AppIncompressible = appInc;
-            m_StartFrom = startFrom;
-            m_StartTime = 0;
-            m_StopAt = stopAt;
-            m_EndTime = 100;
-            m_DeltaT = 1;
-            m_WriteControl = writeControl;
-            m_WriteInterval = 100;
-            m_PurgeWrite = 0;
-            m_WriteFormat = writeFormat;
-            m_WritePrecision = 8;
-            m_WriteCompression = writeCompression;
-            m_TimeFormat = timeFormat;
-            m_TimePrecision = 6;
-            m_RunTimeModifiable = true;
-
-
-            //surfaceFeatureExtract
-
-            m_ExtractionMethod = extractionMethod;
-            m_IncludedAngle = 150;
-            m_WriteObj = "yes";
+        //    m_AppIncompressible = appInc;
+        //    m_StartFrom = startFrom;
+        //    m_StartTime = 0;
+        //    m_StopAt = stopAt;
+        //    m_EndTime = 100;
+        //    m_DeltaT = 1;
+        //    m_WriteControl = writeControl;
+        //    m_WriteInterval = 100;
+        //    m_PurgeWrite = 0;
+        //    m_WriteFormat = writeFormat;
+        //    m_WritePrecision = 8;
+        //    m_WriteCompression = writeCompression;
+        //    m_TimeFormat = timeFormat;
+        //    m_TimePrecision = 6;
+        //    m_RunTimeModifiable = true;
 
 
-            //decomposeParDict
+        //    //surfaceFeatureExtract
 
-            m_NumberOfSubdomains = 4;
-            m_MethodDecompose = methodDecompose;
-
-            m_SimpleCoeffs = new CoeffsMethod
-            {
-                Delta = 0.001
-            };
-            m_SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
-
-            m_HierarchicalCoeffs = new CoeffsMethod
-            {
-                Delta = 0.001
-            };
-            m_HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
-            m_Order = "xyz";
-
-            m_DataFile = "cellDecomposition";
-
-            //FvSchemes
-
-            //To-DO: Implement schemes depending on used Simulation model
-            m_ddtSchemes = new KeyValuePair<string, string>("default", "steadyState");
-            m_gradSchemes = new KeyValuePair<string, string>("default", "cellLimited leastSquares 1");
-            m_divSchemes = new List<KeyValuePair<string, string>>
-            {
-                {new KeyValuePair<string, string>("default", "none") },
-                {new KeyValuePair<string, string>("div(phi,epsilon)", "bounded Gauss linearUpwind grad(epsilon)") },
-                {new KeyValuePair<string, string>("div(phi,U)", "bounded Gauss linearUpwindV grad(U)")},
-                {new KeyValuePair<string, string>("div((nuEff*dev2(T(grad(U)))))", "Gauss linear") },
-                {new KeyValuePair<string, string>("div(phi,k)", "bounded Gauss linearUpwind grad(k)")}
-            };
-            m_laplacianSchemes = new KeyValuePair<string, string>("default", "Gauss linear limited corrected 0.333");
-            m_interpolationSchemes = new KeyValuePair<string, string>("default", "linear");
-            m_snGradSchemes = new KeyValuePair<string, string>("default", "limited corrected 0.333");
-            m_fluxRequired = new KeyValuePair<string, string>("default", "no");
+        //    m_ExtractionMethod = extractionMethod;
+        //    m_IncludedAngle = 150;
+        //    m_WriteObj = "yes";
 
 
-            //FvSolution
+        //    //decomposeParDict
 
-            FvSolutionParamter _p = new FvSolutionParamter();
-            _p.Solver = solverP;
-            _p.RelTol = 0.1;
-            _p.Tolerance = 1e-7;
-            _p.NSweeps = 0;
+        //    m_NumberOfSubdomains = 4;
+        //    m_MethodDecompose = methodDecompose;
 
-            //p-FvSolution-Solvers
-            m_p = new PFv
-            {
-                Param = _p,
-                MergeLevels = 1,
-                NPreSweepsre = 0,
-                NPostSweeps = 2,
-                NCellsInCoarsesLevel = 10,
-                Agglomerator = agglomerator,
-                CacheAgglomeration = cacheAgglomeration
-            };
+        //    m_SimpleCoeffs = new CoeffsMethod
+        //    {
+        //        Delta = 0.001
+        //    };
+        //    m_SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
 
-            //U-FvSolution-Solver
-            m_U = new FvSolutionParamter
-            {
-                RelTol = 0.1,
-                Tolerance = 1e-8,
-                NSweeps = 1,
-                Solver = solverU,
-                Smoother = smootherU
-            };
+        //    m_HierarchicalCoeffs = new CoeffsMethod
+        //    {
+        //        Delta = 0.001
+        //    };
+        //    m_HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
+        //    m_Order = "xyz";
 
-            //k-FvSolution-Solver
-            m_k = new FvSolutionParamter
-            {
-                RelTol = 0.1,
-                Tolerance = 1e-8,
-                NSweeps = 1,
-                Solver = solverK,
-                Smoother = smootherK
-            };
+        //    m_DataFile = "cellDecomposition";
 
-            //epsilon-FvSolution-Solver
-            m_epsilon = new FvSolutionParamter
-            {
-                RelTol = 0.1,
-                Tolerance = 1e-8,
-                NSweeps = 1,
-                Solver = solverEpsilon,
-                Smoother = smootherEpsilon
-            };
+        //    //FvSchemes
+
+        //    //To-DO: Implement schemes depending on used Simulation model
+        //    m_ddtSchemes = new KeyValuePair<string, string>("default", "steadyState");
+        //    m_gradSchemes = new KeyValuePair<string, string>("default", "cellLimited leastSquares 1");
+        //    m_divSchemes = new List<KeyValuePair<string, string>>
+        //    {
+        //        {new KeyValuePair<string, string>("default", "none") },
+        //        {new KeyValuePair<string, string>("div(phi,epsilon)", "bounded Gauss linearUpwind grad(epsilon)") },
+        //        {new KeyValuePair<string, string>("div(phi,U)", "bounded Gauss linearUpwindV grad(U)")},
+        //        {new KeyValuePair<string, string>("div((nuEff*dev2(T(grad(U)))))", "Gauss linear") },
+        //        {new KeyValuePair<string, string>("div(phi,k)", "bounded Gauss linearUpwind grad(k)")}
+        //    };
+        //    m_laplacianSchemes = new KeyValuePair<string, string>("default", "Gauss linear limited corrected 0.333");
+        //    m_interpolationSchemes = new KeyValuePair<string, string>("default", "linear");
+        //    m_snGradSchemes = new KeyValuePair<string, string>("default", "limited corrected 0.333");
+        //    m_fluxRequired = new KeyValuePair<string, string>("default", "no");
 
 
-            //FvSolution-SIMPLE
-            m_nNonOrhtogonalCorrectors = 2;
-            m_residualControl = new Dictionary<string, object>();
+        //    //FvSolution
 
-            //FvSolution-relaxationFactors
-            m_relaxFactor_k = 0.7;
-            m_relaxFactor_U = 0.7;
-            m_relaxFactor_epsilon = 0.7;
-            m_relaxFactor_p = 0.3;
+        //    FvSolutionParamter _p = new FvSolutionParamter();
+        //    _p.Solver = solverP;
+        //    _p.RelTol = 0.1;
+        //    _p.Tolerance = 1e-7;
+        //    _p.NSweeps = 0;
 
-            //SnappyHexMesh-General
-            m_CastellatedMesh = true;
-            m_Snap = true;
-            m_AddLayers = false;
-            m_Debug = 0;
-            m_MergeTolerance = 1e-6;
+        //    //p-FvSolution-Solvers
+        //    m_p = new PFv
+        //    {
+        //        Param = _p,
+        //        MergeLevels = 1,
+        //        NPreSweepsre = 0,
+        //        NPostSweeps = 2,
+        //        NCellsInCoarsesLevel = 10,
+        //        Agglomerator = agglomerator,
+        //        CacheAgglomeration = cacheAgglomeration
+        //    };
 
-            //SnappyHexMesh-CastellatedMeshControls
+        //    //U-FvSolution-Solver
+        //    m_U = new FvSolutionParamter
+        //    {
+        //        RelTol = 0.1,
+        //        Tolerance = 1e-8,
+        //        NSweeps = 1,
+        //        Solver = solverU,
+        //        Smoother = smootherU
+        //    };
 
-            m_MaxLocalCells = 100000;
-            m_MaxGlobalCells = 2000000;
-            m_MinRefinementCalls = 10;
-            m_MaxLoadUnbalance = 0.10;
-            m_NCellsBetweenLevels = 3;
-            m_Features = new ArrayList();
-            m_FeatureLevel = 4;
-            m_WallLevel = new Vector(3, 3);
-            m_OutletLevel = new Vector(4, 4);
-            m_InletLevel = new Vector(4, 4);
-            m_ResolveFeatureAngle = 180;
-            m_RefinementRegions = new Dictionary<string, object>();
-            m_AllowFreeStandingZoneFaces = true;
+        //    //k-FvSolution-Solver
+        //    m_k = new FvSolutionParamter
+        //    {
+        //        RelTol = 0.1,
+        //        Tolerance = 1e-8,
+        //        NSweeps = 1,
+        //        Solver = solverK,
+        //        Smoother = smootherK
+        //    };
 
-            //SnappyHexMesh-SnapControls
-
-            m_NSmoothPatch = 5;
-            m_Tolerance = 5;
-            m_NSolverIter = 100;
-            m_NRelaxIterSnap = 8;
-            m_NFeatureSnapIter = 10;
-            m_ImplicitFeatureSnap = true;
-            m_MultiRegionFeatureSnap = true;
-
-
-            //SnappyHexMesh-AddLayersControl
-            m_RelativeSizes = true;
-            m_Layers = new Dictionary<string, object>();
-            m_ExpansionRatio = 1.1;
-            m_FinalLayerThickness = 0.7;
-            m_MinThickness = 0.1;
-            m_NGrow = 0;
-            m_FeatureAngle = 110;
-            m_NRelaxeIterLayer = 3;
-            m_nSmoothSurfaceNormals = 1;
-            m_NSmoothThickness = 10;
-            m_NSmoothNormals = 3;
-            m_MaxFaceThicknessRatio = 0.5;
-            m_MaxThicknessToMeadialRatio = 0.3;
-            m_MinMedianAxisAngle = 130;
-            m_NBufferCellsNoExtrude = 0;
-            m_NLayerIter = 50;
-            m_NRelaxedIterLayer = 20;
-
-            //SnappyHexMesh-MeshQualityControls
-            m_MaxNonOrthoMeshQualtiy = 60;
-            m_MaxBoundarySkewness = 20;
-            m_MaxInternalSkewness = 4;
-            m_MaxConcave = 80;
-            m_MinFlatness = 0.5;
-            m_MinVol = 1e-13;
-            m_MinTetQuality = 1e-15;
-            m_MinArea = -1;
-            m_MinTwist = 0.02;
-            m_MinDeterminant = 0.001;
-            m_MinFaceWeight = 0.02;
-            m_MinVolRatio = 0.01;
-            m_MinTriangleTwist = -1;
-            m_NSmoothScale = 4;
-            m_ErrorReduction = 0.75;
-            m_MaxNonOrtho = 75;
+        //    //epsilon-FvSolution-Solver
+        //    m_epsilon = new FvSolutionParamter
+        //    {
+        //        RelTol = 0.1,
+        //        Tolerance = 1e-8,
+        //        NSweeps = 1,
+        //        Solver = solverEpsilon,
+        //        Smoother = smootherEpsilon
+        //    };
 
 
-            //U
+        //    //FvSolution-SIMPLE
+        //    m_nNonOrhtogonalCorrectors = 2;
+        //    m_residualControl = new Dictionary<string, object>();
 
-            m_InternalFieldU = new Vector3D(0, 0, 0);
-            m_WallU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0, 0, 0));
-            m_InletU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -5.0));
-            m_OutletU = new FOAMParameterPatch<Vector3D>("inletOutlet", "uniform", new Vector3D(0, 0, 0));
-            m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0, 0, 0));
+        //    //FvSolution-relaxationFactors
+        //    m_relaxFactor_k = 0.7;
+        //    m_relaxFactor_U = 0.7;
+        //    m_relaxFactor_epsilon = 0.7;
+        //    m_relaxFactor_p = 0.3;
 
+        //    //SnappyHexMesh-General
+        //    m_CastellatedMesh = true;
+        //    m_Snap = true;
+        //    m_AddLayers = false;
+        //    m_Debug = 0;
+        //    m_MergeTolerance = 1e-6;
 
-            //Epsilon
+        //    //SnappyHexMesh-CastellatedMeshControls
 
-            m_InternalFieldEpsilon = 0.01;
-            m_WallEpsilon = new FOAMParameterPatch<double>("epsilonWallFunction", "uniform", 0.01);
-            m_InletEpsilon = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
-            m_OutletEpsilon = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
-            m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
+        //    m_MaxLocalCells = 100000;
+        //    m_MaxGlobalCells = 2000000;
+        //    m_MinRefinementCalls = 10;
+        //    m_MaxLoadUnbalance = 0.10;
+        //    m_NCellsBetweenLevels = 3;
+        //    m_Features = new ArrayList();
+        //    m_FeatureLevel = 4;
+        //    m_WallLevel = new Vector(3, 3);
+        //    m_OutletLevel = new Vector(4, 4);
+        //    m_InletLevel = new Vector(4, 4);
+        //    m_ResolveFeatureAngle = 180;
+        //    m_RefinementRegions = new Dictionary<string, object>();
+        //    m_AllowFreeStandingZoneFaces = true;
 
+        //    //SnappyHexMesh-SnapControls
 
-            //Nut
-
-            m_InternalFieldNut = 0;
-            m_WallNut = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
-            m_InletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
-            m_OutletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
-
-
-            //P
-
-            m_InternalFieldP = 0;
-            m_WallP = new FOAMParameterPatch<double>("zeroGradient");
-            m_InletP = new FOAMParameterPatch<double>("zeroGradient");
-            m_OutletP = new FOAMParameterPatch<double>("fixedValue", "uniform", 126.7);
-
-
-            //K
-
-            m_InternalFieldK = 0.1;
-            m_WallK = new FOAMParameterPatch<double>("kqRWallFunction", "uniform", 0.1);
-            m_InletK = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.1);
-            m_OutletK = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
-            m_OutletK.Attributes.Add("inletValue uniform", 0.1);
-
-
-            //g
-            m_GValue = -9.81;
+        //    m_NSmoothPatch = 5;
+        //    m_Tolerance = 5;
+        //    m_NSolverIter = 100;
+        //    m_NRelaxIterSnap = 8;
+        //    m_NFeatureSnapIter = 10;
+        //    m_ImplicitFeatureSnap = true;
+        //    m_MultiRegionFeatureSnap = true;
 
 
-            //TransportProperties
+        //    //SnappyHexMesh-AddLayersControl
+        //    m_RelativeSizes = true;
+        //    m_Layers = new Dictionary<string, object>();
+        //    m_ExpansionRatio = 1.1;
+        //    m_FinalLayerThickness = 0.7;
+        //    m_MinThickness = 0.1;
+        //    m_NGrow = 0;
+        //    m_FeatureAngle = 110;
+        //    m_NRelaxeIterLayer = 3;
+        //    m_nSmoothSurfaceNormals = 1;
+        //    m_NSmoothThickness = 10;
+        //    m_NSmoothNormals = 3;
+        //    m_MaxFaceThicknessRatio = 0.5;
+        //    m_MaxThicknessToMeadialRatio = 0.3;
+        //    m_MinMedianAxisAngle = 130;
+        //    m_NBufferCellsNoExtrude = 0;
+        //    m_NLayerIter = 50;
+        //    m_NRelaxedIterLayer = 20;
 
-            m_TransportModel = transportModel;
-            m_TransportModelParameter = new Dictionary<string, object>();
-            m_TransportModelParameter.Add("nu", 1e-05);
-            m_TransportModelParameter.Add("beta", 3e-03);
-            m_TransportModelParameter.Add("TRef", 300);
-            m_TransportModelParameter.Add("Pr", 0.9);
-            m_TransportModelParameter.Add("Prt", 0.7);
-            m_TransportModelParameter.Add("Cp0", 1000);
+        //    //SnappyHexMesh-MeshQualityControls
+        //    m_MaxNonOrthoMeshQualtiy = 60;
+        //    m_MaxBoundarySkewness = 20;
+        //    m_MaxInternalSkewness = 4;
+        //    m_MaxConcave = 80;
+        //    m_MinFlatness = 0.5;
+        //    m_MinVol = 1e-13;
+        //    m_MinTetQuality = 1e-15;
+        //    m_MinArea = -1;
+        //    m_MinTwist = 0.02;
+        //    m_MinDeterminant = 0.001;
+        //    m_MinFaceWeight = 0.02;
+        //    m_MinVolRatio = 0.01;
+        //    m_MinTriangleTwist = -1;
+        //    m_NSmoothScale = 4;
+        //    m_ErrorReduction = 0.75;
+        //    m_MaxNonOrtho = 75;
 
 
-            //TurbulenceProperties
-            RASModel rasModel = RASModel.RNGkEpsilon;
-            m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
+        //    //U
 
-            InitSystemDictionary();
-            InitConstantDictionary();
-            InitNullDictionary();
+        //    m_InternalFieldU = new Vector3D(0, 0, 0);
+        //    m_WallU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0, 0, 0));
+        //    m_InletU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -5.0));
+        //    m_OutletU = new FOAMParameterPatch<Vector3D>("inletOutlet", "uniform", new Vector3D(0, 0, 0));
+        //    m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0, 0, 0));
 
-            //SSH
-            m_SSH = new SSH("mdjur", "192.168.2.102", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
 
-            //General
-            m_OpenFOAM = false;
-            m_IncludeLinkedModels = false;
-            m_exportColor = false;
-            m_exportSharedCoordinates = false;
-            m_SelectedCategories = new List<Category>();
-            m_Units = DisplayUnitType.DUT_UNDEFINED;
-        }
+        //    //Epsilon
+
+        //    m_InternalFieldEpsilon = 0.01;
+        //    m_WallEpsilon = new FOAMParameterPatch<double>("epsilonWallFunction", "uniform", 0.01);
+        //    m_InletEpsilon = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
+        //    m_OutletEpsilon = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
+        //    m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
+
+
+        //    //Nut
+
+        //    m_InternalFieldNut = 0;
+        //    m_WallNut = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
+        //    m_InletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
+        //    m_OutletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
+
+
+        //    //P
+
+        //    m_InternalFieldP = 0;
+        //    m_WallP = new FOAMParameterPatch<double>("zeroGradient");
+        //    m_InletP = new FOAMParameterPatch<double>("zeroGradient");
+        //    m_OutletP = new FOAMParameterPatch<double>("fixedValue", "uniform", 126.7);
+
+
+        //    //K
+
+        //    m_InternalFieldK = 0.1;
+        //    m_WallK = new FOAMParameterPatch<double>("kqRWallFunction", "uniform", 0.1);
+        //    m_InletK = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.1);
+        //    m_OutletK = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
+        //    m_OutletK.Attributes.Add("inletValue uniform", 0.1);
+
+
+        //    //g
+        //    m_GValue = -9.81;
+
+
+        //    //TransportProperties
+
+        //    m_TransportModel = transportModel;
+        //    m_TransportModelParameter = new Dictionary<string, object>();
+        //    m_TransportModelParameter.Add("nu", 1e-05);
+        //    m_TransportModelParameter.Add("beta", 3e-03);
+        //    m_TransportModelParameter.Add("TRef", 300);
+        //    m_TransportModelParameter.Add("Pr", 0.9);
+        //    m_TransportModelParameter.Add("Prt", 0.7);
+        //    m_TransportModelParameter.Add("Cp0", 1000);
+
+
+        //    //TurbulenceProperties
+        //    RASModel rasModel = RASModel.RNGkEpsilon;
+        //    m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
+
+        //    InitSystemDictionary();
+        //    InitConstantDictionary();
+        //    InitNullDictionary();
+
+        //    //SSH
+        //    m_SSH = new SSH("mdjur", "192.168.2.102", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
+
+        //    //General
+        //    m_OpenFOAM = false;
+        //    m_IncludeLinkedModels = false;
+        //    m_exportColor = false;
+        //    m_exportSharedCoordinates = false;
+        //    m_SelectedCategories = new List<Category>();
+        //    m_Units = DisplayUnitType.DUT_UNDEFINED;
+        //}
 
 
         /// <summary>
@@ -1840,42 +1952,42 @@ namespace BIM.OpenFOAMExport
                 {"maxNonOrtho" ,m_MaxNonOrtho}
             };
 
-
-            //U
-            m_InternalFieldU = new Vector3D(0, 0, 0);
-            m_WallU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0, 0, 0));
-            m_InletU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -5.0));
-            m_OutletU = new FOAMParameterPatch<Vector3D>("inletOutlet", "uniform", new Vector3D(0, 0, 0));
-            m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0, 0, 0));
-
-            //Epsilon
-            m_InternalFieldEpsilon = 0.01;
-            m_WallEpsilon = new FOAMParameterPatch<double>("epsilonWallFunction", "uniform", 0.01);
-            m_InletEpsilon = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
-            m_OutletEpsilon = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
-            m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
+            ////U
+            //m_InternalFieldU = new Vector3D(0, 0, 0);
+            //m_WallU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0, 0, 0));
+            //m_InletU = new FOAMParameterPatch<Vector3D>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -0.25));
+            //m_OutletU = new FOAMParameterPatch<Vector3D>("inletOutlet", "uniform", new Vector3D(0, 0, 0));
+            //m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0, 0, 0));
 
 
-            //Nut
-            m_InternalFieldNut = 0;
-            m_WallNut = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
-            m_InletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
-            m_OutletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
+            ////Epsilon
+            //m_InternalFieldEpsilon = 0.01;
+            //m_WallEpsilon = new FOAMParameterPatch<double>("epsilonWallFunction", "uniform", 0.01);
+            //m_InletEpsilon = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
+            //m_OutletEpsilon = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
+            //m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
 
 
-            //P
-            m_InternalFieldP = 0;
-            m_WallP = new FOAMParameterPatch<double>("zeroGradient");
-            m_InletP = new FOAMParameterPatch<double>("zeroGradient");
-            m_OutletP = new FOAMParameterPatch<double>("fixedValue", "uniform", 126.7);
+            ////Nut
+            //m_InternalFieldNut = 0;
+            //m_WallNut = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.01);
+            //m_InletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
+            //m_OutletNut = new FOAMParameterPatch<double>("calculated", "uniform", 0);
 
 
-            //K
-            m_InternalFieldK = 0.1;
-            m_WallK = new FOAMParameterPatch<double>("kqRWallFunction", "uniform", 0.1);
-            m_InletK = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.1);
-            m_OutletK = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
-            m_OutletK.Attributes.Add("inletValue uniform", 0.1);
+            ////P
+            //m_InternalFieldP = 0;
+            //m_WallP = new FOAMParameterPatch<double>("zeroGradient");
+            //m_InletP = new FOAMParameterPatch<double>("zeroGradient");
+            //m_OutletP = new FOAMParameterPatch<double>("fixedValue", "uniform", 0);
+
+
+            ////K
+            //m_InternalFieldK = 0.1;
+            //m_WallK = new FOAMParameterPatch<double>("kqRWallFunction", "uniform", 0.1);
+            //m_InletK = new FOAMParameterPatch<double>("fixedValue", "uniform", 0.1);
+            //m_OutletK = new FOAMParameterPatch<double>("inletOutlet", "uniform", 0.1);
+            //m_OutletK.Attributes.Add("inletValue uniform", 0.1);
 
             //g
             m_GValue = -9.81;
@@ -1895,8 +2007,8 @@ namespace BIM.OpenFOAMExport
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
             InitSystemDictionary();
-            InitNullDictionary();
             InitConstantDictionary();
+            InitNullDictionary();
 
             //SSH
             m_SSH = new SSH("mdjur", "192.168.2.102", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
@@ -1937,11 +2049,12 @@ namespace BIM.OpenFOAMExport
             {
                 case SolverIncompressible.simpleFoam:
                 {
-                        CreateFoamParameterDictionary("U", m_InternalFieldU, m_WallU, m_InletU, m_OutletU);
-                        CreateFoamParameterDictionary("epsilon", m_InternalFieldEpsilon, m_WallEpsilon, m_InletEpsilon, m_OutletEpsilon);
-                        CreateFoamParameterDictionary("nut", m_InternalFieldNut, m_WallNut, m_InletNut, m_OutletNut);
-                        CreateFoamParameterDictionary("p", m_InternalFieldP, m_WallP, m_InletP, m_OutletP);
-                        CreateFoamParameterDictionary("k", m_InternalFieldK, m_WallK, m_InletK, m_OutletK);
+                        //CreateFoamParameterDictionary("U", m_InternalFieldU, m_WallU, m_InletU, m_OutletU);
+                        //CreateFoamParameterDictionary("epsilon", m_InternalFieldEpsilon, m_WallEpsilon, m_InletEpsilon, m_OutletEpsilon);
+                        //CreateFoamParameterDictionary("nut", m_InternalFieldNut, m_WallNut, m_InletNut, m_OutletNut);
+                        //CreateFoamParameterDictionary("p", m_InternalFieldP, m_WallP, m_InletP, m_OutletP);
+                        //CreateFoamParameterDictionary("k", m_InternalFieldK, m_WallK, m_InletK, m_OutletK);
+                        CreateFoamParametersDictionary();
                         break;
                 }
                 case SolverIncompressible.adjointShapeOptimizationFoam:
@@ -1957,7 +2070,6 @@ namespace BIM.OpenFOAMExport
                 case SolverIncompressible.SRFSimpleFoam:
                     break;
             }
-
             m_SimulationDefaultList.Add("0", m_Null);
         }
 
@@ -2228,6 +2340,239 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
+        /// Creates FoamParameters Dictionary and adds it to the "0" folder.
+        /// </summary>
+        private void CreateFoamParametersDictionary()
+        {
+            Dictionary<string, object> m_Dict = new Dictionary<string, object>();
+            List<InitialParameter> initialParameters = new List<InitialParameter>();
+            CreateFOAMParamterList(initialParameters);
+            foreach (InitialParameter initParam in initialParameters)
+            {
+                m_Dict = new Dictionary<string, object>();
+                m_Dict.Add("internalField", (object)initParam.InternalField);
+                string patchName = string.Empty;
+                foreach (FOAMParameterPatch<dynamic> patch in initParam.Patches)
+                {
+                    m_Dict.Add(patch.Type.ToString(), patch.ToDictionary());
+                }
+                m_Null.Add(initParam.Name, m_Dict);
+            }
+        }
+
+        /// <summary>
+        /// Adds InitialParameter to the given list.
+        /// </summary>
+        /// <param name="initialParameters">List of initialParameter</param>
+        private void CreateFOAMParamterList(List<InitialParameter> initialParameters)
+        {
+            AddParametersBasedOnSimulationType(initialParameters);
+        }
+
+        /// <summary>
+        /// Add InitialParameter based on the simulationType in the TurbulenceParameter.
+        /// </summary>
+        /// <param name="initialParameters">List of initialParameter.</param>
+        private void AddParametersBasedOnSimulationType(List<InitialParameter> initialParameters)
+        {
+            switch(m_TurbulenceParameter.SimType)
+            {
+                case SimulationType.laminar:
+                {
+                    break;
+                }
+                case SimulationType.RAS:
+                {
+                    RAS ras = (RAS)m_TurbulenceParameter.StructModel;
+                    RASModel rasM = ras.RASModel;
+                    ParametersBasedOnTurbulenceModel(initialParameters, rasM);
+                    break;
+                }
+                case SimulationType.LES:
+                {
+                    LES les = (LES)m_TurbulenceParameter.StructModel;
+                    LESModel lesM = les.LESModel;
+                    ParametersBasedOnTurbulenceModel(initialParameters, lesM);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add InitialParameter based on turbulenceModel that is set in TurbulenceModel.
+        /// </summary>
+        /// <param name="initialParameters">List of initialParameter.</param>
+        /// <param name="model">turbulenceModel.</param>
+        private void ParametersBasedOnTurbulenceModel(List<InitialParameter> initialParameters, Enum model)
+        {            
+
+            if(model is RASModel)
+            {
+                AddRASModelParameterToList(initialParameters, (RASModel)model);
+            }
+            else if(model is LESModel)
+            {
+                AddLESModelParameterToList(initialParameters, (LESModel)model);
+            }
+
+            //U
+            InitialParameter U = new InitialParameter("U", new Vector3D(0.0, 0.0, 0.0), model);
+
+            FOAMParameterPatch<dynamic> m_WallU = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", new Vector3D(0.0, 0.0, 0.0), PatchType.wall);
+            FOAMParameterPatch<dynamic> m_InletU = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -0.25), PatchType.inlet);
+            FOAMParameterPatch<dynamic> m_OutletU = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", new Vector3D(0.0, 0.0, 0.0), PatchType.outlet);
+            m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0.0, 0.0, 0.0));
+
+            U.Patches.Add(m_WallU);
+            U.Patches.Add(m_InletU);
+            U.Patches.Add(m_OutletU);
+
+            //p
+            InitialParameter p = new InitialParameter("p", 0.0, model);
+
+            FOAMParameterPatch<dynamic> m_WallP = new FOAMParameterPatch<dynamic>("zeroGradient", PatchType.wall);
+            FOAMParameterPatch<dynamic> m_InletP = new FOAMParameterPatch<dynamic>("zeroGradient", PatchType.inlet);
+            FOAMParameterPatch<dynamic> m_OutletP = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.0, PatchType.outlet);
+
+            p.Patches.Add(m_WallP);
+            p.Patches.Add(m_InletP);
+            p.Patches.Add(m_OutletP);
+
+            initialParameters.Add(U);
+            initialParameters.Add(p);
+        }
+
+        /// <summary>
+        /// Add InitialParameter depending on given RASModel.
+        /// </summary>
+        /// <param name="initialParameters">List of InitialParameter.</param>
+        /// <param name="model">Enum RASModel.</param>
+        private void AddRASModelParameterToList(List<InitialParameter> initialParameters, RASModel model)
+        {
+            switch(model)
+            {
+                case RASModel.RNGkEpsilon:
+                {
+                        // k
+                        InitialParameter k = new InitialParameter("k", 0.1, model);
+
+                        FOAMParameterPatch<dynamic> m_WallK = new FOAMParameterPatch<dynamic>("kqRWallFunction", "uniform", 0.1, PatchType.wall);
+                        FOAMParameterPatch<dynamic> m_InletK = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.1, PatchType.inlet);
+                        FOAMParameterPatch<dynamic> m_OutletK = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
+
+                        m_OutletK.Attributes.Add("inletValue uniform", 0.1);
+
+                        k.Patches.Add(m_WallK);
+                        k.Patches.Add(m_InletK);
+                        k.Patches.Add(m_OutletK);
+
+                        //epsilon
+                        InitialParameter epsilon = new InitialParameter("epsilon", 0.01, model);
+
+                        FOAMParameterPatch<dynamic> m_WallEpsilon = new FOAMParameterPatch<dynamic>("epsilonWallFunction", "uniform", 0.01, PatchType.wall);
+                        FOAMParameterPatch<dynamic> m_InletEpsilon = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.inlet);
+                        FOAMParameterPatch<dynamic> m_OutletEpsilon = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
+                        m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
+
+                        epsilon.Patches.Add(m_WallEpsilon);
+                        epsilon.Patches.Add(m_InletEpsilon);
+                        epsilon.Patches.Add(m_OutletEpsilon);
+
+                        //nut
+                        InitialParameter nut = new InitialParameter("nut", 0.0, model);
+
+                        FOAMParameterPatch<dynamic> m_WallNut = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.wall);
+                        FOAMParameterPatch<dynamic> m_InletNut = new FOAMParameterPatch<dynamic>("calculated", "uniform", 0.0, PatchType.inlet);
+                        FOAMParameterPatch<dynamic> m_OutletNut = new FOAMParameterPatch<dynamic>("calculated", "uniform", 0.0, PatchType.outlet);
+
+                        nut.Patches.Add(m_WallNut);
+                        nut.Patches.Add(m_InletNut);
+                        nut.Patches.Add(m_OutletNut);
+
+                        initialParameters.Add(k);
+                        initialParameters.Add(epsilon);
+                        initialParameters.Add(nut);
+                        break;
+                }
+                case RASModel.buoyantKEpsilon:
+
+                case RASModel.kEpsilon:
+                    {
+                        // k
+                        InitialParameter k = new InitialParameter("k", 0.1, model);
+
+                        FOAMParameterPatch<dynamic> m_WallK = new FOAMParameterPatch<dynamic>("kqRWallFunction", "uniform", 0.1, PatchType.wall);
+                        FOAMParameterPatch<dynamic> m_InletK = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.1, PatchType.inlet);
+                        FOAMParameterPatch<dynamic> m_OutletK = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
+
+                        m_OutletK.Attributes.Add("inletValue uniform", 0.1);
+
+                        k.Patches.Add(m_WallK);
+                        k.Patches.Add(m_InletK);
+                        k.Patches.Add(m_OutletK);
+
+                        //epsilon
+                        InitialParameter epsilon = new InitialParameter("epsilon", 0.01, model);
+
+                        FOAMParameterPatch<dynamic> m_WallEpsilon = new FOAMParameterPatch<dynamic>("epsilonWallFunction", "uniform", 0.01, PatchType.wall);
+                        FOAMParameterPatch<dynamic> m_InletEpsilon = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.inlet);
+                        FOAMParameterPatch<dynamic> m_OutletEpsilon = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
+                        m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
+
+                        epsilon.Patches.Add(m_WallEpsilon);
+                        epsilon.Patches.Add(m_InletEpsilon);
+                        epsilon.Patches.Add(m_OutletEpsilon);
+
+                        initialParameters.Add(k);
+                        initialParameters.Add(epsilon);
+
+                        break;
+                    }
+                case RASModel.kkLOmega:
+                case RASModel.kOmega:
+                case RASModel.kOmegaSST:
+                case RASModel.kOmegaSSTLM:
+                case RASModel.kOmegaSSTSAS:
+                case RASModel.LamBremhorstKE:
+                case RASModel.LaunderSharmaKE:
+                case RASModel.LienCubicKE:
+                case RASModel.LienLeschzine:
+                case RASModel.LRR:
+                case RASModel.qZeta:
+                case RASModel.realizableKE:
+                case RASModel.ShihQuadraticKE:
+                case RASModel.SpalartAllmaras:
+                case RASModel.SSG:
+                case RASModel.v2f:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Add InitialParameter depending on given LESModel.
+        /// </summary>
+        /// <param name="initialParameters">List of InitialParameter.</param>
+        /// <param name="model">Enum LESModel.</param>
+        private void AddLESModelParameterToList(List<InitialParameter> initialParameters, LESModel model)
+        {
+            switch(model)
+            {
+                case LESModel.DeardorffDiffStress:
+                case LESModel.dynamicKEqn:
+                case LESModel.dynamicLagrangian:
+                case LESModel.kEqn:
+                case LESModel.kOmegaSSTDES:
+                case LESModel.Smagorinsky:
+                case LESModel.SpalartAllmarasDDES:
+                case LESModel.SpalartAllmarasDES:
+                case LESModel.SpalartAllmarasIDDES:
+                case LESModel.WALE:
+                    break;
+            }
+        }
+
+
+        /// <summary>
         /// Creates a Dicitionary for g and adds it to constant.
         /// </summary>
         private void CreateGDicitionary()
@@ -2260,6 +2605,11 @@ namespace BIM.OpenFOAMExport
         {
             m_Constant.Add("turbulenceProperties", m_TurbulenceParameter.ToDictionary());
         }
+
+
+
+
+
 
         /**********************TO-DO: IMPLEMENT READ FOR XML-CONFIG BEFORE INSERT THIS**********************/
         ///// <summary>

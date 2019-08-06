@@ -32,8 +32,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_TransportModel = /*(TransportModel)m_DictFile["transportModel"];*/m_Settings.TransportModel;
+            m_TransportModel = m_Settings.TransportModel;
             Dictionary<string, object> transportModelParameterSettings = m_DictFile["transportModelParameter"] as Dictionary<string, object>;
+
             //nu-Unit = default
             int[] m_Unit = new int[] { 0, 2, -1, 0, 0, 0, 0};
             FoamFile.Attributes.Add("transportModel", m_TransportModel);
@@ -42,7 +43,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             if(m_TransportModel != TransportModel.Newtonian)
             {
                 Dictionary<string, object> transportModelParemeter = new Dictionary<string, object>();
-                foreach (var v in transportModelParameterSettings/*m_Settings.TransportModelParameter*/)
+                foreach (var v in transportModelParameterSettings)
                 {
                     if (v.Key.Equals("function polynomial"))
                     {
@@ -65,12 +66,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             }
             else
             {
-                foreach(var obj in transportModelParameterSettings/*m_Settings.TransportModelParameter*/)
+                foreach(var obj in transportModelParameterSettings)
                 {
                     m_Unit = ChangeDimension(obj.Key);
                     if (m_Unit != null)
                     {
-                        modelParameterValue = AddUnit(m_Unit, /*m_Settings.TransportModelParameter*/transportModelParameterSettings[obj.Key]);
+                        modelParameterValue = AddUnit(m_Unit, transportModelParameterSettings[obj.Key]);
                         FoamFile.Attributes.Add(obj.Key + " " + obj.Key, modelParameterValue);
                     }
                     else

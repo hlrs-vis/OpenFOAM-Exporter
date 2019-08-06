@@ -190,6 +190,45 @@ namespace BIM.OpenFOAMExport
 
             saveFormat = SaveFormat.ascii;
 
+            //get duct-terminals in active document
+            //List<Element> ductTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
+            //List<double> outletVolumeFlow = new List<double>();
+            //List<double> inletVolumeFlow = new List<double>();
+
+            //foreach(FamilyInstance instance in ductTerminals)
+            //{
+            //    double paramValue = 0;
+            //    foreach (Parameter param in instance.Parameters)
+            //    {
+            //        if(paramValue == 0)
+            //        {
+            //            break;
+            //        }
+            //        switch (param.Definition.ParameterType)
+            //        {
+            //            //volumeflow
+            //            case ParameterType.HVACAirflow:
+            //                {
+            //                    //double volumeFlow = param.AsDouble();
+            //                    //paramValue = param.AsDouble();
+            //                    break;
+            //                }
+            //            //velocity
+            //            case ParameterType.HVACVelocity:
+            //                {
+            //                    paramValue = param.AsDouble();
+            //                    break;
+            //                }
+            //            //pressure loss
+            //            case ParameterType.HVACPressure:
+            //                {
+            //                    break;
+            //                }
+            //                //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+            //        }
+            //    }
+            //}
+
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);

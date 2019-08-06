@@ -221,7 +221,7 @@ namespace BIM.OpenFOAMExport
             }
 
             //commands as string
-            List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract",  "snappyHexMesh" , "rm -r processor*", "simpleFoam"};
+            List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract",  "snappyHexMesh" , "rm -r processor*", "simpleFoam", "rm -r processor*"};
 
             //run commands in windows-openfoam-environment
             m_RunManager.RunCommands(commands);
@@ -348,7 +348,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="doc">Active document.</param>
         /// <param name="category">BuiltInCategory from the Autodesk database.</param>
         /// <returns>List of elements with specified category instances.</returns>
-        private List<Element> GetDefaultCategoryListOfClass<T>(Document document, BuiltInCategory category)
+        public static List<Element> GetDefaultCategoryListOfClass<T>(Document document, BuiltInCategory category)
         {
             FilteredElementCollector collector = new FilteredElementCollector(document);
             FilteredElementCollector catCollector = collector.OfCategory(category).OfClass(typeof(T));//.OfCategory(category);;
