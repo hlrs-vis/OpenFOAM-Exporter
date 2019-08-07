@@ -582,6 +582,14 @@ namespace BIM.OpenFOAMExport
     }
 
 
+    public enum InitialFOAMParameter
+    {
+        U = 0,
+        p,
+        nut,
+        epsilon,
+        k
+    }
 
 
     public enum PatchType
@@ -1054,6 +1062,10 @@ namespace BIM.OpenFOAMExport
         private List<Category> m_SelectedCategories;
         private DisplayUnitType m_Units;
 
+
+        private Dictionary<string, double> outlet;
+        private Dictionary<string, double> inlet;
+
         //Getter-Setter Runmanager
         public OpenFOAMEnvironment OpenFOAMEnvironment { get => m_openFOAMEnvironment; set => m_openFOAMEnvironment = value; }
 
@@ -1224,6 +1236,10 @@ namespace BIM.OpenFOAMExport
 
         //Getter-Setter-SSH
         public SSH SSH { get => m_SSH; set => m_SSH = value; }
+
+        public Dictionary<string, double> Outlet { get => outlet; }
+
+        public Dictionary<string, double> Inlet { get => inlet; }
 
         /// <summary>
         /// Binary or ASCII STL file.
@@ -1734,6 +1750,9 @@ namespace BIM.OpenFOAMExport
             SolverFV solverU = SolverFV.smoothSolver, SolverFV solverK = SolverFV.smoothSolver, SolverFV solverEpsilon = SolverFV.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
             Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
         {
+            outlet = new Dictionary<string, double>();
+            inlet = new Dictionary<string, double>();
+
             //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
 
@@ -1749,7 +1768,7 @@ namespace BIM.OpenFOAMExport
 
             //blockMeshDict
 
-            m_CellSize = new Vector3D(0,0,0);
+            m_CellSize = new Vector3D(0, 0, 0);
             m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
 
 
@@ -1994,7 +2013,7 @@ namespace BIM.OpenFOAMExport
 
             //TransportProperties
             m_TransportModel = transportModel;
-            m_TransportModelParameter = new Dictionary<string,object>();
+            m_TransportModelParameter = new Dictionary<string, object>();
             m_TransportModelParameter.Add("nu", 1e-05);
             m_TransportModelParameter.Add("beta", 3e-03);
             m_TransportModelParameter.Add("TRef", 300);
@@ -2006,12 +2025,10 @@ namespace BIM.OpenFOAMExport
             RASModel rasModel = RASModel.RNGkEpsilon;
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
-            InitSystemDictionary();
-            InitConstantDictionary();
-            InitNullDictionary();
+            //InitFOAMFolder();
 
             //SSH
-            m_SSH = new SSH("mdjur", "192.168.2.102", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
+            m_SSH = new SSH("name", "xxx.xxx.x.xxx", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
 
             //General
             m_OpenFOAM = openFoam;
@@ -2020,7 +2037,17 @@ namespace BIM.OpenFOAMExport
             m_exportSharedCoordinates = exportSharedCoordinates;
             m_SelectedCategories = selectedCategories;
             m_Units = units;
+        }
 
+        /// <summary>
+        /// Initialize all dictionaries with all default values.
+        /// </summary>
+        public void InitOpenFOAMFolderDictionaries()
+        {
+            InitSystemDictionary();
+            InitConstantDictionary();
+            InitNullDictionary();            
+            //CREATES XML BASED ON DEFAULT SETTINGS => NO READ FUNCTION FOR SETTINGS AND OPENFOAMEXPORTFORM IMPLEMENTED YET
             //CreateConfig();
         }
 
@@ -2049,11 +2076,6 @@ namespace BIM.OpenFOAMExport
             {
                 case SolverIncompressible.simpleFoam:
                 {
-                        //CreateFoamParameterDictionary("U", m_InternalFieldU, m_WallU, m_InletU, m_OutletU);
-                        //CreateFoamParameterDictionary("epsilon", m_InternalFieldEpsilon, m_WallEpsilon, m_InletEpsilon, m_OutletEpsilon);
-                        //CreateFoamParameterDictionary("nut", m_InternalFieldNut, m_WallNut, m_InletNut, m_OutletNut);
-                        //CreateFoamParameterDictionary("p", m_InternalFieldP, m_WallP, m_InletP, m_OutletP);
-                        //CreateFoamParameterDictionary("k", m_InternalFieldK, m_WallK, m_InletK, m_OutletK);
                         CreateFoamParametersDictionary();
                         break;
                 }
@@ -2318,26 +2340,26 @@ namespace BIM.OpenFOAMExport
             m_System.Add("snappyHexMeshDict", m_SnappyHexMeshDict);
         }
 
-        /// <summary>
-        /// Creates a FoamParameter Dictionary and adds it to the "0" folder.
-        /// </summary>
-        /// <typeparam name="T">Type of internalField.</typeparam>
-        /// <param name="name">Name of the FoamParameterPatch.</param>
-        /// <param name="m_InternalField">Internalfield value.</param>
-        /// <param name="m_Wall">FoamParameterPatch for wall.</param>
-        /// <param name="m_Inlet">FoamParameterPatch for inlet.</param>
-        /// <param name="m_Outlet">FoamParameterPatch for outlet.</param>
-        private void CreateFoamParameterDictionary<T>(string name, T m_InternalField, FOAMParameterPatch<T> m_Wall, FOAMParameterPatch<T> m_Inlet, FOAMParameterPatch<T> m_Outlet)
-        {
-            Dictionary<string, object> m_Dict = new Dictionary<string, object>();
+        ///// <summary>
+        ///// Creates a FoamParameter Dictionary and adds it to the "0" folder.
+        ///// </summary>
+        ///// <typeparam name="T">Type of internalField.</typeparam>
+        ///// <param name="name">Name of the FoamParameterPatch.</param>
+        ///// <param name="m_InternalField">Internalfield value.</param>
+        ///// <param name="m_Wall">FoamParameterPatch for wall.</param>
+        ///// <param name="m_Inlet">FoamParameterPatch for inlet.</param>
+        ///// <param name="m_Outlet">FoamParameterPatch for outlet.</param>
+        //private void CreateFoamParameterDictionary<T>(string name, T m_InternalField, FOAMParameterPatch<T> m_Wall, FOAMParameterPatch<T> m_Inlet, FOAMParameterPatch<T> m_Outlet)
+        //{
+        //    Dictionary<string, object> m_Dict = new Dictionary<string, object>();
 
-            m_Dict.Add("internalField", m_InternalField);
-            m_Dict.Add("wall", m_Wall.ToDictionary());
-            m_Dict.Add("inlet", m_Inlet.ToDictionary());
-            m_Dict.Add("outlet", m_Outlet.ToDictionary());
+        //    m_Dict.Add("internalField", m_InternalField);
+        //    m_Dict.Add("wall", m_Wall.ToDictionary());
+        //    m_Dict.Add("inlet", m_Inlet.ToDictionary());
+        //    m_Dict.Add("outlet", m_Outlet.ToDictionary());
 
-            m_Null.Add(name, m_Dict);
-        }
+        //    m_Null.Add(name, m_Dict);
+        //}
 
         /// <summary>
         /// Creates FoamParameters Dictionary and adds it to the "0" folder.
@@ -2404,43 +2426,28 @@ namespace BIM.OpenFOAMExport
         /// <param name="initialParameters">List of initialParameter.</param>
         /// <param name="model">turbulenceModel.</param>
         private void ParametersBasedOnTurbulenceModel(List<InitialParameter> initialParameters, Enum model)
-        {            
+        {
 
-            if(model is RASModel)
+            if (model is RASModel)
             {
                 AddRASModelParameterToList(initialParameters, (RASModel)model);
             }
-            else if(model is LESModel)
+            else if (model is LESModel)
             {
                 AddLESModelParameterToList(initialParameters, (LESModel)model);
             }
 
             //U
-            InitialParameter U = new InitialParameter("U", new Vector3D(0.0, 0.0, 0.0), model);
-
-            FOAMParameterPatch<dynamic> m_WallU = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", new Vector3D(0.0, 0.0, 0.0), PatchType.wall);
-            FOAMParameterPatch<dynamic> m_InletU = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -0.25), PatchType.inlet);
-            FOAMParameterPatch<dynamic> m_OutletU = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", new Vector3D(0.0, 0.0, 0.0), PatchType.outlet);
-            m_OutletU.Attributes.Add("inletValue uniform", new Vector3D(0.0, 0.0, 0.0));
-
-            U.Patches.Add(m_WallU);
-            U.Patches.Add(m_InletU);
-            U.Patches.Add(m_OutletU);
+            InitialParameter U = InitialParameter(model, InitialFOAMParameter.U);
 
             //p
-            InitialParameter p = new InitialParameter("p", 0.0, model);
-
-            FOAMParameterPatch<dynamic> m_WallP = new FOAMParameterPatch<dynamic>("zeroGradient", PatchType.wall);
-            FOAMParameterPatch<dynamic> m_InletP = new FOAMParameterPatch<dynamic>("zeroGradient", PatchType.inlet);
-            FOAMParameterPatch<dynamic> m_OutletP = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.0, PatchType.outlet);
-
-            p.Patches.Add(m_WallP);
-            p.Patches.Add(m_InletP);
-            p.Patches.Add(m_OutletP);
+            InitialParameter p = InitialParameter(model, InitialFOAMParameter.p);
 
             initialParameters.Add(U);
             initialParameters.Add(p);
         }
+
+
 
         /// <summary>
         /// Add InitialParameter depending on given RASModel.
@@ -2452,76 +2459,29 @@ namespace BIM.OpenFOAMExport
             switch(model)
             {
                 case RASModel.RNGkEpsilon:
-                {
+                    {
                         // k
-                        InitialParameter k = new InitialParameter("k", 0.1, model);
-
-                        FOAMParameterPatch<dynamic> m_WallK = new FOAMParameterPatch<dynamic>("kqRWallFunction", "uniform", 0.1, PatchType.wall);
-                        FOAMParameterPatch<dynamic> m_InletK = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.1, PatchType.inlet);
-                        FOAMParameterPatch<dynamic> m_OutletK = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
-
-                        m_OutletK.Attributes.Add("inletValue uniform", 0.1);
-
-                        k.Patches.Add(m_WallK);
-                        k.Patches.Add(m_InletK);
-                        k.Patches.Add(m_OutletK);
+                        InitialParameter k = InitialParameter(model, InitialFOAMParameter.k);
 
                         //epsilon
-                        InitialParameter epsilon = new InitialParameter("epsilon", 0.01, model);
-
-                        FOAMParameterPatch<dynamic> m_WallEpsilon = new FOAMParameterPatch<dynamic>("epsilonWallFunction", "uniform", 0.01, PatchType.wall);
-                        FOAMParameterPatch<dynamic> m_InletEpsilon = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.inlet);
-                        FOAMParameterPatch<dynamic> m_OutletEpsilon = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
-                        m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
-
-                        epsilon.Patches.Add(m_WallEpsilon);
-                        epsilon.Patches.Add(m_InletEpsilon);
-                        epsilon.Patches.Add(m_OutletEpsilon);
+                        InitialParameter epsilon = InitialParameter(model, InitialFOAMParameter.epsilon);
 
                         //nut
-                        InitialParameter nut = new InitialParameter("nut", 0.0, model);
-
-                        FOAMParameterPatch<dynamic> m_WallNut = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.wall);
-                        FOAMParameterPatch<dynamic> m_InletNut = new FOAMParameterPatch<dynamic>("calculated", "uniform", 0.0, PatchType.inlet);
-                        FOAMParameterPatch<dynamic> m_OutletNut = new FOAMParameterPatch<dynamic>("calculated", "uniform", 0.0, PatchType.outlet);
-
-                        nut.Patches.Add(m_WallNut);
-                        nut.Patches.Add(m_InletNut);
-                        nut.Patches.Add(m_OutletNut);
+                        InitialParameter nut = InitialParameter(model, InitialFOAMParameter.nut);
 
                         initialParameters.Add(k);
                         initialParameters.Add(epsilon);
                         initialParameters.Add(nut);
                         break;
-                }
+                    }
                 case RASModel.buoyantKEpsilon:
-
                 case RASModel.kEpsilon:
                     {
                         // k
-                        InitialParameter k = new InitialParameter("k", 0.1, model);
-
-                        FOAMParameterPatch<dynamic> m_WallK = new FOAMParameterPatch<dynamic>("kqRWallFunction", "uniform", 0.1, PatchType.wall);
-                        FOAMParameterPatch<dynamic> m_InletK = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.1, PatchType.inlet);
-                        FOAMParameterPatch<dynamic> m_OutletK = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
-
-                        m_OutletK.Attributes.Add("inletValue uniform", 0.1);
-
-                        k.Patches.Add(m_WallK);
-                        k.Patches.Add(m_InletK);
-                        k.Patches.Add(m_OutletK);
+                        InitialParameter k = InitialParameter(model, InitialFOAMParameter.k);
 
                         //epsilon
-                        InitialParameter epsilon = new InitialParameter("epsilon", 0.01, model);
-
-                        FOAMParameterPatch<dynamic> m_WallEpsilon = new FOAMParameterPatch<dynamic>("epsilonWallFunction", "uniform", 0.01, PatchType.wall);
-                        FOAMParameterPatch<dynamic> m_InletEpsilon = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.inlet);
-                        FOAMParameterPatch<dynamic> m_OutletEpsilon = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
-                        m_OutletEpsilon.Attributes.Add("inletValue uniform", 0.1);
-
-                        epsilon.Patches.Add(m_WallEpsilon);
-                        epsilon.Patches.Add(m_InletEpsilon);
-                        epsilon.Patches.Add(m_OutletEpsilon);
+                        InitialParameter epsilon = InitialParameter(model, InitialFOAMParameter.epsilon);
 
                         initialParameters.Add(k);
                         initialParameters.Add(epsilon);
@@ -2548,6 +2508,9 @@ namespace BIM.OpenFOAMExport
             }
         }
 
+
+
+
         /// <summary>
         /// Add InitialParameter depending on given LESModel.
         /// </summary>
@@ -2571,6 +2534,78 @@ namespace BIM.OpenFOAMExport
             }
         }
 
+        /// <summary>
+        /// Initialize initialParameter with default values depending on InitialFOAMParameter-Enum.
+        /// </summary>
+        /// <param name="model">Model.</param>
+        /// <param name="param">InitialFOAMParameter enum</param>
+        /// <returns>InitialParameter for null folder.</returns>
+        private static InitialParameter InitialParameter(Enum model, InitialFOAMParameter param)
+        {
+            FOAMParameterPatch<dynamic> m_Wall, m_Inlet, m_Outlet;
+            InitialParameter parameter;
+            //value;
+            switch(param)
+            {
+                case InitialFOAMParameter.p:
+                    {
+                        parameter = new InitialParameter(param.ToString(), 0.0, model);
+                        m_Wall = new FOAMParameterPatch<dynamic>("zeroGradient", PatchType.wall);
+                        m_Inlet = new FOAMParameterPatch<dynamic>("zeroGradient", PatchType.inlet);
+                        m_Outlet = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.0, PatchType.outlet);
+                        break;
+                    }
+                case InitialFOAMParameter.U:
+                    {
+                        parameter = new InitialParameter(param.ToString(), new Vector3D(0.0, 0.0, 0.0), model);
+                        m_Wall = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", new Vector3D(0.0, 0.0, 0.0), PatchType.wall);
+                        m_Inlet = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", new Vector3D(0.0, 0.0, -0.25), PatchType.inlet);
+                        m_Outlet = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", new Vector3D(0.0, 0.0, 0.0), PatchType.outlet);
+                        m_Outlet.Attributes.Add("inletValue uniform", new Vector3D(0.0, 0.0, 0.0));
+                        break;
+                    }
+                case InitialFOAMParameter.nut:
+                    {
+                        parameter = new InitialParameter(param.ToString(), 0.0, model);
+                        m_Wall = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.wall);
+                        m_Inlet = new FOAMParameterPatch<dynamic>("calculated", "uniform", 0.0, PatchType.inlet);
+                        m_Outlet = new FOAMParameterPatch<dynamic>("calculated", "uniform", 0.0, PatchType.outlet);
+                        break;
+                    }
+                case InitialFOAMParameter.k:
+                    {
+                        parameter = new InitialParameter(param.ToString(), 0.1, model);
+                        m_Wall = new FOAMParameterPatch<dynamic>("kqRWallFunction", "uniform", 0.1, PatchType.wall);
+                        m_Inlet = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.1, PatchType.inlet);
+                        m_Outlet = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
+                        m_Outlet.Attributes.Add("inletValue uniform", 0.1);
+                        break;
+                    }
+                case InitialFOAMParameter.epsilon:
+                    {
+                        parameter = new InitialParameter(param.ToString(), 0.01, model);
+                        m_Wall = new FOAMParameterPatch<dynamic>("epsilonWallFunction", "uniform", 0.01, PatchType.wall);
+                        m_Inlet = new FOAMParameterPatch<dynamic>("fixedValue", "uniform", 0.01, PatchType.inlet);
+                        m_Outlet = new FOAMParameterPatch<dynamic>("inletOutlet", "uniform", 0.1, PatchType.outlet);
+                        m_Outlet.Attributes.Add("inletValue uniform", 0.1);
+                        break;
+                    }
+                default:
+                    {
+                        parameter = new InitialParameter(param.ToString(), 0.0, model);
+                        m_Wall = new FOAMParameterPatch<dynamic>("", "", 0.0, PatchType.wall);
+                        m_Inlet = new FOAMParameterPatch<dynamic>("", "", 0.0, PatchType.inlet);
+                        m_Outlet = new FOAMParameterPatch<dynamic>("", "", 0.0, PatchType.outlet);
+                        break;
+                    }
+            }
+
+            parameter.Patches.Add(m_Wall);
+            parameter.Patches.Add(m_Inlet);
+            parameter.Patches.Add(m_Outlet);
+
+            return parameter;
+        }
 
         /// <summary>
         /// Creates a Dicitionary for g and adds it to constant.

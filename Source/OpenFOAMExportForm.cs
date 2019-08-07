@@ -190,48 +190,76 @@ namespace BIM.OpenFOAMExport
 
             saveFormat = SaveFormat.ascii;
 
-            //get duct-terminals in active document
-            //List<Element> ductTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
-            //List<double> outletVolumeFlow = new List<double>();
-            //List<double> inletVolumeFlow = new List<double>();
-
-            //foreach(FamilyInstance instance in ductTerminals)
-            //{
-            //    double paramValue = 0;
-            //    foreach (Parameter param in instance.Parameters)
-            //    {
-            //        if(paramValue == 0)
-            //        {
-            //            break;
-            //        }
-            //        switch (param.Definition.ParameterType)
-            //        {
-            //            //volumeflow
-            //            case ParameterType.HVACAirflow:
-            //                {
-            //                    //double volumeFlow = param.AsDouble();
-            //                    //paramValue = param.AsDouble();
-            //                    break;
-            //                }
-            //            //velocity
-            //            case ParameterType.HVACVelocity:
-            //                {
-            //                    paramValue = param.AsDouble();
-            //                    break;
-            //                }
-            //            //pressure loss
-            //            case ParameterType.HVACPressure:
-            //                {
-            //                    break;
-            //                }
-            //                //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
-            //        }
-            //    }
-            //}
-
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
+
+            InitBIMData();
+            m_Settings.InitOpenFOAMFolderDictionaries();
+        }
+
+        /// <summary>
+        /// Initialize air flow velocity in settings for each duct terminals based on BIM-Data.
+        /// </summary>
+        /// <returns>true, if BIMData used.</returns>
+        private bool InitBIMData()
+        {
+            if(m_Settings == null)
+            {
+                return false;
+            }
+
+            bool succeed = false;
+
+            //get duct-terminals in active document
+            List<Element> ductTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
+
+            foreach (FamilyInstance instance in ductTerminals)
+            {
+                double paramValue = 0;
+                foreach (Parameter param in instance.Parameters)
+                {
+                    paramValue = 0;
+                    switch (param.Definition.ParameterType)
+                    {
+                        //volumeflow
+                        case ParameterType.HVACAirflow:
+                            {
+                                break;
+                            }
+                        //velocity
+                        case ParameterType.HVACVelocity:
+                            {
+                                paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture)/*Convert.ToDouble(param.AsValueString().Trim(' ', 'm', '/', 's').Replace('.', ','))*/;
+                                break;
+                            }
+                        //pressure loss
+                        case ParameterType.HVACPressure:
+                            {
+                                break;
+                            }
+                            //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+                    }
+                    if (paramValue != 0)
+                    {
+                        FamilySymbol famSym = instance.Symbol;
+                        string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
+                        string nameDuct = nameDuctFam.Replace(" ", "_");
+                        if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
+                        {
+                            m_Settings.Outlet.Add(nameDuct, paramValue);
+                            succeed = true;
+                        }
+                        else if(nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
+                        {
+                            m_Settings.Inlet.Add(nameDuct, paramValue);
+                            succeed = true;
+                        }
+                        break;
+                    }
+                }
+            }
+            return succeed;
         }
 
         /// <summary>
@@ -253,7 +281,9 @@ namespace BIM.OpenFOAMExport
         private void InitializeDefaultParameterOpenFOAM()
         {
             List<string> keyPath = new List<string>();
-
+            //m_OpenFOAMTreeView = new OpenFOAMTreeView();
+            //InitializeOFTreeViewSize();
+            //TO-DO: UPDATE OpenFOAMTreeView
             foreach (var att in m_Settings.SimulationDefault)
             {
                 keyPath.Add(att.Key);
