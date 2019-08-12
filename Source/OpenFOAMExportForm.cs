@@ -225,27 +225,7 @@ namespace BIM.OpenFOAMExport
                     paramValue = 0;
                     try
                     {
-                        switch (param.Definition.ParameterType)
-                        {
-                            //volumeflow
-                            case ParameterType.HVACAirflow:
-                                {
-                                    break;
-                                }
-                            //velocity
-                            case ParameterType.HVACVelocity:
-                                {
-                                    //convert into . - comma convetion
-                                    paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture);
-                                    break;
-                                }
-                            //pressure loss
-                            case ParameterType.HVACPressure:
-                                {
-                                    break;
-                                }
-                                //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
-                        }
+                        paramValue = GetAirFlowValue(paramValue, param);
                     }
                     catch (Exception)
                     {
@@ -274,6 +254,39 @@ namespace BIM.OpenFOAMExport
                 }
             }
             return succeed;
+        }
+
+        /// <summary>
+        /// Initialize paramValue with the airflow parameter as double.
+        /// </summary>
+        /// <param name="paramValue">Parameter value empty.</param>
+        /// <param name="param">Parameter object.</param>
+        /// <returns>Double.</returns>
+        private static double GetAirFlowValue(double paramValue, Parameter param)
+        {
+            switch (param.Definition.ParameterType)
+            {
+                //volumeflow
+                case ParameterType.HVACAirflow:
+                    {
+                        break;
+                    }
+                //velocity
+                case ParameterType.HVACVelocity:
+                    {
+                        //convert into dot-comma convetion
+                        paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture);
+                        break;
+                    }
+                //pressure loss
+                case ParameterType.HVACPressure:
+                    {
+                        break;
+                    }
+                    //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+            }
+
+            return paramValue;
         }
 
         /// <summary>
