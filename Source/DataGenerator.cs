@@ -1135,6 +1135,18 @@ namespace BIM.OpenFOAMExport
             return linkElements;
         }
 
+        /// <summary>
+        /// Convert-Assist-Function.
+        /// </summary>
+        /// <typeparam name="T">Type value will be converted in.</typeparam>
+        /// <typeparam name="U">Initial type</typeparam>
+        /// <param name="value">Value to convert.</param>
+        /// <returns>Converted value.</returns>
+        public static T ConvertValue<T,U>(U value)/* where U : IConvertible*/
+        {
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+
         ///// <summary>
         ///// Initializes the Cancel form.
         ///// </summary>

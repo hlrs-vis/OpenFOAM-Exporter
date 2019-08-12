@@ -2,8 +2,6 @@
 
 namespace BIM.OpenFOAMExport.OpenFOAM
 {
-
-
     /// <summary>
     /// Abstract base class for simulation parameter that vary with used simulation-model.
     /// </summary>
@@ -103,15 +101,34 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_BoundaryField.Add(m_WallName, m_DictFile["wall"] as Dictionary<string, object>);
+            FOAMParameterPatch<dynamic> patch = (FOAMParameterPatch<dynamic>)m_DictFile["wall"];
+            m_BoundaryField.Add(m_WallName, /*m_DictFile["wall"] as Dictionary<string, object>*/patch.Attributes);
 
             foreach (string s in m_OutletNames)
             {
-                m_BoundaryField.Add(s, m_DictFile["outlet"] as Dictionary<string, object>);
+                if (m_DictFile.ContainsKey(s))
+                {
+                    /*FOAMParameterPatch<dynamic> */patch = (FOAMParameterPatch<dynamic>)m_DictFile[s];
+                    m_BoundaryField.Add(s, /*m_DictFile[s] as Dictionary<string, object>*/ patch.Attributes);
+                }
+                else
+                {
+                    /*FOAMParameterPatch<dynamic> */patch = (FOAMParameterPatch<dynamic>)m_DictFile["outlet"];
+                    m_BoundaryField.Add(s, /*m_DictFile["outlet"] as Dictionary<string, object>*/patch.Attributes);
+                }
             }
             foreach (string s in m_InletNames)
             {
-                m_BoundaryField.Add(s, m_DictFile["inlet"] as Dictionary<string, object>);
+                if(m_DictFile.ContainsKey(s))
+                {
+                    /*FOAMParameterPatch<dynamic> */patch = (FOAMParameterPatch<dynamic>)m_DictFile[s];
+                    m_BoundaryField.Add(s, /*m_DictFile[s] as Dictionary<string, object>*/patch.Attributes);
+                }
+                else
+                {
+                    /*FOAMParameterPatch<dynamic> */patch = (FOAMParameterPatch<dynamic>)m_DictFile["inlet"];
+                    m_BoundaryField.Add(s, /*m_DictFile["inlet"] as Dictionary<string, object>*/patch.Attributes);
+                }
             }
 
             FoamFile.Attributes.Add("dimensions", m_Dimensions);

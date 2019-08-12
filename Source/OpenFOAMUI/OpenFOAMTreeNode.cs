@@ -24,6 +24,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// Stored Value.
         /// </summary>
         protected T m_Value;
+
         #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="T:OpenFOAMDropDownTreeNode"/> class.
@@ -118,6 +119,11 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                 {
                     Dictionary<string, object> newLevel = att[s] as Dictionary<string, object>;
                     att = newLevel;
+                }
+                else if(att[s] is FOAMParameterPatch<dynamic>)
+                {
+                    FOAMParameterPatch<dynamic> patch = (FOAMParameterPatch<dynamic>)att[s];
+                    att = patch.Attributes;
                 }
                 else
                 {

@@ -194,7 +194,10 @@ namespace BIM.OpenFOAMExport
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
 
-            InitBIMData();
+            if (!InitBIMData())
+            {
+                return;
+            }
             m_Settings.InitOpenFOAMFolderDictionaries();
         }
 
@@ -220,26 +223,37 @@ namespace BIM.OpenFOAMExport
                 foreach (Parameter param in instance.Parameters)
                 {
                     paramValue = 0;
-                    switch (param.Definition.ParameterType)
+                    try
                     {
-                        //volumeflow
-                        case ParameterType.HVACAirflow:
-                            {
-                                break;
-                            }
-                        //velocity
-                        case ParameterType.HVACVelocity:
-                            {
-                                paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture)/*Convert.ToDouble(param.AsValueString().Trim(' ', 'm', '/', 's').Replace('.', ','))*/;
-                                break;
-                            }
-                        //pressure loss
-                        case ParameterType.HVACPressure:
-                            {
-                                break;
-                            }
-                            //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+                        switch (param.Definition.ParameterType)
+                        {
+                            //volumeflow
+                            case ParameterType.HVACAirflow:
+                                {
+                                    break;
+                                }
+                            //velocity
+                            case ParameterType.HVACVelocity:
+                                {
+                                    //convert into . - comma convetion
+                                    paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture);
+                                    break;
+                                }
+                            //pressure loss
+                            case ParameterType.HVACPressure:
+                                {
+                                    break;
+                                }
+                                //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+                        }
                     }
+                    catch (Exception)
+                    {
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        return false;
+                    }
+
                     if (paramValue != 0)
                     {
                         FamilySymbol famSym = instance.Symbol;
@@ -247,12 +261,12 @@ namespace BIM.OpenFOAMExport
                         string nameDuct = nameDuctFam.Replace(" ", "_");
                         if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                         {
-                            m_Settings.Outlet.Add(nameDuct, paramValue);
+                            m_Settings.Outlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(0, 0, paramValue));
                             succeed = true;
                         }
                         else if(nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                         {
-                            m_Settings.Inlet.Add(nameDuct, paramValue);
+                            m_Settings.Inlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(0, 0, -paramValue));
                             succeed = true;
                         }
                         break;
@@ -398,10 +412,14 @@ namespace BIM.OpenFOAMExport
                     bool? _bool = att.Value as bool?;
                     if(_bool != null)
                     {
-                        
                         OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>((bool)_bool, ref m_Settings, keyPath);
                         child.Nodes.Add(dropDown);
                     }
+                }
+                else if(att.Value is FOAMParameterPatch<dynamic>)
+                {
+                    FOAMParameterPatch<dynamic> patch = (FOAMParameterPatch<dynamic>)att.Value;
+                    child = GetChildNode(att.Key, patch.Attributes, keyPath);
                 }
                 else
                 {
