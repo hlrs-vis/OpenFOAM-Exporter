@@ -387,7 +387,7 @@ namespace BIM.OpenFOAMExport
             this.txtBoxPort.Name = "txtBoxPort";
             this.txtBoxPort.TextChanged += new System.EventHandler(this.TxtBoxPort_ValueChanged);
             // 
-            // STLExportForm
+            // OpenFOAMExportForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;

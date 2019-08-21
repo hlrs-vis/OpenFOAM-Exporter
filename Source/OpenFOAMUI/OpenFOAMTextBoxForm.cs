@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BIM.OpenFOAMExport.OpenFOAMUI
@@ -16,6 +9,11 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
     /// </summary>
     public partial class OpenFOAMTextBoxForm : Form
     {
+        /// <summary>
+        /// State of the form.
+        /// </summary>
+        private bool m_CancelProcess = false;
+
         /// <summary>
         /// TextBox.
         /// </summary>
@@ -40,11 +38,14 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// Initialize Regular Expression with this constructor.
         /// </summary>
         /// <param name="reg">Regex object.</param>
-        public OpenFOAMTextBoxForm(Regex reg, string text)
+        /// <param name="textBox">TextBox string.</param>
+        /// <param name="lblText">Text for lblText</param>
+        public OpenFOAMTextBoxForm(Regex reg, string lblTextBox, string lblVariable)
         {
-            m_RegTxt = reg;
             InitializeComponent();
-            InitializeTextBox(text);
+            InitializeTextBox(lblTextBox);
+            m_RegTxt = reg;
+            SetLBLVariable(lblVariable);
         }
         #endregion
 
@@ -75,6 +76,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         {
             lblEnvironmentVariable.Text = txt;
         }
+
         /// <summary>
         /// Getter-Setter for textBox.
         /// </summary>
@@ -88,6 +90,59 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
             {
                 m_TxtBox = value;
             }
+        }
+
+        /// <summary>
+        /// Getter for regular expression for textbox.
+        /// </summary>
+        public Regex RegText
+        {
+            get
+            {
+                return m_RegTxt;
+            }
+        }
+
+        /// <summary>
+        /// Getter-Setter for boolean m_CancelProcess.
+        /// </summary>
+        public bool CancelProcess
+        {
+            get { return m_CancelProcess; }
+            set { m_CancelProcess = value; }
+        }
+
+        /// <summary>
+        /// Cancel button click event.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void BtnCancel_Click(object sender, EventArgs e)
+        {
+            m_CancelProcess = !m_CancelProcess;
+
+            if (m_CancelProcess)
+                Close();
+        }
+
+        /// <summary>
+        /// Click-Event for save button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// Click-Event for help button.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">Event args.</param>
+        private void BtnHelp_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Please insert the variable path that is listed on the left.", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
         }
     }
 }

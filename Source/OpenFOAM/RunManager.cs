@@ -15,12 +15,32 @@ namespace BIM.OpenFOAMExport.OpenFOAM
     public abstract class RunManager
     {
         /// <summary>
+        /// Status for runmanager.
+        /// </summary>
+        DataGenerator.GeneratorStatus m_Status;
+
+        /// <summary>
+        /// Path to environment install folder.
+        /// </summary>
+        private string m_DefaultEnvPath;
+
+        /// <summary>
+        /// Environment for simulation.
+        /// </summary>
+        private string m_EnvTag;
+
+        /// <summary>
+        /// Path to config file.
+        /// </summary>
+        private string m_ConfigPath;
+
+        /// <summary>
         /// Path to openFoam-Case
         /// </summary>
         protected string m_CasePath;
 
         /// <summary>
-        /// Path to install folder of the Environment
+        /// Path to install folder of the Environment.
         /// </summary>
         protected string m_FOAMEnvPath;        
         
@@ -38,6 +58,11 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// DecomposPar-Dict for NumberOfSubdomains.
         /// </summary>
         private DecomposeParDict m_DecomposeParDict;
+
+        /// <summary>
+        /// TextBox-Form for install folder of simulation environment.
+        /// </summary>
+        private OpenFOAMTextBoxForm m_OpenFOAMTxtForm;
 
         /// <summary>
         /// Getter-Setter DecomposePar.
@@ -173,7 +198,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
 
             //write commands into batch file
             bool succeed = WriteToCommandBat(runCommands);
-
             if (succeed)
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo
@@ -190,7 +214,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                     {
                         MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment." +
                             "\nC#-Process ExitCode: " + process.ExitCode,
-                            OpenFOAMExportResource.MESSAGE_BOX_TITLE); ;
+                            OpenFOAMExportResource.MESSAGE_BOX_TITLE);
                     }
                 }
             }
@@ -206,21 +230,21 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public virtual void CreateEnvConfig()
         {
-            string defaultEnvPath = "None";
-            string envTag = "<" + m_Env + ">"; ;
+            m_DefaultEnvPath = "None";
+            m_EnvTag = "<" + m_Env + ">"; ;
             string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
             string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
-            string configPath = assemblyDirCorrect + "openfoam_env_config.config";
+            m_ConfigPath = assemblyDirCorrect + "openfoam_env_config.config";
             switch (m_Env)
             {
                 case OpenFOAMEnvironment.blueCFD:
                     {
-                        defaultEnvPath = @"C:\Program Files\blueCFD-Core-2017\setvars.bat";
+                        m_DefaultEnvPath = @"C:\Program Files\blueCFD-Core-2017\setvars.bat";
                         break;
                     }
                 case OpenFOAMEnvironment.wsl:
                     {
-                        defaultEnvPath = @"C:\Windows\System32\bash.exe";
+                        m_DefaultEnvPath = @"C:\Windows\System32\bash.exe";
                         break;
                     }
                 //case OpenFOAMEnvironment.docker:
@@ -230,55 +254,43 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 //    }
                 case OpenFOAMEnvironment.ssh:
                     {
-                        defaultEnvPath = @"C:\Windows\System32\OpenSSH\ssh.exe";
+                        m_DefaultEnvPath = @"C:\Windows\System32\OpenSSH\ssh.exe";
                         break;
                     }
             }
+            CreateConfigEntry();
+        }
 
-            if (!File.Exists(configPath))
+        /// <summary>
+        /// Creates entry for environment based on selected environment.
+        /// </summary>
+        /// <param name="defaultEnvPath">Default path.</param>
+        /// <param name="envTag">Environment enum.</param>
+        /// <param name="configPath">Path to config file.</param>
+        private void CreateConfigEntry()
+        {
+            if (File.Exists(m_ConfigPath))
             {
-                StreamWriter sw = new StreamWriter(configPath);
-                sw.WriteLine("**********************Config for OpenFOAM-Environment**********************");
-
-                if (File.Exists(defaultEnvPath))
-                {
-                    sw.WriteLine(envTag + " " + defaultEnvPath);
-                    m_FOAMEnvPath = defaultEnvPath;
-                }
-                else
-                {
-                    ///TO-DO: NEW GUI FOR OPENFOAM-ENVIRONMENT USER INPUT
-                    //Regex m_Reg = new Regex("^\\S+$");
-                    //OpenFOAMTextBoxForm openFOAMTxtForm = new OpenFOAMTextBoxForm(m_Reg, defaultEnvPath);
-                    //openFOAMTxtForm.SetLBLVariable("Searching for " + defaultEnvPath);
-                    //openFOAMTxtForm.Show();
-                    //if(m_Reg.IsMatch(openFOAMTxtForm.TxtBox.Text))
-                    //{
-                    //    m_FOAMEnvPath = openFOAMTxtForm.TxtBox.Text;
-                    //}
-
-                    m_FOAMEnvPath = string.Empty;
-                }
-                sw.Close();
+                NewConfig();
             }
             else
             {
-                using (var sr = File.OpenText(configPath))
+                using (var sr = File.OpenText(m_ConfigPath))
                 {
                     var configDone = false;
                     string s;
                     while ((s = sr.ReadLine()) != null)
                     {
-                        if (s.Contains(envTag))
+                        if (s.Contains(m_EnvTag))
                         {
                             configDone = true;
-                            if (!s.Contains(defaultEnvPath))
+                            if (!s.Contains(m_DefaultEnvPath))
                             {
                                 m_FOAMEnvPath = s.Substring(s.IndexOf(" "));
                             }
                             else
                             {
-                                m_FOAMEnvPath = defaultEnvPath;
+                                m_FOAMEnvPath = m_DefaultEnvPath;
                             }
                             break;
                         }
@@ -288,19 +300,93 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                     {
                         return;
                     }
-                    using (var sw = File.AppendText(configPath))
-                    {
-                        if (File.Exists(defaultEnvPath))
-                        {
-                            sw.WriteLine(envTag + " " + defaultEnvPath);
-                        }
-                        else
-                        {
-                            ///TO-DO: NEW GUI FOR OPENFOAM-ENVIRONMENT USER INPUT
-                            m_FOAMEnvPath = string.Empty;
-                        }
-                    }
+                    AppendEnvironmentEntryToConfig();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Append environment path to existing config.
+        /// </summary>
+        /// <param name="defaultEnvPath">Default path to install folder of environment.</param>
+        /// <param name="envTag">String for environment enum.</param>
+        /// <param name="configPath">Path to config file.</param>
+        private void AppendEnvironmentEntryToConfig()
+        {
+            using (var sw = File.AppendText(m_ConfigPath))
+            {
+                if (File.Exists(m_DefaultEnvPath))
+                {
+                    sw.WriteLine(m_EnvTag + " " + m_DefaultEnvPath);
+                }
+                else
+                {
+                    StartOpenFOAMTextBoxForm();
+                    sw.WriteLine(m_EnvTag + " " + m_FOAMEnvPath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Generate new environment entry in config.
+        /// </summary>
+        /// <param name="defaultEnvPath">default environment path.</param>
+        /// <param name="envTag">Environment enum as string.</param>
+        /// <param name="configPath">Path to config.</param>
+        private void NewConfig()
+        {
+            StreamWriter sw = new StreamWriter(m_ConfigPath);
+            sw.WriteLine("**********************Config for OpenFOAM-Environment**********************");
+
+            if (!File.Exists(m_DefaultEnvPath))
+            {
+                sw.WriteLine(m_EnvTag + " " + m_DefaultEnvPath);
+                m_FOAMEnvPath = m_DefaultEnvPath;
+            }
+            else
+            {
+                StartOpenFOAMTextBoxForm();
+                if(m_Status != DataGenerator.GeneratorStatus.SUCCESS)
+                    sw.WriteLine(m_EnvTag + " " + m_FOAMEnvPath);
+            }
+            sw.Close();
+        }
+
+        /// <summary>
+        /// Initialize OpenFOAMTextBoxForm and show it.
+        /// </summary>
+        /// <param name="defaultEnvPath">Default simulation environment path.</param>
+        private void StartOpenFOAMTextBoxForm()
+        {
+            Regex reg = new Regex("^\\S+$");
+            m_OpenFOAMTxtForm = new OpenFOAMTextBoxForm(reg, m_DefaultEnvPath, "Searching for " + m_DefaultEnvPath.Substring(m_DefaultEnvPath.LastIndexOf('\\')));
+            
+            //set txtBoxForm to active Form
+            m_OpenFOAMTxtForm.ShowDialog();
+
+            if(m_OpenFOAMTxtForm.CancelProcess)
+            {
+                m_Status = DataGenerator.GeneratorStatus.CANCEL;
+            }
+            else if(reg.IsMatch(m_OpenFOAMTxtForm.Text))
+            {
+                m_FOAMEnvPath = m_OpenFOAMTxtForm.TxtBox.Text;
+                m_Status = DataGenerator.GeneratorStatus.SUCCESS;
+            }
+            else
+            {
+                m_Status = DataGenerator.GeneratorStatus.FAILURE;
+            }
+        }
+
+        /// <summary>
+        /// Getter for status of runManager.
+        /// </summary>
+        public DataGenerator.GeneratorStatus Status
+        {
+            get
+            {
+                return m_Status;
             }
         }
     }

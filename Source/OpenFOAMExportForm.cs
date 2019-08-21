@@ -36,6 +36,11 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private DataGenerator m_Generator = null;
 
+        ///// <summary>
+        ///// TextBox-Form for Input.
+        ///// </summary>
+        //private OpenFOAMTextBoxForm m_OpenFOAMExportTextForm;
+
         /// <summary>
         /// Sorted dictionary for the category-TreeView.
         /// </summary>
@@ -114,7 +119,6 @@ namespace BIM.OpenFOAMExport
                 tvCategories.Enabled = false;
                 btnCheckAll.Enabled = false;
                 btnCheckNone.Enabled = false;
-
             }
 
             // initialize settings
@@ -567,6 +571,7 @@ namespace BIM.OpenFOAMExport
                 else
                 {
                     MessageBox.Show("Please type in the number of subdomains (CPU) for the simulation");
+                    textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
                     return;
                 }
 
@@ -860,5 +865,40 @@ namespace BIM.OpenFOAMExport
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
+
+        ///// <summary>
+        ///// Initialize the openFOAMTextBoxForm and show it.
+        ///// </summary>
+        ///// <param name="reg">Regular expression for textbox.</param>
+        ///// <param name="initTextBox">Default text for textbox.</param>
+        ///// <param name="initLblVariable">Default text for lable lblVariable.</param>
+        //public void ShowInputTextBox(Regex reg, string initTextBox, string initLblVariable)
+        //{
+        //    m_OpenFOAMExportTextForm = new OpenFOAMTextBoxForm(reg, initTextBox, initLblVariable);
+        //    m_OpenFOAMExportTextForm.FormClosed += new FormClosedEventHandler(TextBoxInput_Closed);
+        //    Controls.Add(m_OpenFOAMExportTextForm);
+        //    m_OpenFOAMExportTextForm.Show();
+        //}
+
+        ///// <summary>
+        ///// Getter for OpenFOAMTextBoxForm.
+        ///// </summary>
+        //public OpenFOAMTextBoxForm OpenFOAMTextBoxForm
+        //{
+        //    get
+        //    {
+        //        return m_OpenFOAMExportTextForm;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Event to remove OpenFOAMExportTextForm from controls after closing it.
+        ///// </summary>
+        ///// <param name="sender">Object</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TextBoxInput_Closed(object sender, EventArgs e)
+        //{
+        //    Controls.Remove(m_OpenFOAMExportTextForm);
+        //}
     }
 }

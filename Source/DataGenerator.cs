@@ -31,6 +31,7 @@ using GeometryInstance = Autodesk.Revit.DB.GeometryInstance;
 using RevitView = Autodesk.Revit.DB.View;
 using BIM.OpenFOAMExport.OpenFOAM;
 using Material = Autodesk.Revit.DB.Material;
+using System.Security;
 
 namespace BIM.OpenFOAMExport
 {
@@ -147,7 +148,7 @@ namespace BIM.OpenFOAMExport
         /// Initialize Runmanager as RunManagerBlueCFD or RunManagerDocker depending on the WindowsFOAMVersion that is set in Settings.
         /// </summary>
         /// <param name="casePath">Path to openFOAM-Case.</param>
-        private void InitRunManager(string casePath)
+        private /*void*/GeneratorStatus InitRunManager(string casePath)
         {
             switch(m_Settings.OpenFOAMEnvironment)
             {
@@ -164,13 +165,14 @@ namespace BIM.OpenFOAMExport
                     m_RunManager = new RunManagerWSL(casePath, m_Settings.OpenFOAMEnvironment);
                     break;
             }
+            return m_RunManager.Status;
         }
 
     /// <summary>
     /// Create OpenFOAM-Folder at given path.
     /// </summary>
     /// <param name="path">location for the OpenFOAM-folder</param>
-    private void CreateOpenFOAMCase(string path)
+    private /*void*/GeneratorStatus CreateOpenFOAMCase(string path)
         {
             List<string> minCaseFolders = new List<string>();
 
@@ -197,7 +199,11 @@ namespace BIM.OpenFOAMExport
                 Directory.CreateDirectory(folder);
             }
 
-            InitRunManager(path);
+            GeneratorStatus status = InitRunManager(path);
+            if(status != GeneratorStatus.SUCCESS)
+            {
+                return status;
+            }
 
             //.foam-File
             File.Create(path + "\\" + m_STLName + ".foam");
@@ -224,7 +230,11 @@ namespace BIM.OpenFOAMExport
             List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract",  "snappyHexMesh" , "rm -r processor*", "simpleFoam", "rm -r processor*"};
 
             //run commands in windows-openfoam-environment
-            m_RunManager.RunCommands(commands);
+            if (!m_RunManager.RunCommands(commands))
+            {
+                return GeneratorStatus.FAILURE;
+            }
+            return GeneratorStatus.SUCCESS;
         }
 
         /// <summary>
@@ -291,11 +301,6 @@ namespace BIM.OpenFOAMExport
             {
                 paramList.Add(Path.Combine(nullFolder, param.Key + "."));
             }
-            //string u = Path.Combine(nullFolder, "U.");
-            //string epsilon = Path.Combine(nullFolder, "epsilon.");
-            //string k = Path.Combine(nullFolder, "k.");
-            //string nut = Path.Combine(nullFolder, "nut.");
-            //string p = Path.Combine(nullFolder, "p.");
 
             //Extract inlet/outlet-names
             List<string> inletNames = new List<string>();
@@ -314,28 +319,17 @@ namespace BIM.OpenFOAMExport
             }
 
             //generate Files
-            GenerateFiles(version, paramList, inletNames, outletNames);
-            //U uDict = new U(version, u, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            //P pDict = new P(version, p, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            //Epsilon epsilonDict = new Epsilon(version, epsilon, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            //Nut nutDict = new Nut(version, nut, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            //K kDict = new K(version, k, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-
-            //openFOAMDictionaries.Add(uDict);
-            //openFOAMDictionaries.Add(pDict);
-            //openFOAMDictionaries.Add(epsilonDict);
-            //openFOAMDictionaries.Add(nutDict);
-            //openFOAMDictionaries.Add(kDict);
+            GenerateFOAMFiles(version, paramList, inletNames, outletNames);
         }
 
         /// <summary>
-        /// 
+        /// Generate FOAM files.
         /// </summary>
-        /// <param name="version"></param>
-        /// <param name="param"></param>
-        /// <param name="inletNames"></param>
-        /// <param name="outletNames"></param>
-        private void GenerateFiles(OpenFOAM.Version version, List<string> param, List<string> inletNames, List<string> outletNames)
+        /// <param name="version">Version.</param>
+        /// <param name="param">List of FOAMParameter as string.</param>
+        /// <param name="inletNames">List of inlet names as string.</param>
+        /// <param name="outletNames">List of outlet names as string.</param>
+        private void GenerateFOAMFiles(OpenFOAM.Version version, List<string> param, List<string> inletNames, List<string> outletNames)
         {
             FOAMDict parameter;
             foreach(string nameParam in param)
@@ -423,6 +417,7 @@ namespace BIM.OpenFOAMExport
                     {
                         continue;
                     }
+
                     //materials differentiate from the the original materials which 
                     //will be listed in a component list (colored surface with other material)
                     if(material.Name.Equals("Inlet") || material.Name.Equals("Outlet"))
@@ -463,10 +458,18 @@ namespace BIM.OpenFOAMExport
                     m_Writer = new SaveDataAsAscII(fileName, settings.SaveFormat);
                 }
 
+                //TO-DO: create direct into constant/triSurface if simulation is selected.
                 m_Writer.CreateFile();
-                ScanElement(settings.ExportRange);
+
+                GeneratorStatus status = ScanElement(settings.ExportRange);
 
                 Application.DoEvents();
+
+                if(status != GeneratorStatus.SUCCESS)
+                {
+                    m_StlExportCancel.Close();
+                    return status;
+                }
 
                 if (m_StlExportCancel.CancelProcess == true)
                 {
@@ -489,11 +492,11 @@ namespace BIM.OpenFOAMExport
                     m_Writer.TriangularNumber = m_TriangularNumber;
                     m_Writer.AddTriangularNumberSection();
                 }
-            //m_Writer.CloseFile();
+                //m_Writer.CloseFile();
             //}
             //catch (SecurityException)
             //{
-            //    MessageBox.Show(OpenFoamExportResource.ERR_SECURITY_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+            //    MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
             //                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
             //    m_StlExportCancel.Close();
@@ -501,7 +504,7 @@ namespace BIM.OpenFOAMExport
             //}
             //catch (Exception)
             //{
-            //    MessageBox.Show(OpenFoamExportResource.ERR_EXCEPTION, OpenFoamExportResource.MESSAGE_BOX_TITLE,
+            //    MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
             //                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
             //    m_StlExportCancel.Close();
@@ -592,13 +595,15 @@ namespace BIM.OpenFOAMExport
         /// <param name="exportRange">
         /// The range of elements to be exported.
         /// </param>
-        private void ScanElement(ElementsExportRange exportRange)
+        private GeneratorStatus ScanElement(ElementsExportRange exportRange)
         {
             List<Document> documents = new List<Document>();
+            GeneratorStatus status = GeneratorStatus.FAILURE;
 
             string pathSTL = m_Writer.FileName;
             string stlName = pathSTL.Substring(pathSTL.LastIndexOf("\\") + 1).Split('.')[0];
             m_STLName = stlName;
+
             string pathFolder = pathSTL.Remove(pathSTL.LastIndexOf("."));
 
             //contains all duct terminals lists of each document
@@ -662,7 +667,7 @@ namespace BIM.OpenFOAMExport
                     System.Windows.Forms.Application.DoEvents();
 
                     if (m_StlExportCancel.CancelProcess == true)
-                        return;
+                        return GeneratorStatus.FAILURE;
 
                     //Element element = iterator.Current;
                     Element currentElement = iterator.Current;
@@ -715,13 +720,15 @@ namespace BIM.OpenFOAMExport
             {
                 WriteAirTerminalsToSTL(terminalListOfAllDocuments, stlName);
                 m_Writer.CloseFile();
-                CreateOpenFOAMCase(pathFolder);
+                status = CreateOpenFOAMCase(pathFolder);
             }
             else
             {
                 m_Writer.WriteSolidName(stlName, false);
                 m_Writer.CloseFile();
+                status = GeneratorStatus.SUCCESS;
             }
+            return status;
         }
 
         /// <summary>
@@ -1193,14 +1200,5 @@ namespace BIM.OpenFOAMExport
         {
             return (T)Convert.ChangeType(value, typeof(T));
         }
-
-        ///// <summary>
-        ///// Initializes the Cancel form.
-        ///// </summary>
-        //private void StartCancelForm()
-        //{
-        //    OpenFOAMExportCancelForm stlCancel = new OpenFOAMExportCancelForm();
-        //    stlCancel.Show();
-        //}
     }
 }

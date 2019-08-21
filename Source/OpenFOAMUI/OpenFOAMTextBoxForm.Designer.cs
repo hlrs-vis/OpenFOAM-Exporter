@@ -1,4 +1,6 @@
-﻿namespace BIM.OpenFOAMExport.OpenFOAMUI
+﻿using System.Windows.Forms;
+
+namespace BIM.OpenFOAMExport.OpenFOAMUI
 {
     partial class OpenFOAMTextBoxForm
     {
@@ -60,6 +62,7 @@
             this.buttonCancel.TabIndex = 2;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // buttonSave
             // 
@@ -69,6 +72,7 @@
             this.buttonSave.TabIndex = 3;
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
+            this.buttonSave.Click += new System.EventHandler(this.BtnSave_Click);
             // 
             // buttonHelp
             // 
@@ -78,6 +82,7 @@
             this.buttonHelp.TabIndex = 4;
             this.buttonHelp.Text = "Help";
             this.buttonHelp.UseVisualStyleBackColor = true;
+            this.buttonHelp.Click += new System.EventHandler(this.BtnHelp_Click);
             // 
             // lblEnvironmentVariable
             // 
