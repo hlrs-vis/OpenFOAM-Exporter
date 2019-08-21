@@ -40,27 +40,37 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// Initialize Regular Expression with this constructor.
         /// </summary>
         /// <param name="reg">Regex object.</param>
-        public OpenFOAMTextBoxForm(Regex reg)
+        public OpenFOAMTextBoxForm(Regex reg, string text)
         {
             m_RegTxt = reg;
             InitializeComponent();
-            InitializeTextBox();
+            InitializeTextBox(text);
         }
         #endregion
 
         /// <summary>
         /// Initialize Textbox.
         /// </summary>
-        private void InitializeTextBox()
+        /// <param name="text">string for text</param>
+        private void InitializeTextBox(string text)
         {
-            
+            m_TxtBox = textBox1;
+            m_TxtBox.Text = text;
         }
 
+        /// <summary>
+        /// Set the text for lblText.
+        /// </summary>
+        /// <param name="txt">string for text.</param>
         public void SetLBLText(string txt)
         {
             lblTxt.Text = txt;
         }
 
+        /// <summary>
+        /// Set the text for lblVaribal
+        /// </summary>
+        /// <param name="txt">string for text</param>
         public void SetLBLVariable(string txt)
         {
             lblEnvironmentVariable.Text = txt;

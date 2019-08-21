@@ -1,8 +1,10 @@
-﻿using System;
+﻿using BIM.OpenFOAMExport.OpenFOAMUI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace BIM.OpenFOAMExport.OpenFOAM
@@ -50,7 +52,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             m_Env = env;
             m_CasePath = casePath;
-            //m_CommandBat = casePath + @"\Run.bat";
             CreateEnvConfig();
         }
 
@@ -247,7 +248,15 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 else
                 {
                     ///TO-DO: NEW GUI FOR OPENFOAM-ENVIRONMENT USER INPUT
-                    //StartOpenFOAMTextBoxForm();
+                    //Regex m_Reg = new Regex("^\\S+$");
+                    //OpenFOAMTextBoxForm openFOAMTxtForm = new OpenFOAMTextBoxForm(m_Reg, defaultEnvPath);
+                    //openFOAMTxtForm.SetLBLVariable("Searching for " + defaultEnvPath);
+                    //openFOAMTxtForm.Show();
+                    //if(m_Reg.IsMatch(openFOAMTxtForm.TxtBox.Text))
+                    //{
+                    //    m_FOAMEnvPath = openFOAMTxtForm.TxtBox.Text;
+                    //}
+
                     m_FOAMEnvPath = string.Empty;
                 }
                 sw.Close();

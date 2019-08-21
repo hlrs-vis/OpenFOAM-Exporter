@@ -655,7 +655,9 @@ namespace BIM.OpenFOAMExport
         //TO-DO: Implement laminar
     }
 
-
+    /// <summary>
+    /// Initial boundary parameter for simulation.
+    /// </summary>
     public enum InitialFOAMParameter
     {
         U = 0,
@@ -665,7 +667,9 @@ namespace BIM.OpenFOAMExport
         k
     }
 
-
+    /// <summary>
+    /// Patchtype for initialParameter.
+    /// </summary>
     public enum PatchType
     {
         wall = 0,
@@ -673,14 +677,13 @@ namespace BIM.OpenFOAMExport
         outlet
     }
 
-
-
-
     /// <summary>
     /// Enum-Objects for simulationmodel LES.
     /// </summary>
     public enum LESModel
     {
+        //TO-DO: DONT DELETE THIS! EVERY MODEL NEEDS TO BE IMPLEMENTED WITH BOUNDARYCONDITION DEPENDENCY
+        //NOT IMPLEMENTED FOAMPARAMETER DEPENDENCY YET!
         DeardorffDiffStress = 0,
         Smagorinsky,
         SpalartAllmarasDDES,
@@ -699,16 +702,19 @@ namespace BIM.OpenFOAMExport
     public enum RASModel
     {
         LRR = 0,
+        //NOT IMPLEMENTED FOAMPARAMETER DEPENDENCY YET!
         LamBremhorstKE,
         LaunderSharmaKE,
         LienCubicKE,
         LienLeschzine,
         RNGkEpsilon,
+        //NOT IMPLEMENTED FOAMPARAMETER DEPENDENCY YET!
         SSG,
         ShihQuadraticKE,
         buoyantKEpsilon,
         SpalartAllmaras,
         kEpsilon,
+        //NOT IMPLEMENTED FOAMPARAMETER DEPENDENCY YET!
         kOmega,
         kOmegaSST,
         kOmegaSSTLM,
@@ -772,7 +778,7 @@ namespace BIM.OpenFOAMExport
         blueCFD = 0,
         //docker, //not implemented yet
         wsl, 
-        ssh //not implemeneted yet
+        ssh
     }
 
     /// <summary>
@@ -1079,38 +1085,38 @@ namespace BIM.OpenFOAMExport
 
 
         //U
-        private Vector3D m_InternalFieldU;
-        private FOAMParameterPatch<Vector3D> m_WallU;
-        private FOAMParameterPatch<Vector3D> m_InletU;
-        private FOAMParameterPatch<Vector3D> m_OutletU;
+        //private Vector3D m_InternalFieldU;
+        //private FOAMParameterPatch<Vector3D> m_WallU;
+        //private FOAMParameterPatch<Vector3D> m_InletU;
+        //private FOAMParameterPatch<Vector3D> m_OutletU;
 
 
-        //epsilon
-        private double m_InternalFieldEpsilon;
-        private FOAMParameterPatch<double> m_WallEpsilon;
-        private FOAMParameterPatch<double> m_InletEpsilon;
-        private FOAMParameterPatch<double> m_OutletEpsilon;
+        ////epsilon
+        //private double m_InternalFieldEpsilon;
+        //private FOAMParameterPatch<double> m_WallEpsilon;
+        //private FOAMParameterPatch<double> m_InletEpsilon;
+        //private FOAMParameterPatch<double> m_OutletEpsilon;
 
 
-        //p
-        private double m_InternalFieldP;
-        private FOAMParameterPatch<double> m_WallP;
-        private FOAMParameterPatch<double> m_InletP;
-        private FOAMParameterPatch<double> m_OutletP;
+        ////p
+        //private double m_InternalFieldP;
+        //private FOAMParameterPatch<double> m_WallP;
+        //private FOAMParameterPatch<double> m_InletP;
+        //private FOAMParameterPatch<double> m_OutletP;
 
 
-        //nut
-        private double m_InternalFieldNut;
-        private FOAMParameterPatch<double> m_WallNut;
-        private FOAMParameterPatch<double> m_InletNut;
-        private FOAMParameterPatch<double> m_OutletNut;
+        ////nut
+        //private double m_InternalFieldNut;
+        //private FOAMParameterPatch<double> m_WallNut;
+        //private FOAMParameterPatch<double> m_InletNut;
+        //private FOAMParameterPatch<double> m_OutletNut;
 
 
-        //k
-        private double m_InternalFieldK;
-        private FOAMParameterPatch<double> m_WallK;
-        private FOAMParameterPatch<double> m_InletK;
-        private FOAMParameterPatch<double> m_OutletK;
+        ////k
+        //private double m_InternalFieldK;
+        //private FOAMParameterPatch<double> m_WallK;
+        //private FOAMParameterPatch<double> m_InletK;
+        //private FOAMParameterPatch<double> m_OutletK;
 
 
         //g
@@ -1268,35 +1274,35 @@ namespace BIM.OpenFOAMExport
         public int MaxNonOrthoMeshQualtiy { get => m_MaxNonOrthoMeshQualtiy; set => m_MaxNonOrthoMeshQualtiy = value; }
         public int NRelaxeIterLayer { get => m_NRelaxeIterLayer; set => m_NRelaxeIterLayer = value; }
 
-        //Getter-Setter-U
-        public Vector3D InternalFieldU { get => m_InternalFieldU; set => m_InternalFieldU = value; }
-        public FOAMParameterPatch<Vector3D> WallU { get => m_WallU; set => m_WallU = value; }
-        public FOAMParameterPatch<Vector3D> InletU { get => m_InletU; set => m_InletU = value; }
-        public FOAMParameterPatch<Vector3D> OutletU { get => m_OutletU; set => m_OutletU = value; }
+        ////Getter-Setter-U
+        //public Vector3D InternalFieldU { get => m_InternalFieldU; set => m_InternalFieldU = value; }
+        //public FOAMParameterPatch<Vector3D> WallU { get => m_WallU; set => m_WallU = value; }
+        //public FOAMParameterPatch<Vector3D> InletU { get => m_InletU; set => m_InletU = value; }
+        //public FOAMParameterPatch<Vector3D> OutletU { get => m_OutletU; set => m_OutletU = value; }
 
-        //Getter-Setter-Epsilon
-        public double InternalFieldEpsilon { get => m_InternalFieldEpsilon; set => m_InternalFieldEpsilon = value; }
-        public FOAMParameterPatch<double> WallEpsilon { get => m_WallEpsilon; set => m_WallEpsilon = value; }
-        public FOAMParameterPatch<double> InletEpsilon { get => m_InletEpsilon; set => m_InletEpsilon = value; }
-        public FOAMParameterPatch<double> OutletEpsilon { get => m_OutletEpsilon; set => m_OutletEpsilon = value; }
+        ////Getter-Setter-Epsilon
+        //public double InternalFieldEpsilon { get => m_InternalFieldEpsilon; set => m_InternalFieldEpsilon = value; }
+        //public FOAMParameterPatch<double> WallEpsilon { get => m_WallEpsilon; set => m_WallEpsilon = value; }
+        //public FOAMParameterPatch<double> InletEpsilon { get => m_InletEpsilon; set => m_InletEpsilon = value; }
+        //public FOAMParameterPatch<double> OutletEpsilon { get => m_OutletEpsilon; set => m_OutletEpsilon = value; }
 
-        //Getter-Setter-P
-        public double InternalFieldP { get => m_InternalFieldP; set => m_InternalFieldP = value; }
-        public FOAMParameterPatch<double> WallP { get => m_WallP; set => m_WallP = value; }
-        public FOAMParameterPatch<double> InletP { get => m_InletP; set => m_InletP = value; }
-        public FOAMParameterPatch<double> OutletP { get => m_OutletP; set => m_OutletP = value; }
+        ////Getter-Setter-P
+        //public double InternalFieldP { get => m_InternalFieldP; set => m_InternalFieldP = value; }
+        //public FOAMParameterPatch<double> WallP { get => m_WallP; set => m_WallP = value; }
+        //public FOAMParameterPatch<double> InletP { get => m_InletP; set => m_InletP = value; }
+        //public FOAMParameterPatch<double> OutletP { get => m_OutletP; set => m_OutletP = value; }
 
-        //Getter-Setter-Nut
-        public double InternalFieldNut { get => m_InternalFieldNut; set => m_InternalFieldNut = value; }
-        public FOAMParameterPatch<double> WallNut { get => m_WallNut; set => m_WallNut = value; }
-        public FOAMParameterPatch<double> InletNut { get => m_InletNut; set => m_InletNut = value; }
-        public FOAMParameterPatch<double> OutletNut { get => m_OutletNut; set => m_OutletNut = value; }
+        ////Getter-Setter-Nut
+        //public double InternalFieldNut { get => m_InternalFieldNut; set => m_InternalFieldNut = value; }
+        //public FOAMParameterPatch<double> WallNut { get => m_WallNut; set => m_WallNut = value; }
+        //public FOAMParameterPatch<double> InletNut { get => m_InletNut; set => m_InletNut = value; }
+        //public FOAMParameterPatch<double> OutletNut { get => m_OutletNut; set => m_OutletNut = value; }
 
-        //Getter-Setter-K
-        public double InternalFieldK { get => m_InternalFieldK; set => m_InternalFieldK = value; }
-        public FOAMParameterPatch<double> WallK { get => m_WallK; set => m_WallK = value; }
-        public FOAMParameterPatch<double> InletK { get => m_InletK; set => m_InletK = value; }
-        public FOAMParameterPatch<double> OutletK { get => m_OutletK; set => m_OutletK = value; }
+        ////Getter-Setter-K
+        //public double InternalFieldK { get => m_InternalFieldK; set => m_InternalFieldK = value; }
+        //public FOAMParameterPatch<double> WallK { get => m_WallK; set => m_WallK = value; }
+        //public FOAMParameterPatch<double> InletK { get => m_InletK; set => m_InletK = value; }
+        //public FOAMParameterPatch<double> OutletK { get => m_OutletK; set => m_OutletK = value; }
 
         //Getter-Setter-G
         public double GValue { get => m_GValue; set => m_GValue = value; }
@@ -1894,6 +1900,7 @@ namespace BIM.OpenFOAMExport
 
             //FvSchemes
 
+            //TO-DO: fvSchemes and fvSolution depending on FOAMParameter in null folder.
             m_ddtSchemes = new KeyValuePair<string, string>("default", "steadyState");
             m_gradSchemes = new KeyValuePair<string, string>("default", "cellLimited leastSquares 1");
             m_divSchemes = new List<KeyValuePair<string, string>>
@@ -2377,27 +2384,6 @@ namespace BIM.OpenFOAMExport
             m_System.Add("snappyHexMeshDict", m_SnappyHexMeshDict);
         }
 
-        ///// <summary>
-        ///// Creates a FoamParameter Dictionary and adds it to the "0" folder.
-        ///// </summary>
-        ///// <typeparam name="T">Type of internalField.</typeparam>
-        ///// <param name="name">Name of the FoamParameterPatch.</param>
-        ///// <param name="m_InternalField">Internalfield value.</param>
-        ///// <param name="m_Wall">FoamParameterPatch for wall.</param>
-        ///// <param name="m_Inlet">FoamParameterPatch for inlet.</param>
-        ///// <param name="m_Outlet">FoamParameterPatch for outlet.</param>
-        //private void CreateFoamParameterDictionary<T>(string name, T m_InternalField, FOAMParameterPatch<T> m_Wall, FOAMParameterPatch<T> m_Inlet, FOAMParameterPatch<T> m_Outlet)
-        //{
-        //    Dictionary<string, object> m_Dict = new Dictionary<string, object>();
-
-        //    m_Dict.Add("internalField", m_InternalField);
-        //    m_Dict.Add("wall", m_Wall.ToDictionary());
-        //    m_Dict.Add("inlet", m_Inlet.ToDictionary());
-        //    m_Dict.Add("outlet", m_Outlet.ToDictionary());
-
-        //    m_Null.Add(name, m_Dict);
-        //}
-
         /// <summary>
         /// Creates FoamParameters Dictionary and adds it to the "0" folder.
         /// </summary>
@@ -2416,10 +2402,6 @@ namespace BIM.OpenFOAMExport
                 {
                     m_Dict.Add(patch.Key, patch.Value);
                 }
-                //foreach (FOAMParameterPatch<dynamic> patch in initParam.Patches)
-                //{
-                //    m_Dict.Add(patch.Type.ToString(), patch.ToDictionary());
-                //}
                 m_Null.Add(initParam.Name, m_Dict);
             }
         }
@@ -2500,6 +2482,7 @@ namespace BIM.OpenFOAMExport
         {
             switch(model)
             {
+                case RASModel.kEpsilon:
                 case RASModel.RNGkEpsilon:
                     {
                         // k
@@ -2517,19 +2500,6 @@ namespace BIM.OpenFOAMExport
                         break;
                     }
                 case RASModel.buoyantKEpsilon:
-                case RASModel.kEpsilon:
-                    {
-                        // k
-                        InitialParameter k = InitialParameter(model, InitialFOAMParameter.k);
-
-                        //epsilon
-                        InitialParameter epsilon = InitialParameter(model, InitialFOAMParameter.epsilon);
-
-                        initialParameters.Add(k);
-                        initialParameters.Add(epsilon);
-
-                        break;
-                    }
                 case RASModel.kkLOmega:
                 case RASModel.kOmega:
                 case RASModel.kOmegaSST:
@@ -2549,9 +2519,6 @@ namespace BIM.OpenFOAMExport
                     break;
             }
         }
-
-
-
 
         /// <summary>
         /// Add InitialParameter depending on given LESModel.
@@ -2756,9 +2723,6 @@ namespace BIM.OpenFOAMExport
         {
             m_Constant.Add("turbulenceProperties", m_TurbulenceParameter.ToDictionary());
         }
-
-
-
 
 
 

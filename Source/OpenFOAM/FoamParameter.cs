@@ -111,16 +111,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             foreach (string s in m_InletNames)
             {
                 AddPatchToBoundary(s, 1);
-                //if(m_DictFile.ContainsKey(s))
-                //{
-                //    patch = (FOAMParameterPatch<dynamic>)m_DictFile[s];
-                //    m_BoundaryField.Add(s, patch.Attributes);
-                //}
-                //else
-                //{
-                //    patch = (FOAMParameterPatch<dynamic>)m_DictFile["inlet"];
-                //    m_BoundaryField.Add(s, patch.Attributes);
-                //}
             }
 
             FoamFile.Attributes.Add("dimensions", m_Dimensions);

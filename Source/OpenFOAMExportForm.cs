@@ -64,7 +64,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Revit-App.
         /// </summary>
-        readonly Autodesk.Revit.UI.UIApplication m_Revit = null;
+        private readonly Autodesk.Revit.UI.UIApplication m_Revit = null;
 
         /// <summary>
         /// Regular Expression for txtBoxUserIP.
@@ -761,6 +761,7 @@ namespace BIM.OpenFOAMExport
             {
                 MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
                 return;
             }
 

@@ -284,12 +284,18 @@ namespace BIM.OpenFOAMExport
         /// <param name="nullFolder">Path to nullfolder.</param>
         private void InitNullFolder(OpenFOAM.Version version, string nullFolder)
         {
+            List<string> paramList = new List<string>();
+
             //Files in nullfolder
-            string u = Path.Combine(nullFolder, "U.");
-            string epsilon = Path.Combine(nullFolder, "epsilon.");
-            string k = Path.Combine(nullFolder, "k.");
-            string nut = Path.Combine(nullFolder, "nut.");
-            string p = Path.Combine(nullFolder, "p.");
+            foreach (var param in m_Settings.SimulationDefault["0"] as Dictionary<string, object>)
+            {
+                paramList.Add(Path.Combine(nullFolder, param.Key + "."));
+            }
+            //string u = Path.Combine(nullFolder, "U.");
+            //string epsilon = Path.Combine(nullFolder, "epsilon.");
+            //string k = Path.Combine(nullFolder, "k.");
+            //string nut = Path.Combine(nullFolder, "nut.");
+            //string p = Path.Combine(nullFolder, "p.");
 
             //Extract inlet/outlet-names
             List<string> inletNames = new List<string>();
@@ -308,17 +314,58 @@ namespace BIM.OpenFOAMExport
             }
 
             //generate Files
-            U uDict = new U(version, u, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            P pDict = new P(version, p, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            Epsilon epsilonDict = new Epsilon(version, epsilon, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            Nut nutDict = new Nut(version, nut, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
-            K kDict = new K(version, k, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+            GenerateFiles(version, paramList, inletNames, outletNames);
+            //U uDict = new U(version, u, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+            //P pDict = new P(version, p, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+            //Epsilon epsilonDict = new Epsilon(version, epsilon, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+            //Nut nutDict = new Nut(version, nut, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+            //K kDict = new K(version, k, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
 
-            openFOAMDictionaries.Add(uDict);
-            openFOAMDictionaries.Add(pDict);
-            openFOAMDictionaries.Add(epsilonDict);
-            openFOAMDictionaries.Add(nutDict);
-            openFOAMDictionaries.Add(kDict);
+            //openFOAMDictionaries.Add(uDict);
+            //openFOAMDictionaries.Add(pDict);
+            //openFOAMDictionaries.Add(epsilonDict);
+            //openFOAMDictionaries.Add(nutDict);
+            //openFOAMDictionaries.Add(kDict);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version"></param>
+        /// <param name="param"></param>
+        /// <param name="inletNames"></param>
+        /// <param name="outletNames"></param>
+        private void GenerateFiles(OpenFOAM.Version version, List<string> param, List<string> inletNames, List<string> outletNames)
+        {
+            FOAMDict parameter;
+            foreach(string nameParam in param)
+            {
+                if(nameParam.Contains("U."))
+                {
+                    parameter = new U(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("p."))
+                {
+                    parameter = new P(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("epsilon."))
+                {
+                    parameter = new Epsilon(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("nut."))
+                {
+                    parameter = new Nut(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("k."))
+                {
+                    parameter = new K(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else
+                {
+                    parameter = new U(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                openFOAMDictionaries.Add(parameter);
+            }
         }
 
         /// <summary>
