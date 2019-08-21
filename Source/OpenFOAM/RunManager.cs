@@ -215,6 +215,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                         MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment." +
                             "\nC#-Process ExitCode: " + process.ExitCode,
                             OpenFOAMExportResource.MESSAGE_BOX_TITLE);
+                        return false;
                     }
                 }
             }
@@ -269,7 +270,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="configPath">Path to config file.</param>
         private void CreateConfigEntry()
         {
-            if (File.Exists(m_ConfigPath))
+            if (!File.Exists(m_ConfigPath))
             {
                 NewConfig();
             }
@@ -338,7 +339,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             StreamWriter sw = new StreamWriter(m_ConfigPath);
             sw.WriteLine("**********************Config for OpenFOAM-Environment**********************");
 
-            if (!File.Exists(m_DefaultEnvPath))
+            if (File.Exists(m_DefaultEnvPath))
             {
                 sw.WriteLine(m_EnvTag + " " + m_DefaultEnvPath);
                 m_FOAMEnvPath = m_DefaultEnvPath;

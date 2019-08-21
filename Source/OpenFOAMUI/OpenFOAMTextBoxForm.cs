@@ -132,6 +132,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// <param name="e"></param>
         private void BtnSave_Click(object sender, EventArgs e)
         {
+            //TO-DO: NEEDS TO BE REWORKED TO SAVE VALUE OF TXTBOX IN OWN ATTRIBUTE INTO THIS CLASS.
             Close();
         }
 
@@ -142,6 +143,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// <param name="e">Event args.</param>
         private void BtnHelp_Click(object sender, EventArgs e)
         {
+            //TO-DO: REWORK WITH OPENFOAMEXPORTRESOURCE.
             MessageBox.Show("Please insert the variable path that is listed on the left.", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
         }
     }

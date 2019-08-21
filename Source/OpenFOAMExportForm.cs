@@ -593,7 +593,6 @@ namespace BIM.OpenFOAMExport
                 }
 
                 this.DialogResult = DialogResult.OK;
-
                 this.Close();
             }
             else

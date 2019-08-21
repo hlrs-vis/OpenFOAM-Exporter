@@ -787,6 +787,7 @@ namespace BIM.OpenFOAMExport
             foreach (var face in faces)
             {
                 Face currentFace = face.Value.Key;
+
                 //face.Key.Key = Name + ID
                 m_Writer.WriteSolidName(face.Key.Key,true);
                 Mesh mesh = currentFace.Triangulate();
@@ -794,6 +795,7 @@ namespace BIM.OpenFOAMExport
                 {
                     continue;
                 }
+
                 //face.Key.Value = Document ; face.Value.Value = transform
                 WriteFaceToSTL(face.Key.Value, mesh, currentFace, face.Value.Value);
                 m_Writer.WriteSolidName(face.Key.Key, false);
