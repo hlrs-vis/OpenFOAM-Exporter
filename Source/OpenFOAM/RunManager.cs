@@ -17,7 +17,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <summary>
         /// Status for runmanager.
         /// </summary>
-        DataGenerator.GeneratorStatus m_Status;
+        private DataGenerator.GeneratorStatus m_Status;
 
         /// <summary>
         /// Path to environment install folder.
@@ -60,7 +60,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private DecomposeParDict m_DecomposeParDict;
 
         /// <summary>
-        /// TextBox-Form for install folder of simulation environment.
+        /// TextBox-Form for install folder of simulation environment which will be called if installFolder not default path.
         /// </summary>
         private OpenFOAMTextBoxForm m_OpenFOAMTxtForm;
 
@@ -99,6 +99,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         public virtual bool WriteToCommandBat(List<string> command)
         {
             bool succeed = true;
+
             //create bat
             try
             {
@@ -163,37 +164,39 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 runCommands.Add(s);
             }
             string log = " | tee " + @"log/";
-
             foreach (string command in commands)
             {
                 if (DecomposeParDict != null)
                 {
-                    if (command.Equals("snappyHexMesh"))
+                    if(DecomposeParDict.NumberOfSubdomains != 1)
                     {
-                        runCommands.Add("decomposePar" + log + "decomposepar.log");
-                        runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -overwrite -parallel " + log + command + ".log");
-                        runCommands.Add("reconstructParMesh -constant" + log + "reconstructParMesh.log");
-                        continue;
-                    }
-                    else if (command.Equals("simpleFoam"))
-                    {
-                        runCommands.Add("decomposePar");
-                        runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
-                        runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
-                        runCommands.Add("reconstructPar -latestTime");
-                        continue;
+                        if (command.Equals("snappyHexMesh"))
+                        {
+                            runCommands.Add("decomposePar" + log + "decomposepar.log");
+                            runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -overwrite -parallel " + log + command + ".log");
+                            runCommands.Add("reconstructParMesh -constant" + log + "reconstructParMesh.log");
+                            continue;
+                        }
+                        else if (command.Equals("simpleFoam"))
+                        {
+                            runCommands.Add("decomposePar");
+                            runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
+                            runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
+                            runCommands.Add("reconstructPar -latestTime");
+                            continue;
+                        }
                     }
                 }
 
                 //commands that have no log function.
-                if (command.Equals("\"") || command.Contains("rm -r") 
-                    || command.Contains("call") || /*USEFUL FOR DEBUGGING BATCH*/command.Contains("pause")
-                    || command.Contains("scp") || command.Contains("ssh"))
-                {
-                    runCommands.Add(command);
-                    continue;
-                }
-                runCommands.Add(command + log + command + ".log");
+                //if (command.Equals("\"") || command.Contains("rm -r") 
+                //    || command.Contains("call") || /*USEFUL FOR DEBUGGING BATCH*/command.Contains("pause")
+                //    || command.Contains("scp") || command.Contains("ssh"))
+                //{
+                //    runCommands.Add(command);
+                //    continue;
+                //}
+                runCommands.Add(command /*+ log + command + ".log"*/);
             }
 
             //write commands into batch file
@@ -212,7 +215,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                     process.WaitForExit();
                     if(process.ExitCode != 0)
                     {
-                        MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment." +
+                        MessageBox.Show("Simulation isn't running properly. Please check the simulation parameter or openfoam environment. If SSH is in use" +
+                            " check the VPN connection." +
                             "\nC#-Process ExitCode: " + process.ExitCode,
                             OpenFOAMExportResource.MESSAGE_BOX_TITLE);
                         return false;
@@ -526,9 +530,14 @@ namespace BIM.OpenFOAMExport.OpenFOAM
     public class RunManagerSSH : RunManager
     {
         /// <summary>
+        /// Default alias strings.
+        /// </summary>
+        private List<string> m_AliasString = new List<string> { "source", "of", "ofx", "bash", "call" };
+
+        /// <summary>
         /// Settings-object contains ssh details.
         /// </summary>
-        readonly Settings m_Settings;
+        private readonly Settings m_Settings;
 
         /// <summary>
         /// Constructor needs the casePath of the openFoam-case and environment.
@@ -594,12 +603,29 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 sw.WriteLine(command);
                 return;
             }
-            if (command.Contains("ssh") || command.Contains("source"))
+            if (command.Contains("ssh") || /*command.Contains("source")*/ CheckAlias(command))
             {
                 sw.Write(command);
                 return;
             }
             sw.Write(" && " + command);
+        }
+
+        /// <summary>
+        /// Checks if the command contains alias string from m_AliasString.
+        /// </summary>
+        /// <param name="command">Command as string.</param>
+        /// <returns>True, if the command contains alias.</returns>
+        private bool CheckAlias(string command)
+        {
+            foreach (string alias in m_AliasString)
+            {
+                if(command.Contains(alias))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

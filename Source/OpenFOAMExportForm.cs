@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using Category = Autodesk.Revit.DB.Category;
 using Autodesk.Revit.DB;
 using System.Text.RegularExpressions;
+using Autodesk.Revit.UI;
 
 namespace BIM.OpenFOAMExport
 {
@@ -35,11 +36,6 @@ namespace BIM.OpenFOAMExport
         /// DataGenerator-object.
         /// </summary>
         private DataGenerator m_Generator = null;
-
-        ///// <summary>
-        ///// TextBox-Form for Input.
-        ///// </summary>
-        //private OpenFOAMTextBoxForm m_OpenFOAMExportTextForm;
 
         /// <summary>
         /// Sorted dictionary for the category-TreeView.
@@ -69,7 +65,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Revit-App.
         /// </summary>
-        private readonly Autodesk.Revit.UI.UIApplication m_Revit = null;
+        private UIApplication m_Revit = null;
 
         /// <summary>
         /// Regular Expression for txtBoxUserIP.
@@ -90,7 +86,7 @@ namespace BIM.OpenFOAMExport
         /// Constructor.
         /// </summary>
         /// <param name="revit">The revit application.</param>
-        public OpenFOAMExportForm(Autodesk.Revit.UI.UIApplication revit)
+        public OpenFOAMExportForm(UIApplication revit)
         {
             InitializeComponent();
             m_Revit = revit;
@@ -127,6 +123,22 @@ namespace BIM.OpenFOAMExport
             // initialize openfoam treeview openfoam
             InitializeDefaultParameterOpenFOAM();
 
+            InitializeComboBoxes();
+
+            // textBoxCPU
+            textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
+            //To-Do: ADD EVENT FOR CHANGING TEXT
+
+            // textBoxLocationInMesh
+            txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString().Replace(";", " "); ;
+            InitializeSSH();
+        }
+
+        /// <summary>
+        /// Initializes the comboBoxes of the OpenFOAM-Tab.
+        /// </summary>
+        private void InitializeComboBoxes()
+        {
             // comboBoxEnv
             var enumEnv = OpenFOAMEnvironment.blueCFD;
             foreach (var value in Enum.GetValues(enumEnv.GetType()))
@@ -142,7 +154,6 @@ namespace BIM.OpenFOAMExport
                 comboBoxSolver.Items.Add(value);
             }
             comboBoxSolver.SelectedItem = enumSolver;
-            //To-Do: ADD EVENT FOR CHANGING ENUM AND ALL PARAMETER THAT ARE RELATED TO SOLVER.
 
             // comboBoxTransportModel
             var enumTransport = TransportModel.Newtonian;
@@ -151,12 +162,6 @@ namespace BIM.OpenFOAMExport
                 comboBoxTransportModel.Items.Add(value);
             }
             comboBoxTransportModel.SelectedItem = enumTransport;
-
-            // textBoxCPU
-            textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
-            //To-Do: ADD EVENT FOR CHANGING TEXT
-
-            InitializeSSH();
         }
 
         /// <summary>
@@ -273,18 +278,20 @@ namespace BIM.OpenFOAMExport
                 //volumeflow
                 case ParameterType.HVACAirflow:
                     {
+                        //Not implemented yet.
                         break;
                     }
                 //velocity
                 case ParameterType.HVACVelocity:
                     {
-                        //convert into dot-comma convetion
+                        //convert into dot-comma convention
                         paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture);
                         break;
                     }
                 //pressure loss
                 case ParameterType.HVACPressure:
                     {
+                        //Not implemented yet.
                         break;
                     }
                     //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
@@ -312,9 +319,7 @@ namespace BIM.OpenFOAMExport
         private void InitializeDefaultParameterOpenFOAM()
         {
             List<string> keyPath = new List<string>();
-            //m_OpenFOAMTreeView = new OpenFOAMTreeView();
-            //InitializeOFTreeViewSize();
-            //TO-DO: UPDATE OpenFOAMTreeView
+            //TO-DO: UPDATE OpenFOAMTreeView and Settings
             foreach (var att in m_Settings.SimulationDefault)
             {
                 keyPath.Add(att.Key);
@@ -865,39 +870,142 @@ namespace BIM.OpenFOAMExport
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
 
-        ///// <summary>
-        ///// Initialize the openFOAMTextBoxForm and show it.
-        ///// </summary>
-        ///// <param name="reg">Regular expression for textbox.</param>
-        ///// <param name="initTextBox">Default text for textbox.</param>
-        ///// <param name="initLblVariable">Default text for lable lblVariable.</param>
-        //public void ShowInputTextBox(Regex reg, string initTextBox, string initLblVariable)
-        //{
-        //    m_OpenFOAMExportTextForm = new OpenFOAMTextBoxForm(reg, initTextBox, initLblVariable);
-        //    m_OpenFOAMExportTextForm.FormClosed += new FormClosedEventHandler(TextBoxInput_Closed);
-        //    Controls.Add(m_OpenFOAMExportTextForm);
-        //    m_OpenFOAMExportTextForm.Show();
-        //}
 
-        ///// <summary>
-        ///// Getter for OpenFOAMTextBoxForm.
-        ///// </summary>
-        //public OpenFOAMTextBoxForm OpenFOAMTextBoxForm
-        //{
-        //    get
-        //    {
-        //        return m_OpenFOAMExportTextForm;
-        //    }
-        //}
 
-        ///// <summary>
-        ///// Event to remove OpenFOAMExportTextForm from controls after closing it.
+        /**********************BOUNDING BOX FOR ROOM**********************/
+        //TO-DO: ADD BUTTON TO SELECT BOUNDING-BOX
+
+
+        /////<summary>
+        ///// Create and return a solid representing 
+        ///// the bounding box of the input solid.
+        ///// Source: https://thebuildingcoder.typepad.com/blog/2016/09/solid-from-bounding-box-and-forge-webinar-4.html#2
+        ///// Assumption: aligned with Z axis.
+        ///// Written, described and tested by Owen Merrick for 
+        ///// http://forums.autodesk.com/t5/revit-api-forum/create-solid-from-boundingbox/m-p/6592486
         ///// </summary>
-        ///// <param name="sender">Object</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TextBoxInput_Closed(object sender, EventArgs e)
+        //public static Solid CreateSolidFromBoundingBox(Solid inputSolid)
         //{
-        //    Controls.Remove(m_OpenFOAMExportTextForm);
+        //    BoundingBoxXYZ bbox = inputSolid.GetBoundingBox();
+
+        //    // Corners in BBox coords
+
+        //    XYZ pt0 = new XYZ(bbox.Min.X, bbox.Min.Y, bbox.Min.Z);
+        //    XYZ pt1 = new XYZ(bbox.Max.X, bbox.Min.Y, bbox.Min.Z);
+        //    XYZ pt2 = new XYZ(bbox.Max.X, bbox.Max.Y, bbox.Min.Z);
+        //    XYZ pt3 = new XYZ(bbox.Min.X, bbox.Max.Y, bbox.Min.Z);
+
+        //    // Edges in BBox coords
+
+        //    Line edge0 = Line.CreateBound(pt0, pt1);
+        //    Line edge1 = Line.CreateBound(pt1, pt2);
+        //    Line edge2 = Line.CreateBound(pt2, pt3);
+        //    Line edge3 = Line.CreateBound(pt3, pt0);
+
+        //    // Create loop, still in BBox coords
+
+        //    List<Curve> edges = new List<Curve>();
+        //    edges.Add(edge0);
+        //    edges.Add(edge1);
+        //    edges.Add(edge2);
+        //    edges.Add(edge3);
+
+        //    double height = bbox.Max.Z - bbox.Min.Z;
+
+        //    CurveLoop baseLoop = CurveLoop.Create(edges);
+
+        //    List<CurveLoop> loopList = new List<CurveLoop>();
+        //    loopList.Add(baseLoop);
+
+        //    Solid preTransformBox = GeometryCreationUtilities
+        //      .CreateExtrusionGeometry(loopList, XYZ.BasisZ,
+        //        height);
+
+        //    Solid transformBox = SolidUtils.CreateTransformed(
+        //      preTransformBox, bbox.Transform);
+
+        //    return transformBox;
         //}
+        /// <summary>
+        /// Click-Event for txtBoxLocationInMesh.
+        /// </summary>
+        /// <param name="sender">Object.</param>
+        /// <param name="e">EventArgs</param>
+        private void TxtBoxLocationInMesh_Click(object sender, EventArgs e)
+        {
+            System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
+
+            //Create object of current application
+            XYZ xyz = new XYZ(location.X, location.Y, location.Z);
+            UIDocument documentUI = m_Revit.ActiveUIDocument;
+            Document document = documentUI.Document;
+
+            CreateSphereDirectShape(document, xyz);
+        }
+
+        /// <summary>
+        /// Create a cylinder at the given point.
+        /// Source: 
+        /// https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2016/ENU/Revit-API/files/GUID-A1BCB8D4-5628-45AF-B399-AF573CBBB1D0-htm.html
+        /// </summary>
+        /// <param name="point">Location for ball.</param>
+        /// <param name="height">Height of the ball.</param>
+        /// <param name="radius">Radius of the ball.</param>
+        /// <returns>Ball as solid.</returns>
+        private Solid CreateCylindricalVolume(XYZ point, double height, double radius)
+        {
+            // build cylindrical shape around endpoint
+            List<CurveLoop> curveloops = new List<CurveLoop>();
+            CurveLoop circle = new CurveLoop();
+
+            // For solid geometry creation, two curves are necessary, even for closed
+            // cyclic shapes like circles
+            circle.Append(Arc.Create(point, radius, 0, Math.PI, XYZ.BasisX, XYZ.BasisY));
+            circle.Append(Arc.Create(point, radius, Math.PI, 2 * Math.PI, XYZ.BasisX, XYZ.BasisY));
+            curveloops.Add(circle);
+            Solid createdCylinder = GeometryCreationUtilities.CreateExtrusionGeometry(curveloops, XYZ.BasisZ, height);
+
+            return createdCylinder;
+        }
+
+        /// <summary>
+        /// Create a sphere at the given point.
+        /// Source: https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2016/ENU/Revit-API/files/GUID-DF7B9D4A-5A8A-4E39-8721-B7782CBD7730-htm.html
+        /// </summary>
+        /// <param name="doc">Document sphere will be added to.</param>
+        /// <param name="location">Location point.</param>
+        public void CreateSphereDirectShape(Document doc, XYZ location)
+        {
+            List<Curve> profile = new List<Curve>();
+
+            // first create sphere with 2' radius
+            XYZ center = location;
+            double radius = 2.0;
+
+            //XYZ profile00 = center;
+            XYZ profilePlus = center + new XYZ(0, radius, 0);
+            XYZ profileMinus = center - new XYZ(0, radius, 0);
+
+            profile.Add(Line.CreateBound(profilePlus, profileMinus));
+            profile.Add(Arc.Create(profileMinus, profilePlus, center + new XYZ(radius, 0, 0)));
+
+            CurveLoop curveLoop = CurveLoop.Create(profile);
+            SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
+
+            Frame frame = new Frame(center, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
+
+            Solid sphere = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
+            
+            using (Transaction t = new Transaction(doc, "Create sphere direct shape"))
+            {
+                //start transaction
+                t.Start();
+
+                //create direct shape and assign the sphere shape
+                DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+                ds.SetShape(new GeometryObject[] { sphere });
+                t.Commit();
+            }
+        }
     }
 }

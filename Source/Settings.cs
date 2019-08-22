@@ -1030,6 +1030,7 @@ namespace BIM.OpenFOAMExport
         private Vector m_WallLevel;
         private Vector m_OutletLevel;
         private Vector m_InletLevel;
+        private Vector3D m_LocationInMesh;
         private Dictionary<string, object> m_RefinementRegions;
         private bool m_AllowFreeStandingZoneFaces;
 
@@ -1230,6 +1231,7 @@ namespace BIM.OpenFOAMExport
         public Vector WallLevel { get => m_WallLevel; set => m_WallLevel = value; }
         public Vector OutletLevel { get => m_OutletLevel; set => m_OutletLevel = value; }
         public Vector InletLevel { get => m_InletLevel; set => m_InletLevel = value; }
+        public Vector3D LocationInMesh { get => m_LocationInMesh; set => m_LocationInMesh = value; }
         public Dictionary<string, object> RefinementRegions { get => m_RefinementRegions; set => m_RefinementRegions = value; }
         public bool AllowFreeStandingZoneFaces { get => m_AllowFreeStandingZoneFaces; set => m_AllowFreeStandingZoneFaces = value; }
         public int NSmoothPatch { get => m_NSmoothPatch; set => m_NSmoothPatch = value; }
@@ -1830,6 +1832,8 @@ namespace BIM.OpenFOAMExport
             SolverFV solverU = SolverFV.smoothSolver, SolverFV solverK = SolverFV.smoothSolver, SolverFV solverEpsilon = SolverFV.smoothSolver, Smoother smootherU = Smoother.GaussSeidel, Smoother smootherK = Smoother.GaussSeidel,
             Smoother smootherEpsilon = Smoother.GaussSeidel, TransportModel transportModel = TransportModel.Newtonian, SimulationType simulationType = SimulationType.RAS)
         {
+            //TO-DO: CONFIG CREATE IS IMPLEMENTED BELOW AND COMMENTED OUT
+            //READ FUNCTION NEEDS TO BE IMPLEMENTED
             m_Outlets = new Dictionary<string, object>();
             m_Inlets = new Dictionary<string, object>();
 
@@ -2001,6 +2005,7 @@ namespace BIM.OpenFOAMExport
             m_ResolveFeatureAngle = 180;
             m_RefinementRegions = new Dictionary<string, object>();
             m_AllowFreeStandingZoneFaces = true;
+            m_LocationInMesh = new Vector3D(3.9697562561035156, -0.5521240234375, 1.4000000000000001);
 
             //SnappyHexMesh-SnapControls
             m_NSmoothPatch = 5;
@@ -2069,10 +2074,8 @@ namespace BIM.OpenFOAMExport
             RASModel rasModel = RASModel.RNGkEpsilon;
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
-            //InitFOAMFolder();
-
             //SSH
-            m_SSH = new SSH("name", "xxx.xxx.x.xxx", "source /opt/openfoam6/etc/bashrc", "/home/mdjur/OpenFOAMRemote/", true, true, 22);
+            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/", true, true, 22);
 
             //General
             m_OpenFOAM = openFoam;
@@ -2171,8 +2174,6 @@ namespace BIM.OpenFOAMExport
         {
             Dictionary<string, object> m_ControlDict = new Dictionary<string, object>();
 
-            //solver in general-container of simulation-tab
-            //m_ControlDict.Add("application", m_AppIncompressible);
             m_ControlDict.Add("startFrom", m_StartFrom);
             m_ControlDict.Add("startTime", m_StartTime);
             m_ControlDict.Add("stopAt", m_StopAt);

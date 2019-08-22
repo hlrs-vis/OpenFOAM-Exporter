@@ -79,6 +79,8 @@ namespace BIM.OpenFOAMExport
             this.lblEnv = new System.Windows.Forms.Label();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.tbSSH = new System.Windows.Forms.TabPage();
+            this.txtBoxPort = new System.Windows.Forms.TextBox();
+            this.lblPort = new System.Windows.Forms.Label();
             this.cbDelete = new System.Windows.Forms.CheckBox();
             this.cbDownload = new System.Windows.Forms.CheckBox();
             this.txtBoxCaseFolder = new System.Windows.Forms.TextBox();
@@ -87,8 +89,8 @@ namespace BIM.OpenFOAMExport
             this.lblCaseFolder = new System.Windows.Forms.Label();
             this.lblAlias = new System.Windows.Forms.Label();
             this.lblUserHost = new System.Windows.Forms.Label();
-            this.lblPort = new System.Windows.Forms.Label();
-            this.txtBoxPort = new System.Windows.Forms.TextBox();
+            this.lblLocationInMesh = new System.Windows.Forms.Label();
+            this.txtBoxLocationInMesh = new System.Windows.Forms.TextBox();
             this.tpCategories.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.gbSTLFormat.SuspendLayout();
@@ -247,6 +249,8 @@ namespace BIM.OpenFOAMExport
             // 
             // gbGeneral
             // 
+            this.gbGeneral.Controls.Add(this.txtBoxLocationInMesh);
+            this.gbGeneral.Controls.Add(this.lblLocationInMesh);
             this.gbGeneral.Controls.Add(this.lblTransportModel);
             this.gbGeneral.Controls.Add(this.comboBoxTransportModel);
             this.gbGeneral.Controls.Add(this.textBoxCPU);
@@ -325,6 +329,17 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.tbSSH, "tbSSH");
             this.tbSSH.Name = "tbSSH";
             // 
+            // txtBoxPort
+            // 
+            resources.ApplyResources(this.txtBoxPort, "txtBoxPort");
+            this.txtBoxPort.Name = "txtBoxPort";
+            this.txtBoxPort.TextChanged += new System.EventHandler(this.TxtBoxPort_ValueChanged);
+            // 
+            // lblPort
+            // 
+            resources.ApplyResources(this.lblPort, "lblPort");
+            this.lblPort.Name = "lblPort";
+            // 
             // cbDelete
             // 
             resources.ApplyResources(this.cbDelete, "cbDelete");
@@ -376,16 +391,16 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.lblUserHost, "lblUserHost");
             this.lblUserHost.Name = "lblUserHost";
             // 
-            // lblPort
+            // lblLocationInMesh
             // 
-            resources.ApplyResources(this.lblPort, "lblPort");
-            this.lblPort.Name = "lblPort";
+            resources.ApplyResources(this.lblLocationInMesh, "lblLocationInMesh");
+            this.lblLocationInMesh.Name = "lblLocationInMesh";
             // 
-            // txtBoxPort
+            // txtBoxLocationInMesh
             // 
-            resources.ApplyResources(this.txtBoxPort, "txtBoxPort");
-            this.txtBoxPort.Name = "txtBoxPort";
-            this.txtBoxPort.TextChanged += new System.EventHandler(this.TxtBoxPort_ValueChanged);
+            resources.ApplyResources(this.txtBoxLocationInMesh, "txtBoxLocationInMesh");
+            this.txtBoxLocationInMesh.Name = "txtBoxLocationInMesh";
+            this.txtBoxLocationInMesh.Click += new System.EventHandler(TxtBoxLocationInMesh_Click);
             // 
             // OpenFOAMExportForm
             // 
@@ -398,7 +413,7 @@ namespace BIM.OpenFOAMExport
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "STLExportForm";
+            this.Name = "OpenFOAMExportForm";
             this.tpCategories.ResumeLayout(false);
             this.tpGeneral.ResumeLayout(false);
             this.tpGeneral.PerformLayout();
@@ -456,5 +471,7 @@ namespace BIM.OpenFOAMExport
         private System.Windows.Forms.Label lblUserHost;
         private System.Windows.Forms.TextBox txtBoxPort;
         private System.Windows.Forms.Label lblPort;
+        private System.Windows.Forms.TextBox txtBoxLocationInMesh;
+        private System.Windows.Forms.Label lblLocationInMesh;
     }
 }
