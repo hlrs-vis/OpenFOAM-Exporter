@@ -38,6 +38,23 @@ namespace BIM.OpenFOAMExport
         private DataGenerator m_Generator = null;
 
         /// <summary>
+        /// Active document.
+        /// </summary>
+        private Document m_ActiveDocument;
+
+        /// <summary>
+        /// Element sphere in scene.
+        /// </summary>
+        private ElementId m_SphereLocationInMesh;
+
+        /// <summary>
+        /// Show if the txtBoxLocationInMehs has been clicked.
+        /// </summary>
+        private bool m_ClickedLocationInMesh = false;
+
+        private bool m_LocationInMeshChanged = false;
+
+        /// <summary>
         /// Sorted dictionary for the category-TreeView.
         /// </summary>
         private SortedDictionary<string, Category> m_CategoryList = new SortedDictionary<string, Category>();
@@ -68,6 +85,16 @@ namespace BIM.OpenFOAMExport
         private UIApplication m_Revit = null;
 
         /// <summary>
+        /// String regular expression string for a vector entry.
+        /// </summary>
+        private const string m_Entry = @"(-?\d*\.)?(-?\d+)";
+
+        /// <summary>
+        /// Regular expression for 3 dim vector.
+        /// </summary>
+        private Regex m_LocationReg = new Regex("^" + m_Entry + "\\s+" + m_Entry + "\\s+" + m_Entry + "$");
+
+        /// <summary>
         /// Regular Expression for txtBoxUserIP.
         /// </summary>
         private readonly Regex m_RegUserIP = new Regex("^\\S+@\\S+$");
@@ -90,6 +117,7 @@ namespace BIM.OpenFOAMExport
         {
             InitializeComponent();
             m_Revit = revit;
+            m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
             tbSSH.Enabled = false;
             tbOpenFOAM.Enabled = false;
 
@@ -130,7 +158,7 @@ namespace BIM.OpenFOAMExport
             //To-Do: ADD EVENT FOR CHANGING TEXT
 
             // textBoxLocationInMesh
-            txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString().Replace(";", " "); ;
+            txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
             InitializeSSH();
         }
 
@@ -926,6 +954,9 @@ namespace BIM.OpenFOAMExport
 
         //    return transformBox;
         //}
+
+
+        
         /// <summary>
         /// Click-Event for txtBoxLocationInMesh.
         /// </summary>
@@ -934,13 +965,13 @@ namespace BIM.OpenFOAMExport
         private void TxtBoxLocationInMesh_Click(object sender, EventArgs e)
         {
             System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
-
-            //Create object of current application
-            XYZ xyz = new XYZ(location.X, location.Y, location.Z);
-            UIDocument documentUI = m_Revit.ActiveUIDocument;
-            Document document = documentUI.Document;
-
-            CreateSphereDirectShape(document, xyz);
+            if(!m_ClickedLocationInMesh)
+            {
+                //Create object of current application
+                XYZ xyz = new XYZ(location.X, location.Y, location.Z);
+                CreateSphereDirectShape(xyz);
+                m_ClickedLocationInMesh = true;
+            }
         }
 
         /// <summary>
@@ -974,7 +1005,7 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         /// <param name="doc">Document sphere will be added to.</param>
         /// <param name="location">Location point.</param>
-        public void CreateSphereDirectShape(Document doc, XYZ location)
+        public void CreateSphereDirectShape(XYZ location)
         {
             List<Curve> profile = new List<Curve>();
 
@@ -993,19 +1024,166 @@ namespace BIM.OpenFOAMExport
             SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
 
             Frame frame = new Frame(center, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
-
             Solid sphere = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
-            
-            using (Transaction t = new Transaction(doc, "Create sphere direct shape"))
+
+            SetTransparencyOfActiveView(m_ActiveDocument,50);
+
+            using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
             {
                 //start transaction
                 t.Start();
+                if (m_SphereLocationInMesh != null)
+                {
+                    m_ActiveDocument.Delete(m_SphereLocationInMesh);
+                }
 
                 //create direct shape and assign the sphere shape
-                DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+                DirectShape ds = DirectShape.CreateElement(m_ActiveDocument, new ElementId(BuiltInCategory.OST_GenericModel));
                 ds.SetShape(new GeometryObject[] { sphere });
+                m_SphereLocationInMesh = ds.Id;
                 t.Commit();
             }
+
+            //TO-DO: NEEDS TO BE ADJUSTED
+            ColoringSphere();
+
+            //m_Revit.ActiveUIDocument.ShowElements(m_ActiveDocument.GetElement(m_SphereLocationInMesh));
+        }
+
+        /// <summary>
+        /// Set transparency of the active view.
+        /// </summary>
+        /// <param name="doc">Document for changing transparency.</param>
+        /// <param name="value">Transparency value.</param>
+        private void SetTransparencyOfActiveView(Document doc, int value)
+        {
+            using (Transaction t = new Transaction(doc, "View Transparency"))
+            {
+                t.Start();
+
+                Autodesk.Revit.DB.View active = doc.ActiveView;
+                ViewDisplayModel vdm = active.GetViewDisplayModel();
+                vdm.Transparency = value;
+
+                active.SetViewDisplayModel(vdm);
+
+                t.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Coloring sphere for locationInMesh.
+        /// </summary>
+        private void ColoringSphere()
+        {
+            using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
+            {
+                t.Start();
+                Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(0, 213, 255);
+                OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+                ogs.SetProjectionLineColor(color);
+                ogs.SetSurfaceForegroundPatternColor(color);
+                ogs.SetCutForegroundPatternColor(color);
+                ogs.SetCutLineColor(color);
+                m_ActiveDocument.ActiveView.SetElementOverrides(m_SphereLocationInMesh, ogs);
+                t.Commit();
+            }
+        }
+
+        /// <summary>
+        /// TextBoxLocationInMesh textBox_TextChanged - event.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">EventArgs.</param>
+        private void TxtBoxLocationInMesh_ValueChanged(object sender, EventArgs e)
+        {
+            if (!m_ClickedLocationInMesh)
+                return;
+
+            if (!m_LocationInMeshChanged)
+                m_LocationInMeshChanged = true;
+
+            //if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
+            //{
+            //    List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
+            //    XYZ xyz = new XYZ(entries[0], entries[1], entries[2]);
+            //    m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(entries[0], entries[1], entries[2]);
+            //    MoveSphere(xyz);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Please insert 3 dimensional vector in this format: x y z -> (x,y,z) ∊ ℝ", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
+            //    txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
+            //}
+        }
+
+
+        /// <summary>
+        /// TextBoxLocationInMesh textBox_TextChanged - event.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">EventArgs.</param>
+        private void LocationInMesh_ChangeValue()
+        {
+            if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
+            {
+                List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
+                XYZ xyz = new XYZ(entries[0], entries[1], entries[2]);
+                m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(entries[0], entries[1], entries[2]);
+                MoveSphere(xyz);
+            }
+            else
+            {
+                MessageBox.Show("Please insert 3 dimensional vector in this format: x y z -> (x,y,z) ∊ ℝ", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
+                txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
+            }
+        }
+
+        /// <summary>
+        /// Enter event in txtBoxLocationInMesh.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">EventArgs.</param>
+        private void TxtBoxLocationInMesh_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                if(m_LocationInMeshChanged)
+                {
+                    LocationInMesh_ChangeValue();
+                }
+            }
+        }
+
+        /// <summary>
+        /// TextBoxLocationInMesh leave - event.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">EventArgs.</param>
+        private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
+        {
+            m_ClickedLocationInMesh = !m_ClickedLocationInMesh;
+            m_LocationInMeshChanged = !m_LocationInMeshChanged;
+            using (Transaction t = new Transaction(m_ActiveDocument, "Delete sphere"))
+            {
+                //start transaction
+                t.Start();
+                if (m_SphereLocationInMesh != null)
+                {
+                    m_ActiveDocument.Delete(m_SphereLocationInMesh);
+                }
+                t.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Move sphere to point in 3D-Space of active revit document.
+        /// </summary>
+        /// <param name="xyz">Location sphere will be moved to.</param>
+        private void MoveSphere(XYZ xyz)
+        {
+            //TO-DO: MOVE EXISTING m_SphereLocationInMesh SPHERE => FOR NOW WILL BE CREATED NEW EVERYTIME.
+            CreateSphereDirectShape(xyz);
         }
     }
 }

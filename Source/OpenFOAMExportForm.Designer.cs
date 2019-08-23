@@ -401,6 +401,10 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.txtBoxLocationInMesh, "txtBoxLocationInMesh");
             this.txtBoxLocationInMesh.Name = "txtBoxLocationInMesh";
             this.txtBoxLocationInMesh.Click += new System.EventHandler(TxtBoxLocationInMesh_Click);
+            this.txtBoxLocationInMesh.TextChanged += new System.EventHandler(TxtBoxLocationInMesh_ValueChanged);
+            this.txtBoxLocationInMesh.KeyPress += new System.Windows.Forms.KeyPressEventHandler(TxtBoxLocationInMesh_KeyPress);
+            //this.txtBoxLocationInMesh.Enter += new System.EventHandler(TxtBoxLocationInMesh_Enter);
+            this.txtBoxLocationInMesh.Leave += new System.EventHandler(TxtBoxLocationInMesh_Leave);
             // 
             // OpenFOAMExportForm
             // 

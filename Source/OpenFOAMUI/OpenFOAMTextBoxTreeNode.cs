@@ -34,11 +34,11 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
             m_TxtBox.Text = Text;
             if (Value is Vector3D)
             {
-                m_Format = "x y z -> x,y,z∊ℝ";
+                m_Format = "x y z -> (x,y,z) ∊ ℝ";
             }
             else if (Value is Vector)
             {
-                m_Format = "x y -> x,y∊ℝ";
+                m_Format = "x y -> (x,y) ∊ ℝ";
             }
             else if (Value is int || Value is double)
             {

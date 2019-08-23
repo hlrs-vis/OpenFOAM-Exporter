@@ -275,13 +275,13 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                 //Vector3D ( d d d )
                 if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value is Vector3D)
                 {
-                    List<double> entries = GetListFromVectorString(valueString);
+                    List<double> entries = GetListFromVector3DString(valueString);
                     m_CurrentOFTxtBoxTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
                 }
                 //Vector ( d d )
                 else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value is Vector)
                 {
-                    List<double> entries = GetListFromVectorString(valueString);
+                    List<double> entries = GetListFromVector3DString(valueString);
                     m_CurrentOFTxtBoxTreeNode.Value = new Vector(entries[0], entries[1]);
                 }
                 //double / integer ( d )
@@ -320,7 +320,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// </summary>
         /// <param name="vecString">Vector-String</param>
         /// <returns>Double-List</returns>
-        private List<double> GetListFromVectorString(string vecString)
+        public static List<double> GetListFromVector3DString(string vecString)
         {
             if(vecString.Equals("")|| vecString == string.Empty)
             {
