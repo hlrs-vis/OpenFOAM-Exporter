@@ -44,6 +44,10 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
             {
                 m_Format = "int/double";
             }
+            else if(Value is string)
+            {
+                m_Format = "string";
+            }
             else
             {
                 m_Format = "Please initialize format for this type in OpenFOAMTextBoxTreeNode.";

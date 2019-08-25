@@ -299,6 +299,10 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                         m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
                 }
+                else if(m_CurrentOFTxtBoxTreeNode.Value is string)
+                {
+                    m_CurrentOFTxtBoxTreeNode.Value = valueString;
+                }
                 else
                 {
                     FormatException format = new FormatException();

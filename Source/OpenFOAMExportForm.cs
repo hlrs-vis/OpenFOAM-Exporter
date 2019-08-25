@@ -48,11 +48,14 @@ namespace BIM.OpenFOAMExport
         private ElementId m_SphereLocationInMesh;
 
         /// <summary>
-        /// Show if the txtBoxLocationInMehs has been clicked.
+        /// For click events.
         /// </summary>
-        private bool m_ClickedLocationInMesh = false;
+        private bool m_Clicked = false;
 
-        private bool m_LocationInMeshChanged = false;
+        /// <summary>
+        /// For changing events.
+        /// </summary>
+        private bool m_Changed = false;
 
         /// <summary>
         /// Sorted dictionary for the category-TreeView.
@@ -785,9 +788,10 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void TxtBoxUserIP_ValueChanged(object sender, EventArgs e)
         {
+            //TextBox_ValueChanged();
             string txtBox = txtBoxUserIP.Text;
 
-            if(m_RegUserIP.IsMatch(txtBox))
+            if (m_RegUserIP.IsMatch(txtBox))
             {
                 SSH ssh = m_Settings.SSH;
                 ssh.User = txtBox.Split('@')[0];
@@ -805,6 +809,66 @@ namespace BIM.OpenFOAMExport
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
 
+        ///// <summary>
+        ///// Changes ssh user and server ip in settings.
+        ///// </summary>
+        //private void TxtBoxUserIP_ChangeValue()
+        //{
+        //    if (!m_Changed)
+        //    {
+        //        return;
+        //    }
+
+        //    string txtBox = txtBoxUserIP.Text;
+
+        //    if (m_RegUserIP.IsMatch(txtBox))
+        //    {
+        //        SSH ssh = m_Settings.SSH;
+        //        ssh.User = txtBox.Split('@')[0];
+        //        ssh.ServerIP = txtBox.Split('@')[1];
+        //        m_Settings.SSH = ssh;
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+        //                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        //        txtBoxUserIP.Text = m_Settings.SSH.ConnectionString();
+        //        //return;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// KeyPress-Event txtBoxUserIp.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">KeyPressEventArgs.</param>
+        //private void TxtBoxUserIP_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    TextBox_KeyPress(e, TxtBoxUserIP_ChangeValue);
+        //}
+
+        ///// <summary>
+        ///// Leave-Event txtBoxUserIP.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxUserIP_Leave(object sender, EventArgs e)
+        //{
+        //    TextBox_Leave();
+        //    //m_Clicked = !m_Clicked;
+        //    //m_Changed = !m_Changed;
+        //}
+
+        ///// <summary>
+        ///// Click-Event txtBoxUserIP.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxUserIP_Click(object sender, EventArgs e)
+        //{
+        //    TextBox_Clicked();
+        //}
+
         /// <summary>
         /// ValueChanged event for txtBoxAlias.
         /// </summary>
@@ -812,6 +876,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void TxtBoxAlias_ValueChanged(object sender, EventArgs e)
         {
+            //TextBox_ValueChanged();
             string txt = txtBoxAlias.Text;
             SSH ssh = m_Settings.SSH;
             ssh.OfAlias = txt;
@@ -820,6 +885,50 @@ namespace BIM.OpenFOAMExport
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
 
+        ///// <summary>
+        ///// Change the corresponding value in settings of the txtBoxAlias.
+        ///// </summary>
+        //private void TxtBoxAlias_ChangeValue()
+        //{
+        //    if (!m_Changed)
+        //        return;
+
+        //    string txt = txtBoxAlias.Text;
+        //    SSH ssh = m_Settings.SSH;
+        //    ssh.OfAlias = txt;
+        //    m_Settings.SSH = ssh;
+        //}
+
+        ///// <summary>
+        ///// KeyPress-Event txtBoxAlias.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">KeyPressEventArgs.</param>
+        //private void TxtBoxAlias_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    TextBox_KeyPress(e, TxtBoxAlias_ChangeValue);
+        //}
+
+        ///// <summary>
+        ///// Leave-Event txtBoxAlias.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxAlias_Leave(object sender, EventArgs e)
+        //{
+        //    TextBox_Leave();
+        //}
+
+        ///// <summary>
+        ///// Click-Event txtBoxAlias.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxAlias_Click(object sender, EventArgs e)
+        //{
+        //    TextBox_Clicked();
+        //}
+
         /// <summary>
         /// ValueChanged for txtBoxServerCaseFolder.
         /// </summary>
@@ -827,6 +936,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void TxtBoxServerCaseFolder_ValueChanged(object sender, EventArgs e)
         {
+            //TextBox_ValueChanged();
             string txtBox = txtBoxCaseFolder.Text;
 
             if (m_RegServerCasePath.IsMatch(txtBox))
@@ -845,6 +955,62 @@ namespace BIM.OpenFOAMExport
 
         }
 
+        ///// <summary>
+        ///// Change the corresponding value in settings of the txtServerCaseFolder.
+        ///// </summary>
+        //private void TxtBoxServerCaseFolder_ChangeValue()
+        //{
+        //    if (!m_Changed)
+        //        return;
+
+        //    string txtBox = txtBoxCaseFolder.Text;
+
+        //    if (m_RegServerCasePath.IsMatch(txtBox))
+        //    {
+        //        SSH ssh = m_Settings.SSH;
+        //        ssh.ServerCaseFolder = txtBox;
+        //        m_Settings.SSH = ssh;
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+        //                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        //        txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
+        //        //return;
+        //    }
+        //    //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        //}
+
+        ///// <summary>
+        ///// KeyPress-Event txtBoxServerCaseFolder.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">KeyPressEventArgs.</param>
+        //private void TxtBoxServerCaseFolder_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    TextBox_KeyPress(e, TxtBoxServerCaseFolder_ChangeValue);
+        //}
+
+        ///// <summary>
+        ///// Leave-Event txtBoxServerCaseFolder.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxServerCaseFolder_Leave(object sender, EventArgs e)
+        //{
+        //    TextBox_Leave();
+        //}
+
+        ///// <summary>
+        ///// Click-Event txtBoxServerCaseFolder.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxServerCaseFolder_Click(object sender, EventArgs e)
+        //{
+        //    TextBox_Clicked();
+        //}
+
         /// <summary>
         /// ValueChanged event for txtBoxPort.
         /// </summary>
@@ -852,6 +1018,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void TxtBoxPort_ValueChanged(object sender, EventArgs e)
         {
+            //TextBox_ValueChanged();
             string txtBox = txtBoxPort.Text;
 
             if (m_RegPort.IsMatch(txtBox))
@@ -867,8 +1034,63 @@ namespace BIM.OpenFOAMExport
                 return;
             }
 
-            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+            //TO - DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
+
+        ///// <summary>
+        ///// Change the corresponding value in settings of the txtBoxPort.
+        ///// </summary>
+        //private void TxtBoxPort_ChangeValue()
+        //{
+        //    if (!m_Changed)
+        //        return;
+
+        //    string txtBox = txtBoxPort.Text;
+
+        //    if (m_RegPort.IsMatch(txtBox))
+        //    {
+        //        SSH ssh = m_Settings.SSH;
+        //        ssh.Port = Convert.ToInt32(txtBox);
+        //        m_Settings.SSH = ssh;
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+        //                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        //        txtBoxPort.Text = m_Settings.SSH.Port.ToString();
+        //        //return;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// KeyPress-Event txtBoxPort.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">KeyPressEventArgs.</param>
+        //private void TxtBoxPort_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    TextBox_KeyPress(e, TxtBoxPort_ChangeValue);
+        //}
+
+        ///// <summary>
+        ///// Leave-Event txtBoxPort.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxPort_Leave(object sender, EventArgs e)
+        //{
+        //    TextBox_Leave();
+        //}
+
+        ///// <summary>
+        ///// Click-Event txtBoxPort.
+        ///// </summary>
+        ///// <param name="sender">Sender.</param>
+        ///// <param name="e">EventArgs.</param>
+        //private void TxtBoxPort_Click(object sender, EventArgs e)
+        //{
+        //    TextBox_Clicked();
+        //}
 
         /// <summary>
         /// Checked event for cbDownload.
@@ -965,12 +1187,12 @@ namespace BIM.OpenFOAMExport
         private void TxtBoxLocationInMesh_Click(object sender, EventArgs e)
         {
             System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
-            if(!m_ClickedLocationInMesh)
+            if(!m_Clicked)
             {
                 //Create object of current application
                 XYZ xyz = new XYZ(location.X, location.Y, location.Z);
                 CreateSphereDirectShape(xyz);
-                m_ClickedLocationInMesh = true;
+                m_Clicked = true;
             }
         }
 
@@ -1130,12 +1352,14 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_ValueChanged(object sender, EventArgs e)
         {
-            if (!m_ClickedLocationInMesh)
-                return;
+            //if (!m_Clicked)
+            //    return;
 
-            if (!m_LocationInMeshChanged)
-                m_LocationInMeshChanged = true;
+            //if (!m_Changed)
+            //    m_Changed = true;
+            TextBox_ValueChanged();
         }
+
 
 
         /// <summary>
@@ -1166,13 +1390,14 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                if(m_LocationInMeshChanged)
-                {
-                    LocationInMesh_ChangeValue();
-                }
-            }
+            TextBox_KeyPress(e, LocationInMesh_ChangeValue);
+            //if (e.KeyChar == (char)Keys.Enter)
+            //{
+            //    if(m_Changed)
+            //    {
+            //        LocationInMesh_ChangeValue();
+            //    }
+            //}
         }
 
         /// <summary>
@@ -1182,8 +1407,9 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
         {
-            m_ClickedLocationInMesh = !m_ClickedLocationInMesh;
-            m_LocationInMeshChanged = !m_LocationInMeshChanged;
+            TextBox_Leave();
+            //m_Clicked = !m_Clicked;
+            //m_Changed = !m_Changed;
             OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(0, true, true, false);
             using (Transaction t = new Transaction(m_ActiveDocument, "Delete sphere"))
             {
@@ -1200,7 +1426,6 @@ namespace BIM.OpenFOAMExport
                 t.Commit();
             }
             m_SphereLocationInMesh = null;
-            
         }
 
         /// <summary>
@@ -1211,6 +1436,54 @@ namespace BIM.OpenFOAMExport
         {
             //TO-DO: MOVE EXISTING m_SphereLocationInMesh SPHERE => FOR NOW WILL BE CREATED NEW EVERYTIME.
             CreateSphereDirectShape(xyz);
+        }
+
+        /// <summary>
+        /// If value bool changed and textBox has been clicked set m_Changed to true.
+        /// </summary>
+        private void TextBox_ValueChanged()
+        {
+            if (!m_Clicked)
+                return;
+
+            if (!m_Changed)
+                m_Changed = true;
+        }
+
+        /// <summary>
+        /// If pressed key equals enter than call the changeValueFunc-method.
+        /// </summary>
+        /// <param name="e">KeyPressEventArgs</param>
+        /// <param name="changeValueFunc">Action that will be called after enter in TxtBox.</param>
+        private void TextBox_KeyPress(KeyPressEventArgs e, Action changeValueFunc)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                if (m_Changed)
+                {
+                    changeValueFunc();
+                }
+            }
+        }
+
+        /// <summary>
+        /// If click is false change it to true;
+        /// </summary>
+        private void TextBox_Clicked()
+        {
+            if (!m_Clicked)
+            {
+                m_Clicked = true;
+            }
+        }
+
+        /// <summary>
+        /// Negate m_Changed and m_Clicked.
+        /// </summary>
+        private void TextBox_Leave()
+        {
+            m_Changed = false;
+            m_Clicked = false;
         }
     }
 }
