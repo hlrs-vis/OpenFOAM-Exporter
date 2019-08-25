@@ -1011,7 +1011,7 @@ namespace BIM.OpenFOAMExport
 
             // first create sphere with 2' radius
             XYZ center = location;
-            double radius = 2.0;
+            double radius = 1.0;
 
             //XYZ profile00 = center;
             XYZ profilePlus = center + new XYZ(0, radius, 0);
@@ -1025,8 +1025,6 @@ namespace BIM.OpenFOAMExport
 
             Frame frame = new Frame(center, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
             Solid sphere = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
-
-            SetTransparencyOfActiveView(m_ActiveDocument,50);
 
             using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
             {
@@ -1044,48 +1042,83 @@ namespace BIM.OpenFOAMExport
                 t.Commit();
             }
 
-            //TO-DO: NEEDS TO BE ADJUSTED
-            ColoringSphere();
-
-            //m_Revit.ActiveUIDocument.ShowElements(m_ActiveDocument.GetElement(m_SphereLocationInMesh));
+            ICollection<ElementId> ids = new List<ElementId>();
+            ids.Add(m_SphereLocationInMesh);
+            HighlightElementInScene(m_ActiveDocument, m_SphereLocationInMesh, 90);
+            m_Revit.ActiveUIDocument.Selection.SetElementIds(ids);
+            //Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(0, 213, 255);
+            //Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(255, 128, 0);
+            //ColoringSolid(m_ActiveDocument, m_SphereLocationInMesh, color);
         }
 
         /// <summary>
-        /// Set transparency of the active view.
+        /// Higlight the given element in the document and set the background to the given transparency value.
         /// </summary>
-        /// <param name="doc">Document for changing transparency.</param>
-        /// <param name="value">Transparency value.</param>
-        private void SetTransparencyOfActiveView(Document doc, int value)
+        /// <param name="doc">Document object.</param>
+        /// <param name="elementIdToIsolate">ElementId of the Element that will be highlighted.</param>
+        /// <param name="transparency">Transparency value from 0-100.</param>
+        private void HighlightElementInScene(Document doc, ElementId elementIdToIsolate, int transparency)
         {
-            using (Transaction t = new Transaction(doc, "View Transparency"))
+            OverrideGraphicSettings ogsFade = OverideGraphicSettingsTransparency(transparency, false, false, true);
+            OverrideGraphicSettings ogsIsolate = OverideGraphicSettingsTransparency(0, true, true, false);
+
+            using (Transaction t = new Transaction(doc, "Isolate with Fade"))
             {
                 t.Start();
-
-                Autodesk.Revit.DB.View active = doc.ActiveView;
-                ViewDisplayModel vdm = active.GetViewDisplayModel();
-                vdm.Transparency = value;
-
-                active.SetViewDisplayModel(vdm);
-
+                foreach (Element e in new FilteredElementCollector(doc, doc.ActiveView.Id).WhereElementIsNotElementType())
+                {
+                    if (e.Id == elementIdToIsolate || elementIdToIsolate == null)
+                        doc.ActiveView.SetElementOverrides(e.Id, ogsIsolate);
+                    else
+                        doc.ActiveView.SetElementOverrides(e.Id, ogsFade);
+                }
                 t.Commit();
             }
         }
 
         /// <summary>
-        /// Coloring sphere for locationInMesh.
+        /// Generates a overrideGraphicSettings for transparency.
         /// </summary>
-        private void ColoringSphere()
+        /// <param name="transparency">Transparency value from 0-100.</param>
+        /// <param name="foregroundVisible">Foreground visibility.</param>
+        /// <param name="backgroundVisible">Background visibility.</param>
+        /// <param name="halfTone">Halftone.</param>
+        /// <returns>OverrideGraphicSettings object with given attributes.</returns>
+        private static OverrideGraphicSettings OverideGraphicSettingsTransparency(int transparency, bool foregroundVisible, bool backgroundVisible, bool halfTone)
         {
+            OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+            ogs.SetSurfaceTransparency(transparency);
+            ogs.SetSurfaceForegroundPatternVisible(foregroundVisible);
+            ogs.SetSurfaceBackgroundPatternVisible(backgroundVisible);
+            ogs.SetHalftone(halfTone);
+            return ogs;
+        }
+
+        /// <summary>
+        /// Coloring solid.
+        /// </summary>
+        /// <param name="doc">Document.</param>
+        /// <param name="solidId">Solid elementId.</param>
+        /// <param name="color"></param>
+        private void ColoringSolid(Document doc, ElementId solidId, Autodesk.Revit.DB.Color color)
+        {
+            if(doc.GetElement(solidId) == null)
+            {
+                return;
+            }
             using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
             {
                 t.Start();
-                Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(0, 213, 255);
+                //Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(0, 213, 255);
                 OverrideGraphicSettings ogs = new OverrideGraphicSettings();
                 ogs.SetProjectionLineColor(color);
                 ogs.SetSurfaceForegroundPatternColor(color);
                 ogs.SetCutForegroundPatternColor(color);
+                ogs.SetCutBackgroundPatternColor(color);
                 ogs.SetCutLineColor(color);
-                m_ActiveDocument.ActiveView.SetElementOverrides(m_SphereLocationInMesh, ogs);
+                ogs.SetSurfaceBackgroundPatternColor(color);
+                ogs.SetHalftone(false);
+                doc.ActiveView.SetElementOverrides(solidId, ogs);
                 t.Commit();
             }
         }
@@ -1102,19 +1135,6 @@ namespace BIM.OpenFOAMExport
 
             if (!m_LocationInMeshChanged)
                 m_LocationInMeshChanged = true;
-
-            //if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
-            //{
-            //    List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
-            //    XYZ xyz = new XYZ(entries[0], entries[1], entries[2]);
-            //    m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(entries[0], entries[1], entries[2]);
-            //    MoveSphere(xyz);
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Please insert 3 dimensional vector in this format: x y z -> (x,y,z) ∊ ℝ", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
-            //    txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
-            //}
         }
 
 
@@ -1164,6 +1184,7 @@ namespace BIM.OpenFOAMExport
         {
             m_ClickedLocationInMesh = !m_ClickedLocationInMesh;
             m_LocationInMeshChanged = !m_LocationInMeshChanged;
+            OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(0, true, true, false);
             using (Transaction t = new Transaction(m_ActiveDocument, "Delete sphere"))
             {
                 //start transaction
@@ -1172,8 +1193,14 @@ namespace BIM.OpenFOAMExport
                 {
                     m_ActiveDocument.Delete(m_SphereLocationInMesh);
                 }
+                foreach (Element elem in new FilteredElementCollector(m_ActiveDocument, m_ActiveDocument.ActiveView.Id).WhereElementIsNotElementType())
+                {
+                    m_ActiveDocument.ActiveView.SetElementOverrides(elem.Id, ogs);
+                }
                 t.Commit();
             }
+            m_SphereLocationInMesh = null;
+            
         }
 
         /// <summary>
