@@ -187,7 +187,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private void InitLocationInMesh()
         {
-            m_LocationInMesh = m_Settings.LocationInMesh;/*new Vector3D(3.9697562561035156, -0.5521240234375, 1.4000000000000001)*/;
+            m_LocationInMesh = m_Settings.LocationInMesh;
         }
     }
 }

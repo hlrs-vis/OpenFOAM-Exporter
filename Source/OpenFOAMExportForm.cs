@@ -162,6 +162,8 @@ namespace BIM.OpenFOAMExport
 
             // textBoxLocationInMesh
             txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
+
+            //initialize SSH
             InitializeSSH();
         }
 
@@ -782,6 +784,26 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
+        /// ValueChanged event for comboBoxSolver.
+        /// </summary>
+        /// <param name="sender">Sender objet.</param>
+        /// <param name="e">event args.</param>
+        private void ComboBoxSolver_SelectedValueChanged(object sender, EventArgs e)
+        {
+            //Not implemented yet.
+        }
+
+        /// <summary>
+        /// ValueChanged event for comboBoxTransport.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">Event args.</param>
+        private void ComboBoxTransport_SelectedValueChanged(object sender, EventArgs e)
+        {
+            //Not implemented yet.
+        }
+
+        /// <summary>
         /// ValueChanged event for txtBoxUserIP.
         /// </summary>
         /// <param name="sender">The sender.</param>
@@ -1186,9 +1208,9 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs</param>
         private void TxtBoxLocationInMesh_Click(object sender, EventArgs e)
         {
-            System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
             if(!m_Clicked)
             {
+                System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
                 //Create object of current application
                 XYZ xyz = new XYZ(location.X, location.Y, location.Z);
                 CreateSphereDirectShape(xyz);
@@ -1229,24 +1251,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="location">Location point.</param>
         public void CreateSphereDirectShape(XYZ location)
         {
-            List<Curve> profile = new List<Curve>();
-
-            // first create sphere with 2' radius
-            XYZ center = location;
-            double radius = 1.0;
-
-            //XYZ profile00 = center;
-            XYZ profilePlus = center + new XYZ(0, radius, 0);
-            XYZ profileMinus = center - new XYZ(0, radius, 0);
-
-            profile.Add(Line.CreateBound(profilePlus, profileMinus));
-            profile.Add(Arc.Create(profileMinus, profilePlus, center + new XYZ(radius, 0, 0)));
-
-            CurveLoop curveLoop = CurveLoop.Create(profile);
-            SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
-
-            Frame frame = new Frame(center, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
-            Solid sphere = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
+            Solid sphere = CreateSolidSphere(location, 1.0);
 
             using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
             {
@@ -1266,11 +1271,48 @@ namespace BIM.OpenFOAMExport
 
             ICollection<ElementId> ids = new List<ElementId>();
             ids.Add(m_SphereLocationInMesh);
-            HighlightElementInScene(m_ActiveDocument, m_SphereLocationInMesh, 90);
+            HighlightElementInScene(m_ActiveDocument, m_SphereLocationInMesh, 98);
             m_Revit.ActiveUIDocument.Selection.SetElementIds(ids);
-            //Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(0, 213, 255);
-            //Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(255, 128, 0);
-            //ColoringSolid(m_ActiveDocument, m_SphereLocationInMesh, color);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        private void ChangeView(Document doc)
+        {
+            Autodesk.Revit.DB.View view = doc.ActiveView;
+            //using(Transaction trans = new Transaction(doc))
+            //{
+            //    trans.Start();
+            //    trans.Commit();
+            //}
+        }
+
+        /// <summary>
+        /// Generate a sphere as solid.
+        /// </summary>
+        /// <param name="location">Location of sphere.</param>
+        /// <param name="radius">Radius of sphere.</param>
+        /// <returns>Sphere as solid.</returns>
+        private static Solid CreateSolidSphere(XYZ location, double radius)
+        {
+            List<Curve> profile = new List<Curve>();
+
+            // first create sphere with 2' radius
+            XYZ center = location;
+            XYZ profilePlus = center + new XYZ(0, radius, 0);
+            XYZ profileMinus = center - new XYZ(0, radius, 0);
+
+            profile.Add(Line.CreateBound(profilePlus, profileMinus));
+            profile.Add(Arc.Create(profileMinus, profilePlus, center + new XYZ(radius, 0, 0)));
+
+            CurveLoop curveLoop = CurveLoop.Create(profile);
+            SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
+
+            Frame frame = new Frame(center, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
+            Solid sphere = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
+            return sphere;
         }
 
         /// <summary>
@@ -1331,7 +1373,7 @@ namespace BIM.OpenFOAMExport
             using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
             {
                 t.Start();
-                //Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(0, 213, 255);
+
                 OverrideGraphicSettings ogs = new OverrideGraphicSettings();
                 ogs.SetProjectionLineColor(color);
                 ogs.SetSurfaceForegroundPatternColor(color);
@@ -1340,6 +1382,7 @@ namespace BIM.OpenFOAMExport
                 ogs.SetCutLineColor(color);
                 ogs.SetSurfaceBackgroundPatternColor(color);
                 ogs.SetHalftone(false);
+
                 doc.ActiveView.SetElementOverrides(solidId, ogs);
                 t.Commit();
             }
@@ -1352,15 +1395,8 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_ValueChanged(object sender, EventArgs e)
         {
-            //if (!m_Clicked)
-            //    return;
-
-            //if (!m_Changed)
-            //    m_Changed = true;
             TextBox_ValueChanged();
         }
-
-
 
         /// <summary>
         /// TextBoxLocationInMesh textBox_TextChanged - event.
@@ -1391,13 +1427,6 @@ namespace BIM.OpenFOAMExport
         private void TxtBoxLocationInMesh_KeyPress(object sender, KeyPressEventArgs e)
         {
             TextBox_KeyPress(e, LocationInMesh_ChangeValue);
-            //if (e.KeyChar == (char)Keys.Enter)
-            //{
-            //    if(m_Changed)
-            //    {
-            //        LocationInMesh_ChangeValue();
-            //    }
-            //}
         }
 
         /// <summary>
@@ -1408,8 +1437,6 @@ namespace BIM.OpenFOAMExport
         private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
         {
             TextBox_Leave();
-            //m_Clicked = !m_Clicked;
-            //m_Changed = !m_Changed;
             OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(0, true, true, false);
             using (Transaction t = new Transaction(m_ActiveDocument, "Delete sphere"))
             {

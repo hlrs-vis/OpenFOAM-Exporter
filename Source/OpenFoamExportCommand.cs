@@ -17,12 +17,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
+using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using AsyncShowDialog;
 
 using Autodesk.Revit;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using System.Windows;
 
 namespace BIM.OpenFOAMExport
 {
@@ -37,6 +41,8 @@ namespace BIM.OpenFOAMExport
         /// The application object for the active instance of Autodesk Revit.
         /// </summary>
         private UIApplication m_Revit;
+
+        private OpenFOAMExportForm m_FOAMExportForm;
 
         /// <summary>
         /// Implement the member of IExternalCommand Execute.
@@ -53,20 +59,57 @@ namespace BIM.OpenFOAMExport
         /// <returns>
         /// A value that signifies if yout command was successful, failed or the user wishes to cancel.
         /// </returns>
-        public Result Execute(ExternalCommandData commandData,
-            ref string message, ElementSet elements)
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            m_Revit = commandData.Application;
+            //m_Revit = commandData.Application;
 
             ///pop up the STL export form
-            using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
+            //using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
+            //{
+            //    //TO-DO: Implement with .Show()
+            //    //asynchronous call of showDialog()
+            //    //var task = Task.Run(async () => await exportForm.ShowDialogAsync());
+            //    if (DialogResult.Cancel == task.Result)
+            //    {
+            //        return Result.Cancelled;
+            //    }
+            //}
+
+            if(m_FOAMExportForm == null)
             {
-                if (DialogResult.Cancel == exportForm.ShowDialog())
-                {
-                    return Result.Cancelled;
-                }
+                m_Revit = commandData.Application;
+                m_FOAMExportForm = new OpenFOAMExportForm(m_Revit);
+                m_FOAMExportForm.TopMost = true;
+                m_FOAMExportForm.FormClosed += new FormClosedEventHandler(OpenFOAMExportForm_FormClosed);
+                m_FOAMExportForm.Show();
             }
+
             return Result.Succeeded;
+        }
+
+        private void OpenFOAMExportForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            m_FOAMExportForm = null;
+        }
+    }
+}
+
+namespace AsyncShowDialog
+{
+    public static class ShowDialogAsyncExt
+    {
+        /// <summary>
+        /// ExtensionMethod for asynchronous use of showDialog().
+        /// Source:https://stackoverflow.com/questions/33406939/async-showdialog/43420090#43420090
+        /// </summary>
+        /// <param name="this">Windows form object.</param>
+        /// <returns>DialogResult in Task.</returns>
+        public static async Task<DialogResult> ShowDialogAsync(this System.Windows.Forms.Form @this)
+        {
+            await Task.Yield();
+            if (@this.IsDisposed)
+                return DialogResult.OK;
+            return @this.ShowDialog();
         }
     }
 }

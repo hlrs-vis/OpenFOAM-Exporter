@@ -274,6 +274,7 @@ namespace BIM.OpenFOAMExport
             this.comboBoxTransportModel.FormattingEnabled = true;
             resources.ApplyResources(this.comboBoxTransportModel, "comboBoxTransportModel");
             this.comboBoxTransportModel.Name = "comboBoxTransportModel";
+            this.comboBoxTransportModel.SelectedValueChanged += new System.EventHandler(ComboBoxTransport_SelectedValueChanged);
             // 
             // textBoxCPU
             // 
@@ -290,6 +291,7 @@ namespace BIM.OpenFOAMExport
             this.comboBoxSolver.FormattingEnabled = true;
             resources.ApplyResources(this.comboBoxSolver, "comboBoxSolver");
             this.comboBoxSolver.Name = "comboBoxSolver";
+            this.comboBoxSolver.SelectedValueChanged += new System.EventHandler(this.ComboBoxSolver_SelectedValueChanged);
             // 
             // lblSolver
             // 

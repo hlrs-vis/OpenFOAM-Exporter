@@ -45,7 +45,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// List of inlet-, outlet-, wall-patches.
         /// </summary>
-        /*List<FOAMParameterPatch<dynamic>>*/Dictionary<string, FOAMParameterPatch<dynamic>> patches;
+        Dictionary<string, FOAMParameterPatch<dynamic>> patches;
 
         /// <summary>
         /// Solver for incompressible CFD.
