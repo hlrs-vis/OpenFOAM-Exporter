@@ -2005,7 +2005,7 @@ namespace BIM.OpenFOAMExport
             m_ResolveFeatureAngle = 180;
             m_RefinementRegions = new Dictionary<string, object>();
             m_AllowFreeStandingZoneFaces = true;
-            m_LocationInMesh = new Vector3D(3.9697562561035156, -0.5521240234375, 1.4000000000000001);
+            m_LocationInMesh = new Vector3D(0, 0, 0);
 
             //SnappyHexMesh-SnapControls
             m_NSmoothPatch = 5;

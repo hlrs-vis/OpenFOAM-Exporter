@@ -27,6 +27,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System.Windows;
+using System.Threading;
 
 namespace BIM.OpenFOAMExport
 {
@@ -35,14 +36,13 @@ namespace BIM.OpenFOAMExport
     /// </summary>
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
+    
     public class OpenFOAMExportCommand : IExternalCommand
     {
         /// <summary>
         /// The application object for the active instance of Autodesk Revit.
         /// </summary>
         private UIApplication m_Revit;
-
-        private OpenFOAMExportForm m_FOAMExportForm;
 
         /// <summary>
         /// Implement the member of IExternalCommand Execute.
@@ -61,35 +61,57 @@ namespace BIM.OpenFOAMExport
         /// </returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            //m_Revit = commandData.Application;
+            var iterator = System.Windows.Forms.Application.OpenForms.GetEnumerator();
+            while(iterator.MoveNext())
+            {
+                System.Windows.Forms.Form form = iterator.Current as System.Windows.Forms.Form;
+                if(form is OpenFOAMExportForm)
+                {
+                    return Result.Succeeded;
+                }
+            }
+            m_Revit = commandData.Application;
+            Result result = StartOpenFOAMExportForm();
+            return result;
 
-            ///pop up the STL export form
+            ///pop up the form
             //using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
             //{
-            //    //TO-DO: Implement with .Show()
-            //    //asynchronous call of showDialog()
-            //    //var task = Task.Run(async () => await exportForm.ShowDialogAsync());
-            //    if (DialogResult.Cancel == task.Result)
+            //    //    //asynchronous call of showDialog()
+            //    //    var task = Task.Run(async () => await exportForm.ShowDialogAsync());
+            //    if (DialogResult.Cancel == /*task.Result*/exportForm.ShowDialog())
             //    {
             //        return Result.Cancelled;
             //    }
             //}
 
-            if(m_FOAMExportForm == null)
+            //return result.succeeded;
+        }
+
+        /// <summary>
+        /// Generates OpenFOAMExportForm and shows it.
+        /// </summary>
+        private Result StartOpenFOAMExportForm()
+        {
+            if (m_Revit == null)
+                return Result.Failed;
+
+            using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
             {
-                m_Revit = commandData.Application;
-                m_FOAMExportForm = new OpenFOAMExportForm(m_Revit);
-                m_FOAMExportForm.TopMost = true;
-                m_FOAMExportForm.FormClosed += new FormClosedEventHandler(OpenFOAMExportForm_FormClosed);
-                m_FOAMExportForm.Show();
+                System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+                System.Windows.Forms.Application.EnableVisualStyles();
+                exportForm.TopMost = true;
+
+                //Start modal form with with responsive messageloop.
+                System.Windows.Forms.Application.Run(exportForm);
+
+                if(exportForm.DialogResult == DialogResult.Cancel)
+                {
+                    return Result.Cancelled;
+                }
             }
 
             return Result.Succeeded;
-        }
-
-        private void OpenFOAMExportForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            m_FOAMExportForm = null;
         }
     }
 }

@@ -352,7 +352,6 @@ namespace BIM.OpenFOAMExport
         private void InitializeDefaultParameterOpenFOAM()
         {
             List<string> keyPath = new List<string>();
-            //TO-DO: UPDATE OpenFOAMTreeView and Settings
             foreach (var att in m_Settings.SimulationDefault)
             {
                 keyPath.Add(att.Key);
@@ -613,7 +612,9 @@ namespace BIM.OpenFOAMExport
                     return;
                 }
 
-                // save Revit document's triangular data in a temporary file
+                TopMost = false;
+
+                // save Revit document's triangular data in a temporary file, generate openFOAM-casefolder and start simulation
                 m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
                 DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, m_Settings/*aSetting*/);
 
@@ -1408,8 +1409,12 @@ namespace BIM.OpenFOAMExport
             if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
             {
                 List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
-                XYZ xyz = new XYZ(entries[0], entries[1], entries[2]);
-                m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(entries[0], entries[1], entries[2]);
+                //XYZ xyz = new XYZ(entries[0], entries[1], entries[2]);
+                double x = UnitUtils.ConvertFromInternalUnits(entries[0], DisplayUnitType.DUT_METERS);
+                double y = UnitUtils.ConvertFromInternalUnits(entries[1], DisplayUnitType.DUT_METERS);
+                double z = UnitUtils.ConvertFromInternalUnits(entries[2], DisplayUnitType.DUT_METERS);
+                XYZ xyz = new XYZ(x, y, z);
+                m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
                 MoveSphere(xyz);
             }
             else
@@ -1505,7 +1510,7 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
-        /// Negate m_Changed and m_Clicked.
+        /// Negate m_Changed and m_Clicked after leave txtBox.
         /// </summary>
         private void TextBox_Leave()
         {
