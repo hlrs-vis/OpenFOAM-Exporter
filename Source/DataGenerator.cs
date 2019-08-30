@@ -227,7 +227,10 @@ namespace BIM.OpenFOAMExport
             }
 
             //commands as string
-            List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract",  "snappyHexMesh" , "rm -r processor*", "simpleFoam", "rm -r processor*"};
+            List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract", "snappyHexMesh", "rm -r processor*" };
+            //, "simpleFoam", "rm -r processor*"};
+            commands.Add(m_Settings.AppIncompressible.ToString());
+            commands.Add("rm -r processor*");
 
             //run commands in windows-openfoam-environment
             if (!m_RunManager.RunCommands(commands))
@@ -353,6 +356,18 @@ namespace BIM.OpenFOAMExport
                 else if(nameParam.Contains("k."))
                 {
                     parameter = new K(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("alphat"))
+                {
+                    parameter = new Alphat(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("p_rgh"))
+                {
+                    parameter = new P_rgh(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                }
+                else if(nameParam.Contains("T"))
+                {
+                    parameter = new T(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
                 }
                 else
                 {

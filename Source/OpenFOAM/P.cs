@@ -7,11 +7,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
     /// </summary>
     public class P : FOAMParameter<double>
     {
-        ///// <summary>
-        ///// InternalField entry
-        ///// </summary>
-        //private InternalField<double> m_InternalField;
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -25,7 +20,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
         public P(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _wallName,
             List<string> _InletNames, List<string> _OutletNames)
-            : base(version, path, attributes, format, settings, "p", "volScalarField",  _wallName, _InletNames, _OutletNames)
+            : base(version, path, attributes, format, settings, "p_rgh", "volScalarField",  _wallName, _InletNames, _OutletNames)
         {
         }
 

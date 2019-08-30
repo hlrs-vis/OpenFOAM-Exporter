@@ -159,6 +159,7 @@
     <Compile Include="OpenFOAMUI\OpenFOAMTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="OpenFOAM\Alphat.cs" />
     <Compile Include="OpenFOAM\DecomposeParDict.cs" />
     <Compile Include="OpenFOAM\BlockMeshDict.cs" />
     <Compile Include="OpenFOAM\ControlDict.cs" />
@@ -173,9 +174,11 @@
     <Compile Include="OpenFOAM\MeshDict.cs" />
     <Compile Include="OpenFOAM\Nut.cs" />
     <Compile Include="OpenFOAM\P.cs" />
+    <Compile Include="OpenFOAM\P_rgh.cs" />
     <Compile Include="OpenFOAM\RunManager.cs" />
     <Compile Include="OpenFOAM\SnappyHexMeshDict.cs" />
     <Compile Include="OpenFOAM\SurfaceFeatureExtract.cs" />
+    <Compile Include="OpenFOAM\T.cs" />
     <Compile Include="OpenFOAM\TransportProperties.cs" />
     <Compile Include="OpenFOAM\TurbulenceProperties.cs" />
     <Compile Include="OpenFOAM\U.cs" />

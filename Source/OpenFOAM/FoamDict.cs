@@ -77,6 +77,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             foreach (var obj in m_DictFile)
             {
+                if(obj.Value == null)
+                {
+                    continue;
+                }
                 FoamFile.Attributes.Add(obj.Key, obj.Value);
             }
         }

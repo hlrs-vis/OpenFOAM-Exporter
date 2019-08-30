@@ -181,7 +181,7 @@ namespace BIM.OpenFOAMExport
             comboBoxEnv.SelectedItem = enumEnv;
 
             // comboBoxSolver
-            var enumSolver = SolverIncompressible.simpleFoam;
+            var enumSolver = SolverControlDict.buoyantBoussinesqSimpleFoam;
             foreach (var value in Enum.GetValues(enumSolver.GetType()))
             {
                 comboBoxSolver.Items.Add(value);
@@ -235,7 +235,6 @@ namespace BIM.OpenFOAMExport
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
                 false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
-
             if (!InitBIMData())
             {
                 return;
@@ -593,7 +592,7 @@ namespace BIM.OpenFOAMExport
                 m_Settings.OpenFOAMEnvironment = env;
 
                 //Set current selected incompressible solver
-                SolverIncompressible appInc = (SolverIncompressible)comboBoxSolver.SelectedItem;
+                SolverControlDict appInc = (SolverControlDict)comboBoxSolver.SelectedItem;
                 m_Settings.AppIncompressible = appInc;
 
                 //Set current selected transportModel

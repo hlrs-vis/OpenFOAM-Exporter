@@ -177,7 +177,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                             runCommands.Add("reconstructParMesh -constant" + log + "reconstructParMesh.log");
                             continue;
                         }
-                        else if (command.Equals("simpleFoam"))
+                        else if (command.Equals("simpleFoam")  || command.Equals("buoyantBoussinesqSimpleFoam"))
                         {
                             runCommands.Add("decomposePar");
                             runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
@@ -185,6 +185,14 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                             runCommands.Add("reconstructPar -latestTime");
                             continue;
                         }
+                        //else if(command.Equals("buoyantBoussinesqSimpleFoam"))
+                        //{
+                        //    runCommands.Add("decomposePar");
+                        //    runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
+                        //    runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
+                        //    runCommands.Add("reconstructPar -time " + "'1,2,3,4,5,6,7,8,9,10'");
+                        //    continue;
+                        //}
                     }
                 }
 

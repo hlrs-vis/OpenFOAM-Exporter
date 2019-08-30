@@ -3,9 +3,9 @@
 namespace BIM.OpenFOAMExport.OpenFOAM
 {
     /// <summary>
-    /// K-Parameter for SimpleFoam.
+    /// Alphat-Parameter for HeatTransfer.
     /// </summary>
-    public class K : FOAMParameter<double>
+    public class Alphat : FOAMParameter<double>
     {
         /// <summary>
         /// Constructor.
@@ -18,11 +18,11 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="_wallName">Name of the patch wall.</param>
         /// <param name="_InletNames">Patchnames of the inlets as string-array.</param>
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
-        public K(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _wallName,
+        public Alphat(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _wallName,
             List<string> _InletNames, List<string> _OutletNames)
-            : base(version, path, attributes, format, settings, "k", "volScalarField", _wallName, _InletNames, _OutletNames)
+            : base(version, path, attributes, format, settings, "alphat", "volScalarField", _wallName, _InletNames, _OutletNames)
         {
-            
+
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_Dimensions = new int[] { 0, 2, -2, 0, 0, 0, 0 };
+            m_Dimensions = new int[] { 0, 2, -1, 0, 0, 0, 0 };
             m_InternalFieldString = m_Uniform + " " + m_InternalField.Value.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat);
             base.InitAttributes();
         }
