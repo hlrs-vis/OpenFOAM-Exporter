@@ -419,7 +419,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="doc">Document-object which will used for searching in.</param>
         /// <param name="elements">Element-List which will used for searching in.</param>
         /// <returns>List of ElementId's from the materials.</returns>
-        private List<ElementId> GetMaterialList(Document doc, List<Element> elements)
+        public static List<ElementId> GetMaterialList(Document doc, List<Element> elements)
         {
             List<ElementId> materialIds = new List<ElementId>();
             foreach (Element elem in elements)
@@ -679,7 +679,7 @@ namespace BIM.OpenFOAMExport
 
                 while (iterator.MoveNext())
                 {
-                    System.Windows.Forms.Application.DoEvents();
+                    Application.DoEvents();
 
                     if (m_StlExportCancel.CancelProcess == true)
                         return GeneratorStatus.FAILURE;
@@ -783,6 +783,7 @@ namespace BIM.OpenFOAMExport
                     {
                         continue;
                     }
+
                     KeyValuePair<Face,Transform> inletOutlet = ExtractInletOutlet(elements.Key, geometry, null);
                     if (inletOutlet.Key != null)
                     {
@@ -833,9 +834,11 @@ namespace BIM.OpenFOAMExport
                 if (null != solid)
                 {
                     KeyValuePair<Face, Transform> keyValuePair = new KeyValuePair<Face, Transform>(ScanForInletOutlet(document, solid, transform), transform);
-                    if(keyValuePair.Key != null)
+                    if (keyValuePair.Key != null)
                     {
                         face = keyValuePair;
+                        //remove break if duct terminals should be visible
+                        break;
                     }
                     continue;
                 }
@@ -894,6 +897,7 @@ namespace BIM.OpenFOAMExport
                 {
                     continue;
                 }
+
                 Mesh mesh = face.Triangulate();
                 if (null == mesh)
                 {
@@ -911,6 +915,87 @@ namespace BIM.OpenFOAMExport
                 WriteFaceToSTL(document, mesh, face, transform);
             }
             return faceItem;//valuePair;
+        }
+
+
+        /// <summary>
+        /// Extract solid of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
+        /// </summary>
+        /// <param name="document">Current document in which the geometry is included.</param>
+        /// <param name="geometry">The geometry that contains the inlet/outlet.</param>
+        /// <param name="transform">Specifies the transformation of the geometry.</param>
+        /// <returns>Solid.</returns>
+        public static Solid ExtractSolid(Document document, GeometryElement geometry, Transform transform)
+        {
+            Solid value = default;
+            foreach (GeometryObject gObject in geometry)
+            {
+                Solid solid = gObject as Solid;
+                if (null != solid)
+                {
+                    return solid;
+                }
+
+                // if the type of the geometric primitive is instance
+                GeometryInstance instance = gObject as GeometryInstance;
+                if (null != instance)
+                {
+                    Transform newTransform;
+                    if (null == transform)
+                    {
+                        newTransform = instance.Transform;
+                    }
+                    else
+                    {
+                        newTransform = transform.Multiply(instance.Transform);  // get a transformation of the affine 3-space
+                    }
+                    value = ExtractSolid(document, instance.SymbolGeometry, newTransform);
+                    break;
+                }
+
+                GeometryElement geomElement = gObject as GeometryElement;
+                if (null != geomElement)
+                {
+                    value = ExtractSolid(document, instance.SymbolGeometry, transform);
+                    break;
+                }
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Get the faceNormal of the face from the solid that has a material from the list.
+        /// </summary>
+        /// <param name="materialIds">MaterialList that will be checked for.</param>
+        /// <param name="faceNormal">Reference of the face normal.</param>
+        /// <param name="solid">Solid that will be checked.</param>
+        /// <returns>Face normal as XYZ object.</returns>
+        public static void GetFaceNormal(List<ElementId> materialIds, ref XYZ faceNormal, Solid solid)
+        {
+            // a solid has many faces
+            FaceArray faces = solid.Faces;
+            if (0 == faces.Size)
+            {
+                return;
+            }
+
+            foreach (Face face in faces)
+            {
+                if (face == null)
+                {
+                    continue;
+                }
+                if (face.Visibility != Visibility.Visible)
+                {
+                    continue;
+                }
+                if (materialIds.Contains(face.MaterialElementId))
+                {
+                    UV point = new UV();
+                    faceNormal = face.ComputeNormal(point);
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -942,7 +1027,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="geometry">The geometry element.</param>
         /// <param name="trf">The transformation.</param>
         private void ScanGeomElement(Document document, GeometryElement geometry, Transform transform)
-        {            
+        {
             //get all geometric primitives contained in the GeometryElement
             foreach (GeometryObject gObject in geometry)
             {
@@ -953,6 +1038,7 @@ namespace BIM.OpenFOAMExport
                     ScanSolid(document, solid, transform);
                     continue;
                 }
+
                 // if the type of the geometric primitive is instance
                 GeometryInstance instance = gObject as GeometryInstance;
                 if (null != instance)
@@ -968,7 +1054,6 @@ namespace BIM.OpenFOAMExport
                     ScanGeomElement(document, geomElement, transform);
                 }
             }
-            //return true;
         }
 
         /// <summary>
@@ -994,7 +1079,6 @@ namespace BIM.OpenFOAMExport
             }
             // get all geometric primitives contained in the GeometryElement
             ScanGeomElement(document, instanceGeometry, newTransform);
-            //func(document, instanceGeometry, newTransform);
         }
 
         /// <summary>

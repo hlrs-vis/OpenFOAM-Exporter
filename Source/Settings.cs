@@ -2146,7 +2146,7 @@ namespace BIM.OpenFOAMExport
             if(m_AppControlDictSolver == SolverControlDict.buoyantBoussinesqSimpleFoam)
             {
                 m_SIMPLE.Add("pRefValue", 0);
-                m_SIMPLE.Add("pRefPoint", "(" + m_LocationInMesh.ToString().Replace(';', ' ') + ")");
+                //m_SIMPLE.Add("pRefPoint", "(" + m_LocationInMesh.ToString().Replace(';', ' ') + ")");
             }
 
             m_FvSolution.Add("solvers", m_Solvers);

@@ -120,9 +120,8 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                     Dictionary<string, object> newLevel = att[s] as Dictionary<string, object>;
                     att = newLevel;
                 }
-                else if(att[s] is FOAMParameterPatch<dynamic>)
+                else if (att[s] is FOAMParameterPatch<dynamic> patch)
                 {
-                    FOAMParameterPatch<dynamic> patch = (FOAMParameterPatch<dynamic>)att[s];
                     att = patch.Attributes;
                 }
                 else

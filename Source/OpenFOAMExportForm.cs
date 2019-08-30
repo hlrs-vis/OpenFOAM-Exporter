@@ -48,6 +48,16 @@ namespace BIM.OpenFOAMExport
         private ElementId m_SphereLocationInMesh;
 
         /// <summary>
+        /// 
+        /// </summary>
+        private List<Element> ductTerminals;
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        private List<ElementId> m_InletOutletMaterials;
+
+        /// <summary>
         /// For click events.
         /// </summary>
         private bool m_Clicked = false;
@@ -256,7 +266,9 @@ namespace BIM.OpenFOAMExport
             bool succeed = false;
 
             //get duct-terminals in active document
-            List<Element> ductTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
+            /*var */ductTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
+            //get materials
+            /*var */m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, ductTerminals);
 
             foreach (FamilyInstance instance in ductTerminals)
             {
@@ -275,19 +287,25 @@ namespace BIM.OpenFOAMExport
                         return false;
                     }
 
+
                     if (paramValue != 0)
                     {
                         FamilySymbol famSym = instance.Symbol;
+
+                        //get FaceNormal
+                        var faceNormal = GetOrientationInletOutlet(m_InletOutletMaterials, instance);
+
                         string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
                         string nameDuct = nameDuctFam.Replace(" ", "_");
                         if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                         {
-                            m_Settings.Outlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(0, 0, paramValue));
+                            //negate faceNormal = outlet.
+                            m_Settings.Outlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (-paramValue));
                             succeed = true;
                         }
                         else if(nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                         {
-                            m_Settings.Inlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(0, 0, -paramValue));
+                            m_Settings.Inlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * paramValue);
                             succeed = true;
                         }
                         break;
@@ -295,6 +313,29 @@ namespace BIM.OpenFOAMExport
                 }
             }
             return succeed;
+        }
+
+        /// <summary>
+        /// Search for inlet/outlet face and return the faceNormal.
+        /// </summary>
+        /// <param name="m_InletOutletMaterials">Material list with material elementID's.</param>
+        /// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
+        /// <returns>Face normal.</returns>
+        private XYZ GetOrientationInletOutlet(List<ElementId> m_InletOutletMaterials, FamilyInstance instance)
+        {
+            XYZ faceNormal = new XYZ(0, 0, 0);
+            var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
+            m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
+
+            var geometry = instance.get_Geometry(m_ViewOptions);
+            Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
+
+            if (solid == default)
+                return faceNormal;
+
+            DataGenerator.GetFaceNormal(m_InletOutletMaterials, ref faceNormal, solid);
+
+            return faceNormal;
         }
 
         /// <summary>
@@ -1273,20 +1314,6 @@ namespace BIM.OpenFOAMExport
             ids.Add(m_SphereLocationInMesh);
             HighlightElementInScene(m_ActiveDocument, m_SphereLocationInMesh, 98);
             m_Revit.ActiveUIDocument.Selection.SetElementIds(ids);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="doc"></param>
-        private void ChangeView(Document doc)
-        {
-            Autodesk.Revit.DB.View view = doc.ActiveView;
-            //using(Transaction trans = new Transaction(doc))
-            //{
-            //    trans.Start();
-            //    trans.Commit();
-            //}
         }
 
         /// <summary>

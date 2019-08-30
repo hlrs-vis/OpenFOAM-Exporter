@@ -295,7 +295,8 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                     }
                     else
                     {
-                        double j = Convert.ToDouble(value);
+                        double j;
+                        double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out j);
                         m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
                 }

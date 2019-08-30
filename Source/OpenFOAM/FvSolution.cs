@@ -26,6 +26,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
+            Dictionary<string, object> m_SIMPLE = m_DictFile["SIMPLE"] as Dictionary<string, object>;
+            m_SIMPLE.Add("pRefPoint", m_Settings.LocationInMesh/*"(" + m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat).Replace(';', ' ') + ")"*/);
             base.InitAttributes();
         }
     }
