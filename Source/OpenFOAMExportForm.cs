@@ -348,25 +348,26 @@ namespace BIM.OpenFOAMExport
         {
             switch (param.Definition.ParameterType)
             {
-                //volumeflow
-                case ParameterType.HVACAirflow:
-                    {
-                        //Not implemented yet.
-                        break;
-                    }
                 //velocity
                 case ParameterType.HVACVelocity:
                     {
                         //convert into dot-comma convention
-                        paramValue = double.Parse(param.AsValueString().Trim(' ', 'm', '/', 's'), System.Globalization.CultureInfo.InvariantCulture);
+                        paramValue = double.Parse(param.AsValueString().Trim(" m/s".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture);
                         break;
                     }
-                //pressure loss
-                case ParameterType.HVACPressure:
+                //volumeflow
+                case ParameterType.HVACAirflow:
                     {
                         //Not implemented yet.
+                        paramValue = double.Parse(param.AsValueString().Trim(" m/h³".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture);
                         break;
                     }
+                ////pressure loss
+                //case ParameterType.HVACPressure:
+                //    {
+                //        //Not implemented yet.
+                //        break;
+                //    }
                     //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
             }
 
