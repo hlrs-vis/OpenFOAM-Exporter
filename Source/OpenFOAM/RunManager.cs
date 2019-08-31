@@ -570,8 +570,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             {
                 "scp -P "+ m_Settings.SSH.Port + " -r " + m_CasePath + " " + m_Settings.SSH.ConnectionString() + ":" + m_Settings.SSH.ServerCaseFolder,
                 "ssh -p " + m_Settings.SSH.Port + " -t " + m_Settings.SSH.ConnectionString(),
-                " \"" + m_Settings.SSH.OfAlias,
-                "cd " + m_Settings.SSH.ServerCaseFolder
+                " \"shopt -s expand_aliases ; source ~/.bash_aliases ; eval " + m_Settings.SSH.OfAlias +
+                "; cd " + m_Settings.SSH.ServerCaseFolder
             };
             return shellCommands;
         }
@@ -616,7 +616,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 sw.Write(command);
                 return;
             }
-            sw.Write(" && " + command);
+            sw.Write("; eval " + command);
         }
 
         /// <summary>
