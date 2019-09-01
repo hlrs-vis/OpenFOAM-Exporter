@@ -48,12 +48,12 @@ namespace BIM.OpenFOAMExport
         private ElementId m_SphereLocationInMesh;
 
         /// <summary>
-        /// 
+        /// Current duct terminals in scene of the active document.
         /// </summary>
-        private List<Element> ductTerminals;
+        private List<Element> m_DuctTerminals;
         
         /// <summary>
-        /// 
+        /// Current inlet/outlet material that specify the surfaces.
         /// </summary>
         private List<ElementId> m_InletOutletMaterials;
 
@@ -75,7 +75,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// OpenFOAM-TreeView for default simulation parameter
         /// </summary>
-        private readonly OpenFOAMTreeView m_OpenFOAMTreeView = new OpenFOAMTreeView();
+        private OpenFOAMTreeView m_OpenFOAMTreeView; /*= new OpenFOAMTreeView();*/
 
         /// <summary>
         /// Sorted dictionary for the unity properties that can be set in a drop down menu.
@@ -129,6 +129,7 @@ namespace BIM.OpenFOAMExport
         public OpenFOAMExportForm(UIApplication revit)
         {
             InitializeComponent();
+            m_OpenFOAMTreeView = new OpenFOAMTreeView();
             m_Revit = revit;
             m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
             tbSSH.Enabled = false;
@@ -192,10 +193,13 @@ namespace BIM.OpenFOAMExport
 
             // comboBoxSolver
             var enumSolver = SolverControlDict.buoyantBoussinesqSimpleFoam;
-            foreach (var value in Enum.GetValues(enumSolver.GetType()))
-            {
-                comboBoxSolver.Items.Add(value);
-            }
+            comboBoxSolver.Items.Add(enumSolver);
+            comboBoxSolver.Items.Add(SolverControlDict.simpleFoam);
+            //Not all solver implemented yet.
+            //foreach (var value in Enum.GetValues(enumSolver.GetType()))
+            //{
+            //    comboBoxSolver.Items.Add(value);
+            //}
             comboBoxSolver.SelectedItem = enumSolver;
 
             // comboBoxTransportModel
@@ -244,7 +248,7 @@ namespace BIM.OpenFOAMExport
 
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                false, 0, 100, 1, 100, 0, 8, 6, 4, selectedCategories, dup);
+                false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
             if (!InitBIMData())
             {
                 return;
@@ -258,27 +262,37 @@ namespace BIM.OpenFOAMExport
         /// <returns>true, if BIMData used.</returns>
         private bool InitBIMData()
         {
-            if(m_Settings == null)
+            if (m_Settings == null)
             {
                 return false;
             }
 
-            bool succeed = false;
-
             //get duct-terminals in active document
-            /*var */ductTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
-            //get materials
-            /*var */m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, ductTerminals);
+            m_DuctTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
 
-            foreach (FamilyInstance instance in ductTerminals)
+            //get materials
+            m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, m_DuctTerminals);
+
+            return InitAirFlowVelocity();
+        }
+
+        /// <summary>
+        /// Searches for inlet/outlet to compute airflow velocity based on airflow volume and surface area.
+        /// </summary>
+        /// <returns>True, if there is no error while computing.</returns>
+        private bool InitAirFlowVelocity()
+        {
+            bool succeed = false;
+            foreach (FamilyInstance instance in m_DuctTerminals)
             {
                 double paramValue = 0;
+                var surfaceArea = GetSurfaceArea(instance);
                 foreach (Parameter param in instance.Parameters)
                 {
                     paramValue = 0;
                     try
                     {
-                        paramValue = GetAirFlowValue(paramValue, param);
+                        paramValue = ComputeAirFlowValue(paramValue, surfaceArea, param);
                     }
                     catch (Exception)
                     {
@@ -287,13 +301,12 @@ namespace BIM.OpenFOAMExport
                         return false;
                     }
 
-
                     if (paramValue != 0)
                     {
                         FamilySymbol famSym = instance.Symbol;
 
                         //get FaceNormal
-                        var faceNormal = GetOrientationInletOutlet(m_InletOutletMaterials, instance);
+                        var faceNormal = GetOrientationInletOutlet(instance);
 
                         string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
                         string nameDuct = nameDuctFam.Replace(" ", "_");
@@ -303,7 +316,7 @@ namespace BIM.OpenFOAMExport
                             m_Settings.Outlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (-paramValue));
                             succeed = true;
                         }
-                        else if(nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
+                        else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                         {
                             m_Settings.Inlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * paramValue);
                             succeed = true;
@@ -316,12 +329,36 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
+        /// Search for inlet/outlet face and return the surfaceArea.
+        /// </summary>
+        /// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
+        /// <returns>Surfacearea as double.</returns>
+        private double GetSurfaceArea(FamilyInstance instance)
+        {
+            double area = 0;
+            var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
+            m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
+
+            var geometry = instance.get_Geometry(m_ViewOptions);
+            Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
+            if (solid == default)
+                return area;
+
+            Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
+            if(face != null)
+            {
+                //convert from imperial unit system to metric
+                area = UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+            }
+            return area;
+        }
+
+        /// <summary>
         /// Search for inlet/outlet face and return the faceNormal.
         /// </summary>
-        /// <param name="m_InletOutletMaterials">Material list with material elementID's.</param>
         /// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
         /// <returns>Face normal.</returns>
-        private XYZ GetOrientationInletOutlet(List<ElementId> m_InletOutletMaterials, FamilyInstance instance)
+        private XYZ GetOrientationInletOutlet(FamilyInstance instance)
         {
             XYZ faceNormal = new XYZ(0, 0, 0);
             var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
@@ -333,8 +370,13 @@ namespace BIM.OpenFOAMExport
             if (solid == default)
                 return faceNormal;
 
-            DataGenerator.GetFaceNormal(m_InletOutletMaterials, ref faceNormal, solid);
-
+            Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
+            if(face != null)
+            {
+                UV point = new UV();
+                faceNormal = face.ComputeNormal(point);
+            }
+            
             return faceNormal;
         }
 
@@ -342,33 +384,42 @@ namespace BIM.OpenFOAMExport
         /// Initialize paramValue with the airflow parameter as double.
         /// </summary>
         /// <param name="paramValue">Parameter value empty.</param>
+        /// <param name="area">Surface area.</param>
         /// <param name="param">Parameter object.</param>
         /// <returns>Double.</returns>
-        private static double GetAirFlowValue(double paramValue, Parameter param)
+        private static double ComputeAirFlowValue(double paramValue, double area, Parameter param)
         {
+            bool volumenFlow = false;
             switch (param.Definition.ParameterType)
             {
                 //velocity
-                case ParameterType.HVACVelocity:
-                    {
-                        //convert into dot-comma convention
-                        paramValue = double.Parse(param.AsValueString().Trim(" m/s".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture);
-                        break;
-                    }
+                //case ParameterType.HVACVelocity:
+                //    {
+                //        //convert into dot-comma convention
+                //        paramValue = double.Parse(param.AsValueString().Trim(" m/s".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture);
+                //        volumenFlow = false;
+                //        break;
+                //    }
                 //volumeflow
                 case ParameterType.HVACAirflow:
                     {
-                        //Not implemented yet.
-                        paramValue = double.Parse(param.AsValueString().Trim(" m/h³".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture);
+                        //m³/h => m³/s
+                        paramValue = UnitUtils.ConvertFromInternalUnits(param.AsDouble(), DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND);/*double.Parse(param.AsValueString().Trim(" m³/h".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture)*/;
+                        volumenFlow = true;
                         break;
                     }
-                ////pressure loss
+                //pressure loss
                 //case ParameterType.HVACPressure:
                 //    {
                 //        //Not implemented yet.
                 //        break;
                 //    }
                     //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+            }
+
+            if(volumenFlow && area != 0)
+            {
+                paramValue = paramValue / area;
             }
 
             return paramValue;
@@ -635,7 +686,7 @@ namespace BIM.OpenFOAMExport
 
                 //Set current selected incompressible solver
                 SolverControlDict appInc = (SolverControlDict)comboBoxSolver.SelectedItem;
-                m_Settings.AppIncompressible = appInc;
+                m_Settings.AppSolverControlDict = appInc;
 
                 //Set current selected transportModel
                 TransportModel transport = (TransportModel)comboBoxTransportModel.SelectedItem;
@@ -833,6 +884,12 @@ namespace BIM.OpenFOAMExport
         private void ComboBoxSolver_SelectedValueChanged(object sender, EventArgs e)
         {
             //Not implemented yet.
+            m_Settings.AppSolverControlDict = (SolverControlDict)comboBoxSolver.SelectedItem;
+            m_Settings.Update();
+            TreeNodeCollection collection = m_OpenFOAMTreeView.Nodes;
+            collection.Clear();
+            InitializeDefaultParameterOpenFOAM();
+            //m_OpenFOAMTreeView.Refresh();
         }
 
         /// <summary>
@@ -1480,6 +1537,7 @@ namespace BIM.OpenFOAMExport
                 }
                 foreach (Element elem in new FilteredElementCollector(m_ActiveDocument, m_ActiveDocument.ActiveView.Id).WhereElementIsNotElementType())
                 {
+                    //TO-DO:FIX FOR SWITCHING BETWEEN ACTIVE WINDOWS WHILE SETTING LOCATION IN MESH
                     m_ActiveDocument.ActiveView.SetElementOverrides(elem.Id, ogs);
                 }
                 t.Commit();

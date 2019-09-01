@@ -565,6 +565,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
+            //***********************SSH FOR LINUX IMPLEMENTED*******************/ 
             //-t for print out all outputs from remote server to client.
             List<string> shellCommands = new List<string>
             {

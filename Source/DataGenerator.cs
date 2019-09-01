@@ -229,7 +229,7 @@ namespace BIM.OpenFOAMExport
             //commands as string
             List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract", "snappyHexMesh", "rm -r processor*" };
             //, "simpleFoam", "rm -r processor*"};
-            commands.Add(m_Settings.AppIncompressible.ToString());
+            commands.Add(m_Settings.AppSolverControlDict.ToString());
             commands.Add("rm -r processor*");
 
             //run commands in windows-openfoam-environment
@@ -970,13 +970,13 @@ namespace BIM.OpenFOAMExport
         /// <param name="faceNormal">Reference of the face normal.</param>
         /// <param name="solid">Solid that will be checked.</param>
         /// <returns>Face normal as XYZ object.</returns>
-        public static void GetFaceNormal(List<ElementId> materialIds, ref XYZ faceNormal, Solid solid)
+        public static Face GetFace(List<ElementId> materialIds, /*ref Face refFace*//*XYZ faceNormal*/ Solid solid)
         {
             // a solid has many faces
             FaceArray faces = solid.Faces;
             if (0 == faces.Size)
             {
-                return;
+                return null;
             }
 
             foreach (Face face in faces)
@@ -991,11 +991,13 @@ namespace BIM.OpenFOAMExport
                 }
                 if (materialIds.Contains(face.MaterialElementId))
                 {
-                    UV point = new UV();
-                    faceNormal = face.ComputeNormal(point);
-                    break;
+                    return face;
+                    //UV point = new UV();
+                    //faceNormal = face.ComputeNormal(point);
+                    //break;
                 }
             }
+            return null;
         }
 
         /// <summary>

@@ -1142,7 +1142,7 @@ namespace BIM.OpenFOAMExport
 
 
         //Getter-Setter ControlDict        
-        public SolverControlDict AppIncompressible { get => m_AppControlDictSolver; set => m_AppControlDictSolver = value; }
+        public SolverControlDict AppSolverControlDict { get => m_AppControlDictSolver; set => m_AppControlDictSolver = value; }
         //public TimeFormat _TimeFormat { get => m_TimeFormat; set => m_TimeFormat = value; }
         //public WriteFormat _WriteFormat { get => m_WriteFormat; set => m_WriteFormat = value; }
         //public WriteControl _WriteControl { get => m_WriteControl; set => m_WriteControl = value; }
@@ -1801,10 +1801,6 @@ namespace BIM.OpenFOAMExport
                     { "epsilon", 0.7 },
                     { "p", 0.3 }
                 };
-                //m_relaxFactor_k = 0.7;
-                //m_relaxFactor_U = 0.7;
-                //m_relaxFactor_epsilon = 0.7;
-                //m_relaxFactor_p = 0.3;
             }
         }
 
@@ -1844,15 +1840,6 @@ namespace BIM.OpenFOAMExport
             Smoother smootherU = Smoother.GaussSeidel;
             Smoother smootherK = Smoother.GaussSeidel;
             Smoother smootherEpsilon = Smoother.GaussSeidel;
-
-            //FvSolution
-            //FvSolutionParamter _p = new FvSolutionParamter
-            //{
-            //    Solver = solverP,
-            //    RelTol = 0.1,
-            //    Tolerance = 1e-7,
-            //    NSweeps = 0
-            //};
 
             if (m_AppControlDictSolver == SolverControlDict.buoyantBoussinesqSimpleFoam)
             {
@@ -1953,6 +1940,24 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
+        /// Update settings.
+        /// </summary>
+        public void Update()
+        {
+            m_SimulationDefaultList = new Dictionary<string, object>();
+
+            m_System = new Dictionary<string, object>();
+            m_Constant = new Dictionary<string, object>();
+            m_Null = new Dictionary<string, object>();
+
+            InitFvSchemes();
+            InitFvSolutionRelaxationFactors();
+            InitFvSolutionSIMPLE();
+            InitFvSolutionSolver();
+            InitOpenFOAMFolderDictionaries();
+        }
+
+        /// <summary>
         /// Initialize system dicitonary and add it to simulationDefaultList.
         /// </summary>
         private void InitSystemDictionary()
@@ -1973,35 +1978,6 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private void InitNullDictionary()
         {
-            //switch(m_AppControlDictSolver)
-            //{
-            //    case SolverControlDict.simpleFoam:
-            //        {
-            //            CreateFoamParametersDictionary();
-            //            break;
-            //        }
-            //    case SolverControlDict.buoyantBoussinesqSimpleFoam:
-            //        {
-            //            break;
-            //        }
-            //    case SolverControlDict.adjointShapeOptimizationFoam:
-            //    case SolverControlDict.boundaryFoam:
-            //    case SolverControlDict.icoFoam:
-            //    case SolverControlDict.nonNewtonianIcoFoam:
-            //    case SolverControlDict.pimpleDyMFoam:
-            //    case SolverControlDict.pimpleFoam:
-            //    case SolverControlDict.pisoFoam:
-            //    case SolverControlDict.porousSimpleFoam:
-            //    case SolverControlDict.shallowWaterFoam:
-            //    case SolverControlDict.SRFPimpleFoam:
-            //    case SolverControlDict.SRFSimpleFoam:
-            //    case SolverControlDict.buoyantBoussinesqPimpleFoam:
-            //    case SolverControlDict.buoyantPimpleFoam:
-            //    case SolverControlDict.buoyantSimpleFoam:
-            //    case SolverControlDict.chtMultiRegionFoam:
-            //    case SolverControlDict.chtMultiRegionSimpleFoam:
-            //        break;
-            //}
             CreateFoamParametersDictionaries();
             m_SimulationDefaultList.Add("0", m_Null);
         }
@@ -2400,15 +2376,6 @@ namespace BIM.OpenFOAMExport
             {
                 AddLESModelParameterToList(initialParameters, (LESModel)model);
             }
-
-            ////U
-            //InitialParameter U = InitialParameter(model, InitialFOAMParameter.U);
-
-            ////p
-            //InitialParameter p = InitialParameter(model, InitialFOAMParameter.p);
-
-            //initialParameters.Add(U);
-            //initialParameters.Add(p);
         }
 
 
