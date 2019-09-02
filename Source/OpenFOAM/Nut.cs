@@ -7,11 +7,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
     /// </summary>
     public class Nut : FOAMParameter<double>
     {
-        ///// <summary>
-        ///// InternalField entry
-        ///// </summary>
-        //private InternalField<double> m_InternalField;
-
         /// <summary>
         /// Constructor.
         /// </summary>

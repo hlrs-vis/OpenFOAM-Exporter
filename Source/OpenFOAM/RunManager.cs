@@ -185,26 +185,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                             runCommands.Add("reconstructPar -latestTime");
                             continue;
                         }
-                        //else if(command.Equals("buoyantBoussinesqSimpleFoam"))
-                        //{
-                        //    runCommands.Add("decomposePar");
-                        //    runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
-                        //    runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
-                        //    runCommands.Add("reconstructPar -time " + "'1,2,3,4,5,6,7,8,9,10'");
-                        //    continue;
-                        //}
                     }
                 }
-
-                //commands that have no log function.
-                //if (command.Equals("\"") || command.Contains("rm -r") 
-                //    || command.Contains("call") || /*USEFUL FOR DEBUGGING BATCH*/command.Contains("pause")
-                //    || command.Contains("scp") || command.Contains("ssh"))
-                //{
-                //    runCommands.Add(command);
-                //    continue;
-                //}
-                runCommands.Add(command /*+ log + command + ".log"*/);
+                runCommands.Add(command);
             }
 
             //write commands into batch file

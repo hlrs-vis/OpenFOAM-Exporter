@@ -343,7 +343,7 @@ namespace BIM.OpenFOAMExport
                 }
                 else if(nameParam.Contains("p."))
                 {
-                    parameter = new P(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new P("p", version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("epsilon."))
                 {

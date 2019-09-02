@@ -27,6 +27,7 @@ using Category = Autodesk.Revit.DB.Category;
 using Autodesk.Revit.DB;
 using System.Text.RegularExpressions;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 
 namespace BIM.OpenFOAMExport
 {
@@ -75,7 +76,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// OpenFOAM-TreeView for default simulation parameter
         /// </summary>
-        private OpenFOAMTreeView m_OpenFOAMTreeView; /*= new OpenFOAMTreeView();*/
+        private OpenFOAMTreeView m_OpenFOAMTreeView;
 
         /// <summary>
         /// Sorted dictionary for the unity properties that can be set in a drop down menu.
@@ -131,6 +132,7 @@ namespace BIM.OpenFOAMExport
             InitializeComponent();
             m_OpenFOAMTreeView = new OpenFOAMTreeView();
             m_Revit = revit;
+            m_Revit.ViewActivating += Revit_ViewActivating;
             m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
             tbSSH.Enabled = false;
             tbOpenFOAM.Enabled = false;
@@ -177,6 +179,8 @@ namespace BIM.OpenFOAMExport
             //initialize SSH
             InitializeSSH();
         }
+
+
 
         /// <summary>
         /// Initializes the comboBoxes of the OpenFOAM-Tab.
@@ -392,14 +396,6 @@ namespace BIM.OpenFOAMExport
             bool volumenFlow = false;
             switch (param.Definition.ParameterType)
             {
-                //velocity
-                //case ParameterType.HVACVelocity:
-                //    {
-                //        //convert into dot-comma convention
-                //        paramValue = double.Parse(param.AsValueString().Trim(" m/s".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture);
-                //        volumenFlow = false;
-                //        break;
-                //    }
                 //volumeflow
                 case ParameterType.HVACAirflow:
                     {
@@ -541,6 +537,7 @@ namespace BIM.OpenFOAMExport
 
             foreach(var att in dict)
             {
+                //new datatypes needs to be handled here.
                 keyPath.Add(att.Key);
                 TreeNode child = new TreeNode(att.Key);
                 if (att.Value is Dictionary<string,object>)
@@ -647,62 +644,8 @@ namespace BIM.OpenFOAMExport
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                SaveFormat saveFormat;
-                if (rbBinary.Checked)
-                {
-                    saveFormat = SaveFormat.binary;
-                }
-                else
-                {
-                    saveFormat = SaveFormat.ascii;
-                }
-                m_Settings.SaveFormat = saveFormat;
-
-                ElementsExportRange exportRange;
-                exportRange = ElementsExportRange.OnlyVisibleOnes;
-
-                m_Settings.ExportRange = exportRange;
-
-                // get selected categories from the category list
-                List<Category> selectedCategories = new List<Category>();
-
-                // only for projects
-                if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
-                {
-                    foreach (TreeNode treeNode in tvCategories.Nodes)
-                    {
-                        AddSelectedTreeNode(treeNode, selectedCategories);
-                    }
-                }
-
-                //Set current selected unit
-                DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
-                m_SelectedDUT = dup;
-                m_Settings.Units = dup;
-
-                //Set current selected OpenFoam-Environment as active.
-                OpenFOAMEnvironment env = (OpenFOAMEnvironment)comboBoxEnv.SelectedItem;
-                m_Settings.OpenFOAMEnvironment = env;
-
-                //Set current selected incompressible solver
-                SolverControlDict appInc = (SolverControlDict)comboBoxSolver.SelectedItem;
-                m_Settings.AppSolverControlDict = appInc;
-
-                //Set current selected transportModel
-                TransportModel transport = (TransportModel)comboBoxTransportModel.SelectedItem;
-                m_Settings.TransportModel = transport;
-
-                //set number of cpu
-                if (int.TryParse(textBoxCPU.Text, out int cpu))
-                {
-                    m_Settings.NumberOfSubdomains = cpu;
-                }
-                else
-                {
-                    MessageBox.Show("Please type in the number of subdomains (CPU) for the simulation");
-                    textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
+                if (!UpdateNonDefaultSettings())
                     return;
-                }
 
                 TopMost = false;
 
@@ -731,6 +674,75 @@ namespace BIM.OpenFOAMExport
                 MessageBox.Show(OpenFOAMExportResource.CANCEL_FILE_NOT_SAVED, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
+        }
+
+        /// <summary>
+        /// Updates settings parameter from general section of the OpenFOAM-Tab.
+        /// </summary>
+        private bool UpdateNonDefaultSettings()
+        {
+            if (m_Settings == null)
+            {
+                return false;
+            }
+            SaveFormat saveFormat;
+            if (rbBinary.Checked)
+            {
+                saveFormat = SaveFormat.binary;
+            }
+            else
+            {
+                saveFormat = SaveFormat.ascii;
+            }
+            m_Settings.SaveFormat = saveFormat;
+
+            ElementsExportRange exportRange;
+            exportRange = ElementsExportRange.OnlyVisibleOnes;
+
+            m_Settings.ExportRange = exportRange;
+
+            // get selected categories from the category list
+            List<Category> selectedCategories = new List<Category>();
+
+            // only for projects
+            if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
+            {
+                foreach (TreeNode treeNode in tvCategories.Nodes)
+                {
+                    AddSelectedTreeNode(treeNode, selectedCategories);
+                }
+            }
+
+            //Set current selected unit
+            DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
+            m_SelectedDUT = dup;
+            m_Settings.Units = dup;
+
+            //Set current selected OpenFoam-Environment as active.
+            OpenFOAMEnvironment env = (OpenFOAMEnvironment)comboBoxEnv.SelectedItem;
+            m_Settings.OpenFOAMEnvironment = env;
+
+            //Set current selected incompressible solver
+            SolverControlDict appInc = (SolverControlDict)comboBoxSolver.SelectedItem;
+            m_Settings.AppSolverControlDict = appInc;
+
+            //Set current selected transportModel
+            TransportModel transport = (TransportModel)comboBoxTransportModel.SelectedItem;
+            m_Settings.TransportModel = transport;
+
+            //set number of cpu
+            if (int.TryParse(textBoxCPU.Text, out int cpu))
+            {
+                m_Settings.NumberOfSubdomains = cpu;
+            }
+            else
+            {
+                MessageBox.Show("Please type in the number of subdomains (CPU) for the simulation");
+                textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -883,13 +895,11 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">event args.</param>
         private void ComboBoxSolver_SelectedValueChanged(object sender, EventArgs e)
         {
-            //Not implemented yet.
             m_Settings.AppSolverControlDict = (SolverControlDict)comboBoxSolver.SelectedItem;
             m_Settings.Update();
             TreeNodeCollection collection = m_OpenFOAMTreeView.Nodes;
             collection.Clear();
             InitializeDefaultParameterOpenFOAM();
-            //m_OpenFOAMTreeView.Refresh();
         }
 
         /// <summary>
@@ -1493,7 +1503,7 @@ namespace BIM.OpenFOAMExport
             if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
             {
                 List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
-                //XYZ xyz = new XYZ(entries[0], entries[1], entries[2]);
+                //needs to be converted from internal Unit to meters
                 double x = UnitUtils.ConvertFromInternalUnits(entries[0], DisplayUnitType.DUT_METERS);
                 double y = UnitUtils.ConvertFromInternalUnits(entries[1], DisplayUnitType.DUT_METERS);
                 double z = UnitUtils.ConvertFromInternalUnits(entries[2], DisplayUnitType.DUT_METERS);
@@ -1537,7 +1547,6 @@ namespace BIM.OpenFOAMExport
                 }
                 foreach (Element elem in new FilteredElementCollector(m_ActiveDocument, m_ActiveDocument.ActiveView.Id).WhereElementIsNotElementType())
                 {
-                    //TO-DO:FIX FOR SWITCHING BETWEEN ACTIVE WINDOWS WHILE SETTING LOCATION IN MESH
                     m_ActiveDocument.ActiveView.SetElementOverrides(elem.Id, ogs);
                 }
                 t.Commit();
@@ -1601,6 +1610,19 @@ namespace BIM.OpenFOAMExport
         {
             m_Changed = false;
             m_Clicked = false;
+        }
+
+        /// <summary>
+        /// Event that will be called if user changes view while add-in is open.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">ViewActivatedEventArgs.</param>
+        private void Revit_ViewActivating(object sender, ViewActivatingEventArgs e)
+        {
+            if(m_Changed || m_Clicked)
+            {
+                TxtBoxLocationInMesh_Leave(sender, e);
+            }
         }
     }
 }

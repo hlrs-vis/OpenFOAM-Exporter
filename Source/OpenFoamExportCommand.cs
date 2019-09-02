@@ -16,6 +16,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
+// Modified version
+// Author: Marko Djuric
 
 using System;
 using System.Threading.Tasks;
@@ -32,7 +34,7 @@ using System.Threading;
 namespace BIM.OpenFOAMExport
 {
     /// <summary>
-    /// Class STLExportCommand is the entry of the AddIn program and contains the method to save STL file.
+    /// Class STLExportCommand is the entry of the AddIn program and contains the method to save STL file and creates OpenFOAM case.
     /// </summary>
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
@@ -74,10 +76,10 @@ namespace BIM.OpenFOAMExport
             Result result = StartOpenFOAMExportForm();
             return result;
 
-            ///pop up the form
+            ///pop up the form //////FROM STL-EXPORTER/////////
             //using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
             //{
-            //    //    //asynchronous call of showDialog()
+            //    //    Attempt to make non modal window  NOT INCLUDED IN STL EXPORTER //asynchronous call of showDialog()
             //    //    var task = Task.Run(async () => await exportForm.ShowDialogAsync());
             //    if (DialogResult.Cancel == /*task.Result*/exportForm.ShowDialog())
             //    {
@@ -118,6 +120,9 @@ namespace BIM.OpenFOAMExport
 
 namespace AsyncShowDialog
 {
+    /// <summary>
+    /// Call Window.ShowDialog asynchron extension.
+    /// </summary>
     public static class ShowDialogAsyncExt
     {
         /// <summary>

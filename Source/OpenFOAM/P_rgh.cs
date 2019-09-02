@@ -20,7 +20,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
         public P_rgh(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _wallName,
             List<string> _InletNames, List<string> _OutletNames)
-            : base(version, path, attributes, format, settings, _wallName, _InletNames, _OutletNames)
+            : base("p_rgh", version, path, attributes, format, settings, _wallName, _InletNames, _OutletNames)
         {
 
         }

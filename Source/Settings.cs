@@ -2543,9 +2543,10 @@ namespace BIM.OpenFOAMExport
 
                 case InitialFOAMParameter.T:
                     {
-                        double tempWall = 273.15;
-                        double tempOutlet = tempWall + 22;
-                        double tempInlet = 273.15 + 28;
+                        double kelvin = 273.15;
+                        double tempWall = kelvin + 25;
+                        double tempOutlet = kelvin + 25;
+                        double tempInlet = kelvin + 29;
 
                         parameter = new InitialParameter(param.ToString(), m_TransportModelParameter["TRef"], model);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", tempWall, PatchType.wall, false);

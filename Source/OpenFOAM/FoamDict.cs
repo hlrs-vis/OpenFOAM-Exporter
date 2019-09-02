@@ -10,12 +10,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <summary>
         /// Name of the dictionary
         /// </summary>
-        protected string name = string.Empty;
+        protected string m_Name = string.Empty;
 
         /// <summary>
         /// Class of the dictionary
         /// </summary>
-        protected string _class = string.Empty;
+        protected string m_Class = string.Empty;
 
         /// <summary>
         /// Settings-object
@@ -35,12 +35,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <summary>
         /// FoamFile-Object
         /// </summary>
-        private readonly FOAMFile foamFile;
+        private readonly FOAMFile m_FoamFile;
 
         /// <summary>
         /// Getter for the FoamFile.
         /// </summary>
-        public FOAMFile FoamFile { get => foamFile;}
+        public FOAMFile FoamFile { get => m_FoamFile;}
 
         /// <summary>
         /// Constructor.
@@ -52,22 +52,22 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-object</param>
-        public FOAMDict(string _name, string m_class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
+        public FOAMDict(string _name, string _class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
         {
-            name = _name;
-            _class = m_class;
+            m_Name = _name;
+            m_Class = _class;
             m_Settings = settings;
 
             if (format == SaveFormat.ascii)
             {
-                foamFile = new FoamFileAsAscII(name, version, path, _class, attributes, format);
+                m_FoamFile = new FoamFileAsAscII(m_Name, version, path, m_Class, attributes, format);
             }
             else if (format == SaveFormat.binary)
             {
-                foamFile = new FoamFileAsBinary(name, version, path, _class, attributes, format);
+                m_FoamFile = new FoamFileAsBinary(m_Name, version, path, m_Class, attributes, format);
             }
             m_ParentFolder = m_Settings.SimulationDefault[FoamFile.Location.Trim('"')] as Dictionary<string, object>;
-            m_DictFile = m_ParentFolder[name] as Dictionary<string, object>;
+            m_DictFile = m_ParentFolder[m_Name] as Dictionary<string, object>;
         }
 
         /// <summary>
