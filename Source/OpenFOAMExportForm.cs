@@ -28,6 +28,7 @@ using Autodesk.Revit.DB;
 using System.Text.RegularExpressions;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using System.IO;
 
 namespace BIM.OpenFOAMExport
 {
@@ -130,9 +131,14 @@ namespace BIM.OpenFOAMExport
         public OpenFOAMExportForm(UIApplication revit)
         {
             InitializeComponent();
+
             m_OpenFOAMTreeView = new OpenFOAMTreeView();
             m_Revit = revit;
-            m_Revit.ViewActivating += Revit_ViewActivating;
+
+            //needs to be implemented cause of non-modal window.
+            FormClosed += OpenFOAMExportForm_FormClosed;
+            m_Revit.ViewActivating += Revit_ViewActivating;            
+            
             m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
             tbSSH.Enabled = false;
             tbOpenFOAM.Enabled = false;
@@ -180,8 +186,6 @@ namespace BIM.OpenFOAMExport
             InitializeSSH();
         }
 
-
-
         /// <summary>
         /// Initializes the comboBoxes of the OpenFOAM-Tab.
         /// </summary>
@@ -199,7 +203,7 @@ namespace BIM.OpenFOAMExport
             var enumSolver = SolverControlDict.buoyantBoussinesqSimpleFoam;
             comboBoxSolver.Items.Add(enumSolver);
             comboBoxSolver.Items.Add(SolverControlDict.simpleFoam);
-            //Not all solver implemented yet.
+            //Not all solver are implemented yet.
             //foreach (var value in Enum.GetValues(enumSolver.GetType()))
             //{
             //    comboBoxSolver.Items.Add(value);
@@ -1319,9 +1323,10 @@ namespace BIM.OpenFOAMExport
         {
             if(!m_Clicked)
             {
-                System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
-                //Create object of current application
-                XYZ xyz = new XYZ(location.X, location.Y, location.Z);
+                //System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
+
+                //Create sphere
+                XYZ xyz = ConvertLocationInMeshToInternalUnit()/*new XYZ(location.X, location.Y, location.Z)*/;
                 CreateSphereDirectShape(xyz);
                 m_Clicked = true;
             }
@@ -1382,6 +1387,7 @@ namespace BIM.OpenFOAMExport
             ids.Add(m_SphereLocationInMesh);
             HighlightElementInScene(m_ActiveDocument, m_SphereLocationInMesh, 98);
             m_Revit.ActiveUIDocument.Selection.SetElementIds(ids);
+           
         }
 
         /// <summary>
@@ -1429,7 +1435,10 @@ namespace BIM.OpenFOAMExport
                     if (e.Id == elementIdToIsolate || elementIdToIsolate == null)
                         doc.ActiveView.SetElementOverrides(e.Id, ogsIsolate);
                     else
+                    {
                         doc.ActiveView.SetElementOverrides(e.Id, ogsFade);
+                        e.Pinned = true;
+                    }
                 }
                 t.Commit();
             }
@@ -1500,22 +1509,44 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void LocationInMesh_ChangeValue()
         {
+            XYZ previousLocation = ConvertLocationInMeshToInternalUnit();
             if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
             {
                 List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
+                
                 //needs to be converted from internal Unit to meters
                 double x = UnitUtils.ConvertFromInternalUnits(entries[0], DisplayUnitType.DUT_METERS);
                 double y = UnitUtils.ConvertFromInternalUnits(entries[1], DisplayUnitType.DUT_METERS);
                 double z = UnitUtils.ConvertFromInternalUnits(entries[2], DisplayUnitType.DUT_METERS);
-                XYZ xyz = new XYZ(x, y, z);
                 m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
-                MoveSphere(xyz);
+
+                //internal length unit = feet
+                XYZ internalXYZ = new XYZ(entries[0], entries[1], entries[2]);
+                internalXYZ = internalXYZ - previousLocation;
+                MoveSphere(internalXYZ);
             }
             else
             {
+                string previousLoc = previousLocation.ToString();
                 MessageBox.Show("Please insert 3 dimensional vector in this format: x y z -> (x,y,z) ∊ ℝ", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
-                txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
+                txtBoxLocationInMesh.Text = previousLoc.Replace(", ", " ").Trim('(', ')')/*m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ")*/;
             }
+        }
+
+        /// <summary>
+        /// Convert locationInMesh in settings to Internal Unit and return as XYZ object. 
+        /// </summary>
+        /// <returns>Location as XYZ as internal Unit.</returns>
+        private XYZ ConvertLocationInMeshToInternalUnit()
+        {
+            System.Windows.Media.Media3D.Vector3D previousVec = m_Settings.LocationInMesh;
+
+            double xPre = UnitUtils.ConvertToInternalUnits(previousVec.X, DisplayUnitType.DUT_METERS);
+            double yPre = UnitUtils.ConvertToInternalUnits(previousVec.Y, DisplayUnitType.DUT_METERS);
+            double zPre = UnitUtils.ConvertToInternalUnits(previousVec.Z, DisplayUnitType.DUT_METERS);
+
+            XYZ previousLocation = new XYZ(xPre, yPre, zPre);
+            return previousLocation;
         }
 
         /// <summary>
@@ -1535,7 +1566,13 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
         {
+            /********************CHANGEVALUE WIRD MEHRMAL AUFGERUFEN*************************/
             TextBox_Leave();
+            var vector = GetLocationOfElementAsVector(m_SphereLocationInMesh);
+            if(vector != new System.Windows.Media.Media3D.Vector3D())
+            {
+                m_Settings.LocationInMesh = vector;
+            }
             OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(0, true, true, false);
             using (Transaction t = new Transaction(m_ActiveDocument, "Delete sphere"))
             {
@@ -1548,10 +1585,41 @@ namespace BIM.OpenFOAMExport
                 foreach (Element elem in new FilteredElementCollector(m_ActiveDocument, m_ActiveDocument.ActiveView.Id).WhereElementIsNotElementType())
                 {
                     m_ActiveDocument.ActiveView.SetElementOverrides(elem.Id, ogs);
+                    elem.Pinned = false;
                 }
                 t.Commit();
             }
+
+            XYZ previousLocation = ConvertLocationInMeshToInternalUnit();
+            string previousLoc = previousLocation.ToString();
+            txtBoxLocationInMesh.Text = previousLoc.Replace(", ", " ").Trim('(', ')');
             m_SphereLocationInMesh = null;
+        }
+
+        /// <summary>
+        /// Search the elementId in active document and return the origin location of it as Vector3D object.
+        /// </summary>
+        /// <param name="id">ElementId of element to search for.</param>
+        /// <returns>Location of element as vector3D.</returns>
+        private System.Windows.Media.Media3D.Vector3D GetLocationOfElementAsVector(ElementId id)
+        {
+            System.Windows.Media.Media3D.Vector3D location = new System.Windows.Media.Media3D.Vector3D();
+            if (id == null)
+                return location;
+
+            var locationInMesh = m_ActiveDocument.GetElement(id) as DirectShape;
+            if(locationInMesh != null)
+            {
+                var geometry = locationInMesh.get_Geometry(new Options());
+                foreach (Solid solid in geometry)
+                {
+                    XYZ point = solid.GetBoundingBox().Transform.Origin;
+                    location.X = UnitUtils.ConvertFromInternalUnits(point.X, DisplayUnitType.DUT_METERS);
+                    location.Y = UnitUtils.ConvertFromInternalUnits(point.Y, DisplayUnitType.DUT_METERS);
+                    location.Z = UnitUtils.ConvertFromInternalUnits(point.Z, DisplayUnitType.DUT_METERS);
+                }
+            }
+            return location;
         }
 
         /// <summary>
@@ -1560,8 +1628,14 @@ namespace BIM.OpenFOAMExport
         /// <param name="xyz">Location sphere will be moved to.</param>
         private void MoveSphere(XYZ xyz)
         {
-            //TO-DO: MOVE EXISTING m_SphereLocationInMesh SPHERE => FOR NOW WILL BE CREATED NEW EVERYTIME.
-            CreateSphereDirectShape(xyz);
+            using (Transaction t = new Transaction(m_ActiveDocument, "Move sphere"))
+            {
+                t.Start();
+                var elem = m_ActiveDocument.GetElement(m_SphereLocationInMesh);
+                elem.Location.Move(xyz);
+                t.Commit();
+            }
+            m_Changed = false;
         }
 
         /// <summary>
@@ -1623,6 +1697,16 @@ namespace BIM.OpenFOAMExport
             {
                 TxtBoxLocationInMesh_Leave(sender, e);
             }
+        }
+
+        /// <summary>
+        /// Event that will be called after closing the form.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">FormClosedEventArgs.</param>
+        private void OpenFOAMExportForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            TxtBoxLocationInMesh_Leave(sender, e);
         }
     }
 }

@@ -1020,18 +1020,9 @@ namespace BIM.OpenFOAMExport
 
 
         //FvSolution
-
         Dictionary<string, object> m_FvParameter;
         Dictionary<string, object> m_RelaxationFactors;
-        //private PFv m_p;
-        //private FvSolutionParamter m_U;
-        //private FvSolutionParamter m_k;
-        //private FvSolutionParamter m_epsilon;
         private int m_nNonOrhtogonalCorrectors;
-        //private double m_relaxFactor_k;
-        //private double m_relaxFactor_U;
-        //private double m_relaxFactor_epsilon;
-        //private double m_relaxFactor_p;
         private Dictionary<string, object> m_residualControl;
 
 
@@ -1135,173 +1126,23 @@ namespace BIM.OpenFOAMExport
         //Getter-Setter Runmanager
         public OpenFOAMEnvironment OpenFOAMEnvironment { get => m_openFOAMEnvironment; set => m_openFOAMEnvironment = value; }
 
-
-        //Getter-Setter BlockMeshDict
-        //public Vector3D SimpleGrading { get => m_SimpleGrading; set => m_SimpleGrading = value; }
-        //public Vector3D CellSize { get => m_CellSize; set => m_CellSize = value; }
-
-
         //Getter-Setter ControlDict        
         public SolverControlDict AppSolverControlDict { get => m_AppControlDictSolver; set => m_AppControlDictSolver = value; }
-        //public TimeFormat _TimeFormat { get => m_TimeFormat; set => m_TimeFormat = value; }
-        //public WriteFormat _WriteFormat { get => m_WriteFormat; set => m_WriteFormat = value; }
-        //public WriteControl _WriteControl { get => m_WriteControl; set => m_WriteControl = value; }
-        //public StopAt _StopAt { get => m_StopAt; set => m_StopAt = value; }
-        //public WriteCompression WriteCompression { get => m_WriteCompression; set => m_WriteCompression = value; }
-        //public StartFrom _StartFrom { get => m_StartFrom; set => m_StartFrom = value; }
-        //public double StartTime { get => m_StartTime; set => m_StartTime = value; }
-        //public double EndTime { get => m_EndTime; set => m_EndTime = value; }
-        //public double DeltaT { get => m_DeltaT; set => m_DeltaT = value; }
-        //public double WriteInterval { get => m_WriteInterval; set => m_WriteInterval = value; }
-        //public double PurgeWrite { get => m_PurgeWrite; set => m_PurgeWrite = value; }
-        //public double WritePrecision { get => m_WritePrecision; set => m_WritePrecision = value; }
-        //public double TimePrecision { get => m_TimePrecision; set => m_TimePrecision = value; }
-        //public bool RunTimeModifiable { get => m_RunTimeModifiable; set => m_RunTimeModifiable = value; }
-
-
-        //Getter-Setter SurfaceFeatureExtract
-        //public ExtractionMethod ExtractionMethod { get => m_ExtractionMethod; set => m_ExtractionMethod = value; }
-        //public Dictionary<string, object> ExtractFromSurfaceCoeffs { get => m_ExtractFromSurfaceCoeffs; set => m_ExtractFromSurfaceCoeffs = value; }
-        //public int IncludedAngle { get => m_IncludedAngle; set => m_IncludedAngle = value; }
-        //public string WriteObj { get => m_WriteObj; set => m_WriteObj = value; }
-
 
         //Getter-Setter DecomposeParDict
         public int NumberOfSubdomains { get => m_NumberOfSubdomains; set => m_NumberOfSubdomains = value; }
-        //public MethodDecompose MethodDecompose { get => m_MethodDecompose; set => m_MethodDecompose = value; }
-        //public CoeffsMethod SimpleCoeffs { get => m_SimpleCoeffs; set => m_SimpleCoeffs = value; }
-        //public CoeffsMethod HierarchicalCoeffs { get => m_HierarchicalCoeffs; set => m_HierarchicalCoeffs = value; }
-        //public string Order { get => m_Order; set => m_Order = value; }
-        //public string DataFile { get => m_DataFile; set => m_DataFile = value; }
-
-
-        //Getter-Setter FvSchemes
-        //public KeyValuePair<string, string> DdtSchemes { get => m_ddtSchemes; set => m_ddtSchemes = value; }
-        //public KeyValuePair<string, string> GradSchemes { get => m_gradSchemes; set => m_gradSchemes = value; }
-        //public List<KeyValuePair<string, string>> DivSchemes { get => m_divSchemes; set => m_divSchemes = value; }
-        //public KeyValuePair<string, string> LaplacianSchemes { get => m_laplacianSchemes; set => m_laplacianSchemes = value; }
-        //public KeyValuePair<string, string> InterpolationSchemes { get => m_interpolationSchemes; set => m_interpolationSchemes = value; }
-        //public KeyValuePair<string, string> SnGradSchemes { get => m_snGradSchemes; set => m_snGradSchemes = value; }
-        //public KeyValuePair<string, string> FluxRequired { get => m_fluxRequired; set => m_fluxRequired = value; }
-
 
         //Getter-Setter FvSolution
-        //public PFv P1 { get => m_p; set => m_p = value; }
-        //public FvSolutionParamter U1 { get => m_U; set => m_U = value; }
-        //public FvSolutionParamter K { get => m_k; set => m_k = value; }
-        //public FvSolutionParamter Epsilon { get => m_epsilon; set => m_epsilon = value; }
         public int NNonOrhtogonalCorrectors { get => m_nNonOrhtogonalCorrectors; set => m_nNonOrhtogonalCorrectors = value; }
-        //public double RelaxFactor_k { get => m_relaxFactor_k; set => m_relaxFactor_k = value; }
-        //public double RelaxFactor_U { get => m_relaxFactor_U; set => m_relaxFactor_U = value; }
-        //public double RelaxFactor_epsilon { get => m_relaxFactor_epsilon; set => m_relaxFactor_epsilon = value; }
-        //public double RelaxFactor_p { get => m_relaxFactor_p; set => m_relaxFactor_p = value; }
-        //public Dictionary<string, object> FvParameter { get => m_FvParameter; set => m_FvParameter = value; }
-        //public Dictionary<string, object>  RelaxFactorDict { get => m_RelaxFactor; set => m_RelaxFactor = value; }
         public Dictionary<string, object> ResidualControl { get => m_residualControl; set => m_residualControl = value; }
 
-
         //Getter-Setter SnappyHexMesh
-        //public bool CastellatedMesh { get => m_CastellatedMesh; set => m_CastellatedMesh = value; }
-        //public bool Snap { get => m_Snap; set => m_Snap = value; }
-        //public bool AddLayers { get => m_AddLayers; set => m_AddLayers = value; }
         public int Debug { get => m_Debug; set => m_Debug = value; }
         public double MergeTolerance { get => m_MergeTolerance; set => m_MergeTolerance = value; }
-        //public int MaxLocalCells { get => m_MaxLocalCells; set => m_MaxLocalCells = value; }
-        //public int MaxGlobalCells { get => m_MaxGlobalCells; set => m_MaxGlobalCells = value; }
-        //public int MinRefinementCalls { get => m_MinRefinementCalls; set => m_MinRefinementCalls = value; }
-        //public int ResolveFeatureAngle { get => m_ResolveFeatureAngle; set => m_ResolveFeatureAngle = value; }
-        //public int NCellsBetweenLevels { get => m_NCellsBetweenLevels; set => m_NCellsBetweenLevels = value; }
-        //public double MaxLoadUnbalance { get => m_MaxLoadUnbalance; set => m_MaxLoadUnbalance = value; }
-        //public ArrayList Features { get => m_Features; set => m_Features = value; }
-        //public string NameEMesh { get => m_NameEMesh; set => m_NameEMesh = value; }
-        //public int FeatureLevel { get => m_FeatureLevel; set => m_FeatureLevel = value; }
-        //public Vector WallLevel { get => m_WallLevel; set => m_WallLevel = value; }
-        //public Vector OutletLevel { get => m_OutletLevel; set => m_OutletLevel = value; }
-        //public Vector InletLevel { get => m_InletLevel; set => m_InletLevel = value; }
         public Vector3D LocationInMesh { get => m_LocationInMesh; set => m_LocationInMesh = value; }
-        //public Dictionary<string, object> RefinementRegions { get => m_RefinementRegions; set => m_RefinementRegions = value; }
-        //public bool AllowFreeStandingZoneFaces { get => m_AllowFreeStandingZoneFaces; set => m_AllowFreeStandingZoneFaces = value; }
-        //public int NSmoothPatch { get => m_NSmoothPatch; set => m_NSmoothPatch = value; }
-        //public int Tolerance { get => m_Tolerance; set => m_Tolerance = value; }
-        //public int NSolverIter { get => m_NSolverIter; set => m_NSolverIter = value; }
-        //public int NRelaxIterSnap { get => m_NRelaxIterSnap; set => m_NRelaxIterSnap = value; }
-        //public int NFeatureSnapIter { get => m_NFeatureSnapIter; set => m_NFeatureSnapIter = value; }
-        //public bool ImplicitFeatureSnap { get => m_ImplicitFeatureSnap; set => m_ImplicitFeatureSnap = value; }
-        //public bool MultiRegionFeatureSnap { get => m_MultiRegionFeatureSnap; set => m_MultiRegionFeatureSnap = value; }
-        //public bool RelativeSizes { get => m_RelativeSizes; set => m_RelativeSizes = value; }
-        //public double ExpansionRatio { get => m_ExpansionRatio; set => m_ExpansionRatio = value; }
-        //public double FinalLayerThickness { get => m_FinalLayerThickness; set => m_FinalLayerThickness = value; }
-        //public double MinThickness { get => m_MinThickness; set => m_MinThickness = value; }
-        //public double MaxFaceThicknessRatio { get => m_MaxFaceThicknessRatio; set => m_MaxFaceThicknessRatio = value; }
-        //public double MaxThicknessToMeadialRatio { get => m_MaxThicknessToMeadialRatio; set => m_MaxThicknessToMeadialRatio = value; }
-        //public int NGrow { get => m_NGrow; set => m_NGrow = value; }
-        //public int FeatureAngle { get => m_FeatureAngle; set => m_FeatureAngle = value; }
-        //public int NRelaxedIterLayer { get => m_NRelaxedIterLayer; set => m_NRelaxedIterLayer = value; }
-        //public int NSmoothSurfaceNormals { get => m_nSmoothSurfaceNormals; set => m_nSmoothSurfaceNormals = value; }
-        //public int NSmoothThickness { get => m_NSmoothThickness; set => m_NSmoothThickness = value; }
-        //public int NSmoothNormals { get => m_NSmoothNormals; set => m_NSmoothNormals = value; }
-        //public int MinMedianAxisAngle { get => m_MinMedianAxisAngle; set => m_MinMedianAxisAngle = value; }
-        //public int NBufferCellsNoExtrude { get => m_NBufferCellsNoExtrude; set => m_NBufferCellsNoExtrude = value; }
-        //public int NLayerIter { get => m_NLayerIter; set => m_NLayerIter = value; }
-        //public Dictionary<string, object> Layers { get => m_Layers; set => m_Layers = value; }
-        //public int MaxNonOrtho { get => m_MaxNonOrtho; set => m_MaxNonOrtho = value; }
-        //public int MaxBoundarySkewness { get => m_MaxBoundarySkewness; set => m_MaxBoundarySkewness = value; }
-        //public int MaxInternalSkewness { get => m_MaxInternalSkewness; set => m_MaxInternalSkewness = value; }
-        //public int MaxConcave { get => m_MaxConcave; set => m_MaxConcave = value; }
-        //public double MinFlatness { get => m_MinFlatness; set => m_MinFlatness = value; }
-        //public double MinVol { get => m_MinVol; set => m_MinVol = value; }
-        //public double MinTetQuality { get => m_MinTetQuality; set => m_MinTetQuality = value; }
-        //public int MinArea { get => m_MinArea; set => m_MinArea = value; }
-        //public double MinTwist { get => m_MinTwist; set => m_MinTwist = value; }
-        //public double MinDeterminant { get => m_MinDeterminant; set => m_MinDeterminant = value; }
-        //public double MinFaceWeight { get => m_MinFaceWeight; set => m_MinFaceWeight = value; }
-        //public double MinVolRatio { get => m_MinVolRatio; set => m_MinVolRatio = value; }
-        //public int MinTriangleTwist { get => m_MinTriangleTwist; set => m_MinTriangleTwist = value; }
-        //public int NSmoothScale { get => m_NSmoothScale; set => m_NSmoothScale = value; }
-        //public double ErrorReduction { get => m_ErrorReduction; set => m_ErrorReduction = value; }
-        //public Dictionary<string, object> Relaxed { get => m_Relaxed; set => m_Relaxed = value; }
-        //public int MaxNonOrthoMeshQualtiy { get => m_MaxNonOrthoMeshQualtiy; set => m_MaxNonOrthoMeshQualtiy = value; }
-        //public int NRelaxeIterLayer { get => m_NRelaxeIterLayer; set => m_NRelaxeIterLayer = value; }
-
-        ////Getter-Setter-U
-        //public Vector3D InternalFieldU { get => m_InternalFieldU; set => m_InternalFieldU = value; }
-        //public FOAMParameterPatch<Vector3D> WallU { get => m_WallU; set => m_WallU = value; }
-        //public FOAMParameterPatch<Vector3D> InletU { get => m_InletU; set => m_InletU = value; }
-        //public FOAMParameterPatch<Vector3D> OutletU { get => m_OutletU; set => m_OutletU = value; }
-
-        ////Getter-Setter-Epsilon
-        //public double InternalFieldEpsilon { get => m_InternalFieldEpsilon; set => m_InternalFieldEpsilon = value; }
-        //public FOAMParameterPatch<double> WallEpsilon { get => m_WallEpsilon; set => m_WallEpsilon = value; }
-        //public FOAMParameterPatch<double> InletEpsilon { get => m_InletEpsilon; set => m_InletEpsilon = value; }
-        //public FOAMParameterPatch<double> OutletEpsilon { get => m_OutletEpsilon; set => m_OutletEpsilon = value; }
-
-        ////Getter-Setter-P
-        //public double InternalFieldP { get => m_InternalFieldP; set => m_InternalFieldP = value; }
-        //public FOAMParameterPatch<double> WallP { get => m_WallP; set => m_WallP = value; }
-        //public FOAMParameterPatch<double> InletP { get => m_InletP; set => m_InletP = value; }
-        //public FOAMParameterPatch<double> OutletP { get => m_OutletP; set => m_OutletP = value; }
-
-        ////Getter-Setter-Nut
-        //public double InternalFieldNut { get => m_InternalFieldNut; set => m_InternalFieldNut = value; }
-        //public FOAMParameterPatch<double> WallNut { get => m_WallNut; set => m_WallNut = value; }
-        //public FOAMParameterPatch<double> InletNut { get => m_InletNut; set => m_InletNut = value; }
-        //public FOAMParameterPatch<double> OutletNut { get => m_OutletNut; set => m_OutletNut = value; }
-
-        ////Getter-Setter-K
-        //public double InternalFieldK { get => m_InternalFieldK; set => m_InternalFieldK = value; }
-        //public FOAMParameterPatch<double> WallK { get => m_WallK; set => m_WallK = value; }
-        //public FOAMParameterPatch<double> InletK { get => m_InletK; set => m_InletK = value; }
-        //public FOAMParameterPatch<double> OutletK { get => m_OutletK; set => m_OutletK = value; }
-
-        //Getter-Setter-G
-        //public double GValue { get => m_GValue; set => m_GValue = value; }
 
         //Getter-Setter-TransportProperties
         public TransportModel TransportModel { get => m_TransportModel; set => m_TransportModel = value; }
-        //public Dictionary<string,object> TransportModelParameter { get => m_TransportModelParameter; }
-
-        //Getter-Setter-TurbulenceProperties
-        //public TurbulenceParameter TurbulenceParameter { get => m_TurbulenceParameter; set => m_TurbulenceParameter = value; }
 
         //Getter-Setter-SSH
         public SSH SSH { get => m_SSH; set => m_SSH = value; }
@@ -1954,6 +1795,7 @@ namespace BIM.OpenFOAMExport
             InitFvSolutionRelaxationFactors();
             InitFvSolutionSIMPLE();
             InitFvSolutionSolver();
+
             InitOpenFOAMFolderDictionaries();
         }
 

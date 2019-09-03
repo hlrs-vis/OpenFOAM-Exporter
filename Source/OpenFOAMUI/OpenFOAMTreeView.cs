@@ -276,13 +276,15 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                 if (m_Vector3DReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value is Vector3D)
                 {
                     List<double> entries = GetListFromVector3DString(valueString);
-                    m_CurrentOFTxtBoxTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
+                    if(entries.Count != 0)
+                        m_CurrentOFTxtBoxTreeNode.Value = new Vector3D(entries[0], entries[1], entries[2]);
                 }
                 //Vector ( d d )
                 else if (m_VectorReg.IsMatch(valueString) && m_CurrentOFTxtBoxTreeNode.Value is Vector)
                 {
                     List<double> entries = GetListFromVector3DString(valueString);
-                    m_CurrentOFTxtBoxTreeNode.Value = new Vector(entries[0], entries[1]);
+                    if(entries.Count != 0)
+                        m_CurrentOFTxtBoxTreeNode.Value = new Vector(entries[0], entries[1]);
                 }
                 //double / integer ( d )
                 else if (m_SingleReg.IsMatch(valueString))
@@ -327,12 +329,11 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// <returns>Double-List</returns>
         public static List<double> GetListFromVector3DString(string vecString)
         {
+            List<double> entries = new List<double>();
             if(vecString.Equals("")|| vecString == string.Empty)
             {
-                return null;
+                return entries;
             }
-
-            List<double> entries = new List<double>();
             double j = 0;
             foreach (string s in vecString.Split(' '))
             {
@@ -350,6 +351,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                     System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_VECTOR_FORMAT,
                         OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                         MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return entries;
                 }
                 
                 entries.Add(j);
