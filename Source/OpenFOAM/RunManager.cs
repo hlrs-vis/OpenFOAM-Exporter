@@ -523,7 +523,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <summary>
         /// Default alias strings.
         /// </summary>
-        private List<string> m_AliasString = new List<string> { "source", "of", "ofx", "bash", "call" };
+        private List<string> m_AliasString = new List<string> { "source", "of", "ofx", /*"bash", */"call"};
 
         /// <summary>
         /// Settings-object contains ssh details.
