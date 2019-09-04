@@ -49,7 +49,7 @@ namespace BIM.OpenFOAMExport
         private int m_TriangularNumber;
 
         /// <summary>
-        /// Name of the STL
+        /// Name of the STL.
         /// </summary>
         private string m_STLName;
 
@@ -148,7 +148,7 @@ namespace BIM.OpenFOAMExport
         /// Initialize Runmanager as RunManagerBlueCFD or RunManagerDocker depending on the WindowsFOAMVersion that is set in Settings.
         /// </summary>
         /// <param name="casePath">Path to openFOAM-Case.</param>
-        private /*void*/GeneratorStatus InitRunManager(string casePath)
+        private GeneratorStatus InitRunManager(string casePath)
         {
             switch(m_Settings.OpenFOAMEnvironment)
             {
@@ -172,7 +172,7 @@ namespace BIM.OpenFOAMExport
     /// Create OpenFOAM-Folder at given path.
     /// </summary>
     /// <param name="path">location for the OpenFOAM-folder</param>
-    private /*void*/GeneratorStatus CreateOpenFOAMCase(string path)
+    private GeneratorStatus CreateOpenFOAMCase(string path)
         {
             List<string> minCaseFolders = new List<string>();
 
@@ -226,11 +226,32 @@ namespace BIM.OpenFOAMExport
                 openFOAMDictionary.Init();
             }
 
+            List<string> commands = new List<string>();
             //commands as string
-            List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract", "snappyHexMesh", "rm -r processor*" };
-            //, "simpleFoam", "rm -r processor*"};
-            commands.Add(m_Settings.AppSolverControlDict.ToString());
-            commands.Add("rm -r processor*");
+            if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.blueCFD)
+            {
+                commands.Add("blockMesh");
+                commands.Add("surfaceFeatureExtract");
+                commands.Add("snappyHexMesh");
+                commands.Add("rm -r processor*");
+                commands.Add(m_Settings.AppSolverControlDict.ToString());
+                commands.Add("rm -r processor*");
+                commands.Add("rm -rf constant / extendedFeatureEdgeMesh > / dev / null 2 > &1");
+                commands.Add("rm -f constant/triSurface/buildings.eMesh > /dev/null 2>&1");
+                commands.Add("rm -f constant/polyMesh/boundary > /dev/null 2>&1");
+            }
+            else
+            {
+                SetupLinux(path, commands);
+            }
+
+            //List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract", "snappyHexMesh", "rm -r processor*" };
+            ////, "simpleFoam", "rm -r processor*"};
+            //commands.Add(m_Settings.AppSolverControlDict.ToString());
+            //commands.Add("rm -r processor*");
+            //commands.Add("rm - rf constant / extendedFeatureEdgeMesh > / dev / null 2 > &1");
+            //commands.Add("rm -f constant/triSurface/buildings.eMesh > /dev/null 2>&1");
+            //commands.Add("rm -f constant/polyMesh/boundary > /dev/null 2>&1");
 
             //run commands in windows-openfoam-environment
             if (!m_RunManager.RunCommands(commands))
@@ -238,6 +259,115 @@ namespace BIM.OpenFOAMExport
                 return GeneratorStatus.FAILURE;
             }
             return GeneratorStatus.SUCCESS;
+        }
+
+        /// <summary>
+        /// Add allrun and allclean to the case folder and add corresponding command to the list.
+        /// </summary>
+        /// <param name="path">Path to case folder.</param>
+        /// <param name="commands">List of commands.</param>
+        private void SetupLinux(string path, List<string> commands)
+        {
+            string allrun = "#!/bin/sh" +
+                "\ncd ${0%/*} || exit 1    # run from this directory" +
+                "\n" +
+                "\n# Source tutorial run functions" +
+                "\n. $WM_PROJECT_DIR/bin/tools/RunFunctions" +
+                "\n" +
+                "\nrunApplication surfaceFeatureExtract" +
+                "\n" +
+                "\nrunApplication blockMesh" +
+                "\n" +
+                //"\n[ ! -d 0 ] && cp -r 0.orig 0" +
+                "\nrunApplication decomposePar -copyZero" +
+                "\nrunParallel snappyHexMesh -overwrite" +
+                "\n" +
+                "\nrunApplication reconstructParMesh -constant" +
+                "\nrm -r processor*" +
+                "\nrm -rf log.decomposePar" +
+                "\nrunApplication decomposePar" +
+                "\nrunParallel renumberMesh -overwrite" +
+                "\nrunParallel $(getApplication)" +
+                "\n" +
+                "\nrunApplication reconstructPar -latestTime" +
+                "\n#------------------------------------------------------------------------------";
+
+            if (CreateGeneralFile(path, "Allrun.", allrun))
+            {
+                commands.Add("./Allrun");
+
+                string allclean = "#!/bin/sh" +
+                    "\ncd ${0%/*} || exit 1    # run from this directory" +
+                    "\n" +
+                    "\n# Source tutorial clean functions" +
+                    "\n. $WM_PROJECT_DIR/bin/tools/CleanFunctions" +
+                    "\n" +
+                    "\ncleanCase" +
+                    "\n" +
+                    "\nrm -rf constant/extendedFeatureEdgeMesh > /dev/null 2>&1" +
+                    "\nrm -f constant/triSurface/buildings.eMesh > /dev/null 2>&1" +
+                    "\nrm -f constant/polyMesh/boundary > /dev/null 2>&1" +
+                    "\n" +
+                    "\n#------------------------------------------------------------------------------";
+
+                CreateGeneralFile(path, "Allclean.", allclean);
+            }
+        }
+
+        /// <summary>
+        /// Creates general file in openfoam case folder.
+        /// For example: Allrun, Allclean
+        /// </summary>
+        private bool CreateGeneralFile(string path, string name, string text)
+        {
+            bool succeed = true;
+            string m_Path = Path.Combine(path, name);
+            try
+            {
+                FileAttributes fileAttribute = FileAttributes.Normal;
+
+                if (File.Exists(m_Path))
+                {
+                    fileAttribute = File.GetAttributes(m_Path);
+                    FileAttributes tempAtt = fileAttribute & FileAttributes.ReadOnly;
+                    if (FileAttributes.ReadOnly == tempAtt)
+                    {
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FILE_READONLY, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                              MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        return false;
+                    }
+                    File.Delete(m_Path);
+                }
+
+                //Create File.
+                using (StreamWriter sw = new StreamWriter(m_Path))
+                {
+                    fileAttribute = File.GetAttributes(m_Path) | fileAttribute;
+                    File.SetAttributes(m_Path, fileAttribute);
+                    
+                    // Add information to the file.
+                    sw.Write(text);
+                }
+            }
+            catch (SecurityException)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                succeed = false;
+            }
+            catch (IOException)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_IO_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                succeed = false;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                succeed = false;
+            }
+            return succeed;
         }
 
         /// <summary>
@@ -455,13 +585,13 @@ namespace BIM.OpenFOAMExport
         {
             m_Settings = settings;
             ///***********************************************PLS INSERT LATER********************************************************************///
-            ///*********************************************************************************************************************************///
-            ///********************************************************************************************************************************///
-            ///*******************************************************************************************************************************///
-            //try
-            //{
+                                                                                                                                                   ///*********************************************************************************************************************************///
+                                                                                                                                                   ///********************************************************************************************************************************///
+                                                                                                                                                   ///*******************************************************************************************************************************///
+                                                      //try
+                                                      //{
 
-                m_StlExportCancel.Show();
+                                                      m_StlExportCancel.Show();
 
                 // save data in certain STL file
                 if (SaveFormat.binary == settings.SaveFormat)

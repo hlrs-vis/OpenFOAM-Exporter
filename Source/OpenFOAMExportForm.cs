@@ -1566,7 +1566,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
         {
-            /********************CHANGEVALUE WIRD MEHRMAL AUFGERUFEN*************************/
+            /********************CHANGEVALUE WIRD MEHRMALs AUFGERUFEN*************************/
             TextBox_Leave();
             var vector = GetLocationOfElementAsVector(m_SphereLocationInMesh);
             if(vector != new System.Windows.Media.Media3D.Vector3D())
