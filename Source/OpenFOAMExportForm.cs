@@ -624,10 +624,10 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void BtnHelp_Click(object sender, EventArgs e)
         {
-            string helpfile = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            helpfile = System.IO.Path.Combine(helpfile, "OpenFOAM_Export.chm");
+            string helpfile = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            helpfile = Path.Combine(helpfile, "OpenFOAM_Export.chm");
 
-            if (System.IO.File.Exists(helpfile) == false)
+            if (File.Exists(helpfile) == false)
             {
                 MessageBox.Show("Help File " + helpfile + " NOT FOUND!");
                 return;
@@ -1324,7 +1324,7 @@ namespace BIM.OpenFOAMExport
             if(!m_Clicked)
             {
                 //System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
-
+                TopMost = true;
                 //Create sphere
                 XYZ xyz = ConvertLocationInMeshToInternalUnit()/*new XYZ(location.X, location.Y, location.Z)*/;
                 CreateSphereDirectShape(xyz);
@@ -1566,8 +1566,10 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
         {
-            /********************CHANGEVALUE WIRD MEHRMALs AUFGERUFEN*************************/
             TextBox_Leave();
+
+            TopMost = false;
+
             var vector = GetLocationOfElementAsVector(m_SphereLocationInMesh);
             if(vector != new System.Windows.Media.Media3D.Vector3D())
             {

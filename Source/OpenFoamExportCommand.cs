@@ -102,7 +102,7 @@ namespace BIM.OpenFOAMExport
             {
                 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
                 System.Windows.Forms.Application.EnableVisualStyles();
-                exportForm.TopMost = true;
+                //exportForm.TopMost = true;
 
                 //Start modal form with with responsive messageloop.
                 System.Windows.Forms.Application.Run(exportForm);
