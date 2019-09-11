@@ -216,6 +216,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OpenFOAMExportResource.resx</DependentUpon>
     </Compile>
+    <Compile Include="XMLHandler.cs" />
     <EmbeddedResource Include="OpenFOAMUI\OpenFOAMTextBoxForm.resx">
       <DependentUpon>OpenFOAMTextBoxForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -280,7 +281,7 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>if exist "$(AppData)\Autodesk\REVIT\Addins\2019" copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2019"
-if exist "$(AppData)\Autodesk\REVIT\Addins\2019" copy "$(ProjectDir)bin\Debug\OpenFOAMExport.dll" "$(AppData)\Autodesk\REVIT\Addins\2019"</PostBuildEvent>
+    <PostBuildEvent>if exist "$(AppData)\Autodesk\REVIT\Addins\2020" copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2020"
+if exist "$(AppData)\Autodesk\REVIT\Addins\2020" copy "$(ProjectDir)bin\Debug\OpenFOAMExport.dll" "$(AppData)\Autodesk\REVIT\Addins\2020"</PostBuildEvent>
   </PropertyGroup>
 </Project>

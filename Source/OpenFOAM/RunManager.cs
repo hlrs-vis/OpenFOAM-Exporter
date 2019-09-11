@@ -483,12 +483,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="command">Command as string.</param>
         public override void WriteLine(StreamWriter sw, string command)
         {
-            //if (command.Equals("\"") || command.Contains("bash") || command.Contains("blockMesh") || command.Contains("All"))
-            //{
-            //    sw.Write(command);
-            //    return;
-            //}
-            sw.Write(/*" && " + */command);
+            if (command.Equals("\"") || command.Contains("bash") || command.Contains("blockMesh") || command.Contains("All"))
+            {
+                sw.Write(command);
+                return;
+            }
+            sw.Write(" && " + command);
         }
     }
 

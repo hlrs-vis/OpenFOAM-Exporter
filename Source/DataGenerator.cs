@@ -227,8 +227,14 @@ namespace BIM.OpenFOAMExport
             }
 
             List<string> commands = new List<string>();
+
             //commands as string
-            if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.blueCFD)
+            if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.ssh)
+            {
+                SetupLinux(path, commands);
+                
+            }
+            else
             {
                 commands.Add("blockMesh");
                 commands.Add("surfaceFeatureExtract");
@@ -236,20 +242,14 @@ namespace BIM.OpenFOAMExport
                 commands.Add("rm -r processor*");
                 commands.Add(m_Settings.AppSolverControlDict.ToString());
                 commands.Add("rm -r processor*");
-                commands.Add("rm -rf constant / extendedFeatureEdgeMesh > / dev / null 2 > &1");
-                commands.Add("rm -f constant/triSurface/buildings.eMesh > /dev/null 2>&1");
-                commands.Add("rm -f constant/polyMesh/boundary > /dev/null 2>&1");
-            }
-            else
-            {
-                SetupLinux(path, commands);
+                
             }
 
             //List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract", "snappyHexMesh", "rm -r processor*" };
             ////, "simpleFoam", "rm -r processor*"};
             //commands.Add(m_Settings.AppSolverControlDict.ToString());
             //commands.Add("rm -r processor*");
-            //commands.Add("rm - rf constant / extendedFeatureEdgeMesh > / dev / null 2 > &1");
+            //commands.Add("rm - rf constant/extendedFeatureEdgeMesh > / dev / null 2 > &1");
             //commands.Add("rm -f constant/triSurface/buildings.eMesh > /dev/null 2>&1");
             //commands.Add("rm -f constant/polyMesh/boundary > /dev/null 2>&1");
 
@@ -268,7 +268,10 @@ namespace BIM.OpenFOAMExport
         /// <param name="commands">List of commands.</param>
         private void SetupLinux(string path, List<string> commands)
         {
-            string allrun = "#!/bin/sh" +
+            string allrun = string.Empty;
+            if(m_Settings.NumberOfSubdomains != 1)
+            {
+                allrun = "#!/bin/sh" +
                 "\ncd ${0%/*} || exit 1    # run from this directory" +
                 "\n" +
                 "\n# Source tutorial run functions" +
@@ -282,6 +285,7 @@ namespace BIM.OpenFOAMExport
                 "\nrunApplication decomposePar -copyZero" +
                 "\nrunParallel snappyHexMesh -overwrite" +
                 "\n" +
+                //Problem with regular allrun => bypass through recontstructParMesh and decompose the case again
                 "\nrunApplication reconstructParMesh -constant" +
                 "\nrm -r processor*" +
                 "\nrm -rf log.decomposePar" +
@@ -291,6 +295,25 @@ namespace BIM.OpenFOAMExport
                 "\n" +
                 "\nrunApplication reconstructPar -latestTime" +
                 "\n#------------------------------------------------------------------------------";
+            }
+            else
+            {
+                allrun = "#!/bin/sh" +
+                "\ncd ${0%/*} || exit 1    # run from this directory" +
+                "\n" +
+                "\n# Source tutorial run functions" +
+                "\n. $WM_PROJECT_DIR/bin/tools/RunFunctions" +
+                "\n" +
+                "\nrunApplication surfaceFeatureExtract" +
+                "\n" +
+                "\nrunApplication blockMesh" +
+                "\n" +
+                //"\n[ ! -d 0 ] && cp -r 0.orig 0" +
+                "\nrunApplication snappyHexMesh -overwrite" +
+                "\n" +
+                "\nrunApplication $(getApplication)" +
+                "\n#------------------------------------------------------------------------------";
+            }
 
             if (CreateGeneralFile(path, "Allrun.", allrun))
             {
@@ -317,6 +340,9 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Creates general file in openfoam case folder.
         /// For example: Allrun, Allclean
+        /// <paramref name="path"/>Path<param>ref name="path"/>
+        /// <paramref name="name"/>Name of the file<paramref name="name"/>
+        /// <paramref name="text"/>Text for file.<paramref name="text"/>
         /// </summary>
         private bool CreateGeneralFile(string path, string name, string text)
         {
