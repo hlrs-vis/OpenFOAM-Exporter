@@ -27,6 +27,7 @@ using System;
 using System.Xml.Linq;
 using System.IO;
 using System.Xml;
+using BIM.OpenFOAMExport.OpenFOAM;
 
 namespace BIM.OpenFOAMExport
 {
@@ -2524,7 +2525,5 @@ namespace BIM.OpenFOAMExport
         {
             m_Constant.Add("turbulenceProperties", m_TurbulenceParameter.ToDictionary());
         }
-
-        
     }
 }

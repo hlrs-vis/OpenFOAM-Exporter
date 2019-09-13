@@ -173,6 +173,7 @@
     <Compile Include="OpenFOAM\K.cs" />
     <Compile Include="OpenFOAM\MeshDict.cs" />
     <Compile Include="OpenFOAM\Nut.cs" />
+    <Compile Include="OpenFOAM\OpenFOAMCalculator.cs" />
     <Compile Include="OpenFOAM\P.cs" />
     <Compile Include="OpenFOAM\P_rgh.cs" />
     <Compile Include="OpenFOAM\RunManager.cs" />

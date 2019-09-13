@@ -291,6 +291,7 @@ namespace BIM.OpenFOAMExport
         private bool InitAirFlowVelocity()
         {
             bool succeed = false;
+            OpenFOAM.OpenFOAMCalculator calculator = new OpenFOAM.OpenFOAMCalculator();
             foreach (FamilyInstance instance in m_DuctTerminals)
             {
                 double paramValue = 0;
@@ -327,6 +328,35 @@ namespace BIM.OpenFOAMExport
                         else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                         {
                             m_Settings.Inlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * paramValue);
+
+
+                            //IMPLEMENT IN SETTINGS.
+                            //if(m_Settings.AppSolverControlDict == SolverControlDict.buoyantBoussinesqSimpleFoam 
+                            //    || m_Settings.AppSolverControlDict == SolverControlDict.simpleFoam)
+                            //{
+                            //    //if(turbulencemodel == RASModel.kEpsilon || turbulencemodel == RASModel.RNGkEpsilon)
+                            //    dynamic temp = 0.0;
+                            //    if (!(m_Settings.SimulationDefault["0"] as Dictionary<string, object>).ContainsKey("T"))
+                            //    {
+                            //        var value = (m_Settings.SimulationDefault["0"] as Dictionary<string, object>)["T"];
+                            //        var initValue = (InitialParameter)value;
+                            //        temp = initValue.Patches[PatchType.inlet.ToString()];
+                            //    }
+                            //    double kinematicViscosity = calculator.InterpolateKinematicViscosity(temp);
+                            //    double area = 0;
+                            //    double boundary = 0;
+
+                            //    double characteristicLength = calculator.CalculateHydraulicDiameter(area, boundary);
+                            //    double reynoldsNumber = calculator.CalculateReynoldsnumber(paramValue, kinematicViscosity, characteristicLength);
+
+                            //    double turbulenceLengthScale = calculator.EstimateTurbulencLengthScalePipe(characteristicLength);
+                            //    double turbulenceIntensity = calculator.EstimateTurbulenceIntensityPipe(reynoldsNumber);
+
+                            //    double k = calculator.CalculateK(paramValue, turbulenceIntensity);
+                            //    double epsilon = calculator.CalculateEpsilon(turbulenceLengthScale, k);
+                            //    //update settings dict
+                            //}
+
                             succeed = true;
                         }
                         break;
@@ -689,6 +719,7 @@ namespace BIM.OpenFOAMExport
             {
                 return false;
             }
+
             SaveFormat saveFormat;
             if (rbBinary.Checked)
             {
@@ -702,7 +733,6 @@ namespace BIM.OpenFOAMExport
 
             ElementsExportRange exportRange;
             exportRange = ElementsExportRange.OnlyVisibleOnes;
-
             m_Settings.ExportRange = exportRange;
 
             // get selected categories from the category list
@@ -1325,6 +1355,7 @@ namespace BIM.OpenFOAMExport
             {
                 //System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
                 TopMost = true;
+
                 //Create sphere
                 XYZ xyz = ConvertLocationInMeshToInternalUnit()/*new XYZ(location.X, location.Y, location.Z)*/;
                 CreateSphereDirectShape(xyz);
@@ -1529,7 +1560,7 @@ namespace BIM.OpenFOAMExport
             {
                 string previousLoc = previousLocation.ToString();
                 MessageBox.Show("Please insert 3 dimensional vector in this format: x y z -> (x,y,z) ∊ ℝ", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
-                txtBoxLocationInMesh.Text = previousLoc.Replace(", ", " ").Trim('(', ')')/*m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ")*/;
+                txtBoxLocationInMesh.Text = previousLoc.Replace(", ", " ").Trim('(', ')');
             }
         }
 
