@@ -24,13 +24,52 @@ using System.Collections;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System;
-using System.Xml.Linq;
-using System.IO;
-using System.Xml;
 using BIM.OpenFOAMExport.OpenFOAM;
 
 namespace BIM.OpenFOAMExport
 {
+    /// <summary>
+    /// Properties of a surface like inlet/outlet.
+    /// </summary>
+    public struct SurfaceProperties
+    {
+        /// <summary>
+        /// Area of the surface.
+        /// </summary>
+        public double Area { get; set; }
+
+        /// <summary>
+        /// Boundary of the surface.
+        /// </summary>
+        public double Boundary { get; set; }
+
+        /// <summary>
+        /// Mean flow velocity through surface.
+        /// </summary>
+        public double MeanFlowVelocity { get; set; }
+
+        /// <summary>
+        /// Face normal of the surface.
+        /// </summary>
+        public XYZ FaceNormal { get; set; }
+    }
+
+    /// <summary>
+    /// K-Epsilon turbulence model datatype.
+    /// </summary>
+    public struct KEpsilon
+    {
+        /// <summary>
+        /// Turbulence energie.
+        /// </summary>
+        public double K { get; set; }
+
+        /// <summary>
+        /// Dissipation rate.
+        /// </summary>
+        public double Epsilon { get; set; }
+    }
+
     /// <summary>
     /// Represents an initial parameter from the null folder.
     /// </summary>
@@ -972,6 +1011,10 @@ namespace BIM.OpenFOAMExport
 
         private OpenFOAMEnvironment m_openFOAMEnvironment;
 
+        private double m_TempWall;
+        private double m_TempOutlet;
+        private double m_TempInlet;
+
         //BlockMeshDict
         private Vector3D m_SimpleGrading;
         private Vector3D m_CellSize;
@@ -1528,6 +1571,11 @@ namespace BIM.OpenFOAMExport
             {
                 {"maxNonOrtho" ,m_MaxNonOrtho}
             };
+
+            double kelvin = 273.15;
+            m_TempWall = kelvin + 25;
+            m_TempOutlet = kelvin + 25;
+            m_TempInlet = kelvin + 29;
         }
 
         /// <summary>
@@ -2088,7 +2136,7 @@ namespace BIM.OpenFOAMExport
             {
                 m_Dict = new Dictionary<string, object>();
                 m_Dict.Add("internalField", (object)initParam.InternalField);
-                string patchName = string.Empty;
+                //string patchName = string.Empty;
 
                 foreach(var patch in initParam.Patches)
                 {
@@ -2344,9 +2392,9 @@ namespace BIM.OpenFOAMExport
                 case InitialFOAMParameter.k:
                     {
                         parameter = new InitialParameter(param.ToString(), 0.1, model);
-                        CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false);
+                        CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false*/true);
                         foreach (var outlet in parameter.Patches)
                         {
                             if (outlet.Value.Type == PatchType.outlet)
@@ -2359,9 +2407,9 @@ namespace BIM.OpenFOAMExport
                 case InitialFOAMParameter.epsilon:
                     {
                         parameter = new InitialParameter(param.ToString(), 0.01, model);
-                        CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false);
+                        CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, /*false*/ true);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false*/ true);
                         foreach(var outlet in parameter.Patches)
                         {
                             if(outlet.Value.Type == PatchType.outlet)
@@ -2390,15 +2438,18 @@ namespace BIM.OpenFOAMExport
 
                 case InitialFOAMParameter.T:
                     {
-                        double kelvin = 273.15;
-                        double tempWall = kelvin + 25;
-                        double tempOutlet = kelvin + 25;
-                        double tempInlet = kelvin + 29;
+                        //double kelvin = 273.15;
+                        ////double tempWall = kelvin + 25;
+                        ////double tempOutlet = kelvin + 25;
+                        ////double tempInlet = kelvin + 29;
+                        //m_TempWall = kelvin + 25;
+                        //m_TempOutlet = kelvin + 25;
+                        //m_TempInlet = kelvin + 29;
 
                         parameter = new InitialParameter(param.ToString(), m_TransportModelParameter["TRef"], model);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", tempWall, PatchType.wall, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", tempInlet, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", tempOutlet, PatchType.outlet, false);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempWall, PatchType.wall, false);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempInlet, PatchType.inlet, false);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempOutlet, PatchType.outlet, false);
                         break;
                     }
 
@@ -2456,7 +2507,24 @@ namespace BIM.OpenFOAMExport
                         {
                             foreach(var inlet in Inlet)
                             {
-                                _inlet = new FOAMParameterPatch<dynamic>(type, uniform, inlet.Value, pType);
+                                var properties = (SurfaceProperties)inlet.Value;
+                                object v = default;
+                                if(param.Name.Equals(InitialFOAMParameter.k.ToString()))
+                                {
+                                    KEpsilon k = CalculateKEpsilon(properties.Area, properties.Boundary, properties.MeanFlowVelocity);
+                                    v = k.K;
+                                }
+                                else if (param.Name.Equals(InitialFOAMParameter.epsilon.ToString()))
+                                {
+                                    KEpsilon kEpsilon = CalculateKEpsilon(properties.Area, properties.Boundary, properties.MeanFlowVelocity);
+                                    v = kEpsilon.Epsilon;
+                                }
+                                else if(param.Name.Equals(InitialFOAMParameter.U.ToString()))
+                                {
+                                    v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z)*properties.MeanFlowVelocity;
+                                }
+                                //v = properties.MeanFlowVelocity;
+                                _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v/*inlet.Value*/, pType);
                                 param.Patches.Add(inlet.Key, _inlet);
                             }
                         }
@@ -2475,7 +2543,23 @@ namespace BIM.OpenFOAMExport
                         {
                             foreach(var outlet in Outlet)
                             {
-                                _outlet = new FOAMParameterPatch<dynamic>(type, uniform, outlet.Value, pType);
+                                var properties = (SurfaceProperties)outlet.Value;
+                                object v = default;
+                                if (param.Name.Equals(InitialFOAMParameter.k.ToString()))
+                                {
+                                    KEpsilon k = CalculateKEpsilon(properties.Area, properties.Boundary, properties.MeanFlowVelocity);
+                                    v = k.K;
+                                }
+                                else if (param.Name.Equals(InitialFOAMParameter.epsilon.ToString()))
+                                {
+                                    KEpsilon epsilon = CalculateKEpsilon(properties.Area, properties.Boundary, properties.MeanFlowVelocity);
+                                    v = epsilon.Epsilon;
+                                }
+                                else if (param.Name.Equals(InitialFOAMParameter.U.ToString()))
+                                {
+                                    v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z) * properties.MeanFlowVelocity;
+                                }
+                                _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v/*outlet.Value*/, pType);
                                 param.Patches.Add(outlet.Key, _outlet);
                             }
                         }
@@ -2489,7 +2573,36 @@ namespace BIM.OpenFOAMExport
                         break;
                     }
             }
+        }
 
+        /// <summary>
+        /// Calculate k and epsilon with OpenFOAMCalculator-class.
+        /// </summary>
+        /// <param name="area">Area of inlet surface.</param>
+        /// <param name="boundary">Boundary of inlet surface.</param>
+        /// <param name="meanFlowVelocity">Mean flow velocity through inlet.</param>
+        private KEpsilon CalculateKEpsilon(double area, double boundary, double meanFlowVelocity)
+        {
+            OpenFOAMCalculator calculator = new OpenFOAMCalculator();
+
+            double kinematicViscosity = calculator.InterpolateKinematicViscosity(m_TempInlet - 273.15);
+
+            double characteristicLength = calculator.CalculateHydraulicDiameter(area, boundary);
+            double reynoldsNumber = calculator.CalculateReynoldsnumber(Math.Abs(meanFlowVelocity), kinematicViscosity, characteristicLength);
+
+            double turbulenceLengthScale = calculator.EstimateTurbulencLengthScalePipe(characteristicLength);
+            double turbulenceIntensity = calculator.EstimateTurbulenceIntensityPipe(reynoldsNumber);
+
+            double k = calculator.CalculateK(Math.Abs(meanFlowVelocity), turbulenceIntensity);
+            double epsilon = calculator.CalculateEpsilon(turbulenceLengthScale, k);
+
+            KEpsilon kepsilon = new KEpsilon()
+            {
+                Epsilon = epsilon,
+                K = k
+            };
+
+            return kepsilon;
         }
 
         /// <summary>

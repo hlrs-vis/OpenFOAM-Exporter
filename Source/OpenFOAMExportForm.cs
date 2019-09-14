@@ -203,11 +203,13 @@ namespace BIM.OpenFOAMExport
             var enumSolver = SolverControlDict.buoyantBoussinesqSimpleFoam;
             comboBoxSolver.Items.Add(enumSolver);
             comboBoxSolver.Items.Add(SolverControlDict.simpleFoam);
+
             //Not all solver are implemented yet.
             //foreach (var value in Enum.GetValues(enumSolver.GetType()))
             //{
             //    comboBoxSolver.Items.Add(value);
             //}
+
             comboBoxSolver.SelectedItem = enumSolver;
 
             // comboBoxTransportModel
@@ -291,11 +293,10 @@ namespace BIM.OpenFOAMExport
         private bool InitAirFlowVelocity()
         {
             bool succeed = false;
-            OpenFOAM.OpenFOAMCalculator calculator = new OpenFOAM.OpenFOAMCalculator();
             foreach (FamilyInstance instance in m_DuctTerminals)
             {
                 double paramValue = 0;
-                var surfaceArea = GetSurfaceArea(instance);
+                double surfaceArea = /*GetSurfaceArea(instance);*/ Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
                 foreach (Parameter param in instance.Parameters)
                 {
                     paramValue = 0;
@@ -315,48 +316,34 @@ namespace BIM.OpenFOAMExport
                         FamilySymbol famSym = instance.Symbol;
 
                         //get FaceNormal
-                        var faceNormal = GetOrientationInletOutlet(instance);
+                        XYZ faceNormal = /*GetOrientationInletOutlet(instance);*/ GetSurfaceParameter(instance, GetFaceNormal);
+                        double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
 
                         string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
                         string nameDuct = nameDuctFam.Replace(" ", "_");
                         if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                         {
                             //negate faceNormal = outlet.
-                            m_Settings.Outlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (-paramValue));
+                            SurfaceProperties sProp = new SurfaceProperties
+                            {
+                                Area = surfaceArea,
+                                Boundary = faceBoundary,
+                                FaceNormal = faceNormal,
+                                MeanFlowVelocity = /*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (*/-paramValue/*)*/
+                            };
+                            m_Settings.Outlet.Add(nameDuct, sProp/*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (-paramValue)*/);
                             succeed = true;
                         }
                         else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                         {
-                            m_Settings.Inlet.Add(nameDuct, new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * paramValue);
-
-
-                            //IMPLEMENT IN SETTINGS.
-                            //if(m_Settings.AppSolverControlDict == SolverControlDict.buoyantBoussinesqSimpleFoam 
-                            //    || m_Settings.AppSolverControlDict == SolverControlDict.simpleFoam)
-                            //{
-                            //    //if(turbulencemodel == RASModel.kEpsilon || turbulencemodel == RASModel.RNGkEpsilon)
-                            //    dynamic temp = 0.0;
-                            //    if (!(m_Settings.SimulationDefault["0"] as Dictionary<string, object>).ContainsKey("T"))
-                            //    {
-                            //        var value = (m_Settings.SimulationDefault["0"] as Dictionary<string, object>)["T"];
-                            //        var initValue = (InitialParameter)value;
-                            //        temp = initValue.Patches[PatchType.inlet.ToString()];
-                            //    }
-                            //    double kinematicViscosity = calculator.InterpolateKinematicViscosity(temp);
-                            //    double area = 0;
-                            //    double boundary = 0;
-
-                            //    double characteristicLength = calculator.CalculateHydraulicDiameter(area, boundary);
-                            //    double reynoldsNumber = calculator.CalculateReynoldsnumber(paramValue, kinematicViscosity, characteristicLength);
-
-                            //    double turbulenceLengthScale = calculator.EstimateTurbulencLengthScalePipe(characteristicLength);
-                            //    double turbulenceIntensity = calculator.EstimateTurbulenceIntensityPipe(reynoldsNumber);
-
-                            //    double k = calculator.CalculateK(paramValue, turbulenceIntensity);
-                            //    double epsilon = calculator.CalculateEpsilon(turbulenceLengthScale, k);
-                            //    //update settings dict
-                            //}
-
+                            SurfaceProperties sProp = new SurfaceProperties
+                            {
+                                Area = surfaceArea,
+                                Boundary = faceBoundary,
+                                FaceNormal = faceNormal,
+                                MeanFlowVelocity = /*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * */paramValue
+                            };
+                            m_Settings.Inlet.Add(nameDuct, sProp/*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * paramValue*/);
                             succeed = true;
                         }
                         break;
@@ -366,57 +353,134 @@ namespace BIM.OpenFOAMExport
             return succeed;
         }
 
+        ///// <summary>
+        ///// Search for inlet/outlet face and return the surfaceArea.
+        ///// </summary>
+        ///// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
+        ///// <returns>Surfacearea as double.</returns>
+        //private double GetSurfaceArea(FamilyInstance instance)
+        //{
+        //    double area = 0;
+        //    var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
+        //    m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
+
+        //    var geometry = instance.get_Geometry(m_ViewOptions);
+        //    Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
+        //    if (solid == default)
+        //        return area;
+
+        //    Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
+        //    if(face != null)
+        //    {
+        //        var edges = face.EdgeLoops;
+        //        double boundary = 0;
+        //        if (!edges.IsEmpty)
+        //        {
+        //            foreach (Edge edge in edges.get_Item(0) as EdgeArray)
+        //            {
+        //                boundary += UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS);
+        //            }
+        //        }
+
+        //        //convert from imperial unit system to metric
+        //        area = UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+        //    }
+        //    return area;
+        //}
+
         /// <summary>
-        /// Search for inlet/outlet face and return the surfaceArea.
+        /// Get surface parameter based on given Face-Function. 
         /// </summary>
-        /// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
-        /// <returns>Surfacearea as double.</returns>
-        private double GetSurfaceArea(FamilyInstance instance)
+        /// <typeparam name="T">return type.</typeparam>
+        /// <param name="instance">Familyinstance.</param>
+        /// <param name="func">Face-function/methode.</param>
+        /// <returns>Parameter as type T.</returns>
+        private T GetSurfaceParameter<T>(FamilyInstance instance, Func<Face, T> func)
         {
-            double area = 0;
+            T value = default(T);
             var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
             m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
 
             var geometry = instance.get_Geometry(m_ViewOptions);
             Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
             if (solid == default)
-                return area;
+                return value;
 
             Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
-            if(face != null)
+            if (face != null)
             {
-                //convert from imperial unit system to metric
-                area = UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+                value = func(face);
             }
-            return area;
+            return value;
         }
 
         /// <summary>
-        /// Search for inlet/outlet face and return the faceNormal.
+        /// Get face normal from face.
         /// </summary>
-        /// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
-        /// <returns>Face normal.</returns>
-        private XYZ GetOrientationInletOutlet(FamilyInstance instance)
+        /// <param name="face">Face object.</param>
+        /// <returns>Facenormal as xyz object.</returns>
+        private XYZ GetFaceNormal(Face face)
         {
-            XYZ faceNormal = new XYZ(0, 0, 0);
-            var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
-            m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
+            UV point = new UV();
+            return face.ComputeNormal(point);
+        }
 
-            var geometry = instance.get_Geometry(m_ViewOptions);
-            Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
+        /// <summary>
+        /// Get face are from given face.
+        /// </summary>
+        /// <param name="face">Face object.</param>
+        /// <returns>Area of the face as double.</returns>
+        private double GetFaceArea(Face face)
+        {
+            return UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+        }
 
-            if (solid == default)
-                return faceNormal;
-
-            Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
-            if(face != null)
+        /// <summary>
+        /// Get face boundary from the given face.
+        /// </summary>
+        /// <param name="face">Face object.</param>
+        /// <returns>Boundary of the face as double.</returns>
+        private double GetFaceBoundary(Face face)
+        {
+            var edges = face.EdgeLoops;
+            double boundary = 0;
+            if (!edges.IsEmpty && edges != null)
             {
-                UV point = new UV();
-                faceNormal = face.ComputeNormal(point);
+                foreach (Edge edge in edges.get_Item(0) as EdgeArray)
+                {
+                    boundary += Math.Round(UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS),2);
+                }
             }
+            return boundary;
+        }
+
+
+        ///// <summary>
+        ///// Search for inlet/outlet face and return the faceNormal.
+        ///// </summary>
+        ///// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
+        ///// <returns>Face normal.</returns>
+        //private XYZ GetOrientationInletOutlet(FamilyInstance instance)
+        //{
+        //    XYZ faceNormal = new XYZ(0, 0, 0);
+        //    var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
+        //    m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
+
+        //    var geometry = instance.get_Geometry(m_ViewOptions);
+        //    Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
+
+        //    if (solid == default)
+        //        return faceNormal;
+
+        //    Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
+        //    if(face != null)
+        //    {
+        //        UV point = new UV();
+        //        faceNormal = face.ComputeNormal(point);
+        //    }
             
-            return faceNormal;
-        }
+        //    return faceNormal;
+        //}
 
         /// <summary>
         /// Initialize paramValue with the airflow parameter as double.

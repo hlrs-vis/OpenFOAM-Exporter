@@ -40,7 +40,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <returns>k for k-epsilon Turbulencemodel.</returns>
         public double CalculateK(double meanFlowVelocity, double turbulenceIntensity)
         {
-            return (3 / 2) * Math.Pow( (meanFlowVelocity * turbulenceIntensity) , 2);
+            return Math.Pow( (meanFlowVelocity * turbulenceIntensity) , 2) * 3 / 2;
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             //for fully developed piped flows.
             //Source: https://www.cfd-online.com/Wiki/Turbulence_intensity
-            return 0.16 * Math.Pow(reynoldsNumber, -(1 / 8));
+            return 0.16 * Math.Pow(reynoldsNumber, -1.0/8.0);
         }
 
         /// <summary>
@@ -109,10 +109,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <returns>Kinematic viscosity at temprature.</returns>
         public double InterpolateKinematicViscosity(double temp)
         {
-            if(temp == 0)
-            {
-                return m_ViAir20;
-            }
             return m_ViAir20 + (m_ViAir30 - m_ViAir20) * (temp - 20) / (10);
         }
     }

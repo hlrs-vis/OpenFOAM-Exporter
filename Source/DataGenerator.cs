@@ -1276,7 +1276,6 @@ namespace BIM.OpenFOAMExport
                     continue;
                 }
                 m_TriangularNumber += mesh.NumTriangles;
-                PlanarFace planarFace = face as PlanarFace;
                 // write face to stl file
                 // a face has a mesh, all meshes are made of triangles
                 WriteFaceToSTL(document, mesh, face, transform);
