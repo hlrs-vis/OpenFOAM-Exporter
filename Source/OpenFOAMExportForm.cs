@@ -258,7 +258,7 @@ namespace BIM.OpenFOAMExport
 
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
+                false, 0, 100, 1, 100, 0, 6, 6, 4, selectedCategories, dup);
             if (!InitBIMData())
             {
                 return;

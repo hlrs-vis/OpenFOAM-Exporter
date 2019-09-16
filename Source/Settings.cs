@@ -2392,9 +2392,9 @@ namespace BIM.OpenFOAMExport
                 case InitialFOAMParameter.k:
                     {
                         parameter = new InitialParameter(param.ToString(), 0.1, model);
-                        CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, /*false*/true);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, /*false*/true);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, false/*true*/);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, false/*true*/);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false/*true*/);
                         foreach (var outlet in parameter.Patches)
                         {
                             if (outlet.Value.Type == PatchType.outlet)
@@ -2407,9 +2407,9 @@ namespace BIM.OpenFOAMExport
                 case InitialFOAMParameter.epsilon:
                     {
                         parameter = new InitialParameter(param.ToString(), 0.01, model);
-                        CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, /*false*/true);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, /*false*/ true);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false*/ true);
+                        CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, /*true*/false);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, false/* true*/);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false /*true*/);
                         foreach(var outlet in parameter.Patches)
                         {
                             if(outlet.Value.Type == PatchType.outlet)
