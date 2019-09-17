@@ -296,7 +296,7 @@ namespace BIM.OpenFOAMExport
             foreach (FamilyInstance instance in m_DuctTerminals)
             {
                 double paramValue = 0;
-                double surfaceArea = /*GetSurfaceArea(instance);*/ Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
+                double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
                 foreach (Parameter param in instance.Parameters)
                 {
                     paramValue = 0;
@@ -316,7 +316,7 @@ namespace BIM.OpenFOAMExport
                         FamilySymbol famSym = instance.Symbol;
 
                         //get FaceNormal
-                        XYZ faceNormal = /*GetOrientationInletOutlet(instance);*/ GetSurfaceParameter(instance, GetFaceNormal);
+                        XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
                         double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
 
                         string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
@@ -329,9 +329,9 @@ namespace BIM.OpenFOAMExport
                                 Area = surfaceArea,
                                 Boundary = faceBoundary,
                                 FaceNormal = faceNormal,
-                                MeanFlowVelocity = /*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (*/-paramValue/*)*/
+                                MeanFlowVelocity = -paramValue
                             };
-                            m_Settings.Outlet.Add(nameDuct, sProp/*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * (-paramValue)*/);
+                            m_Settings.Outlet.Add(nameDuct, sProp);
                             succeed = true;
                         }
                         else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
@@ -341,9 +341,9 @@ namespace BIM.OpenFOAMExport
                                 Area = surfaceArea,
                                 Boundary = faceBoundary,
                                 FaceNormal = faceNormal,
-                                MeanFlowVelocity = /*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * */paramValue
+                                MeanFlowVelocity = paramValue
                             };
-                            m_Settings.Inlet.Add(nameDuct, sProp/*new System.Windows.Media.Media3D.Vector3D(faceNormal.X, faceNormal.Y, faceNormal.Z) * paramValue*/);
+                            m_Settings.Inlet.Add(nameDuct, sProp);
                             succeed = true;
                         }
                         break;
@@ -498,7 +498,7 @@ namespace BIM.OpenFOAMExport
                 case ParameterType.HVACAirflow:
                     {
                         //m³/h => m³/s
-                        paramValue = UnitUtils.ConvertFromInternalUnits(param.AsDouble(), DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND);/*double.Parse(param.AsValueString().Trim(" m³/h".ToCharArray()), System.Globalization.CultureInfo.InvariantCulture)*/;
+                        paramValue = UnitUtils.ConvertFromInternalUnits(param.AsDouble(), DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND);
                         volumenFlow = true;
                         break;
                     }
