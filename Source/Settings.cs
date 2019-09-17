@@ -181,6 +181,11 @@ namespace BIM.OpenFOAMExport
         string serverCaseFolder;
 
         /// <summary>
+        /// Threads used.
+        /// </summary>
+        int tasks;
+
+        /// <summary>
         /// Port server.
         /// </summary>
         int port;
@@ -196,6 +201,11 @@ namespace BIM.OpenFOAMExport
         bool delete;
 
         /// <summary>
+        /// Use slurm.
+        /// </summary>
+        bool slurm;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="_user">The user to login.</param>
@@ -205,7 +215,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="_download">if true, case folder will be downloaded from server after simulation.</param>
         /// <param name="_delete">if true, case folder will be deleted after simulation.</param>
         /// <param name="_port">SSH Port.</param>
-        public SSH(string _user, string _ip, string _alias, string _caseFolder, bool _download, bool _delete, int _port)
+        public SSH(string _user, string _ip, string _alias, string _caseFolder, bool _download, bool _delete, bool _slurm, int _port, int _tasks)
         {
             user = _user;
             serverIP = _ip;
@@ -213,7 +223,9 @@ namespace BIM.OpenFOAMExport
             serverCaseFolder = _caseFolder;
             download = _download;
             delete = _delete;
+            slurm = _slurm;
             port = _port;
+            tasks = _tasks;
         }
 
         /// <summary>
@@ -241,9 +253,17 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         public bool Delete { get => delete; set => delete = value; }
         /// <summary>
+        /// Getter-Setter for slurm.
+        /// </summary>
+        public bool Slurm { get => slurm; set => slurm = value; }
+        /// <summary>
         /// Getter-Setter for port.
         /// </summary>
         public int Port { get => port; set => port = value; }
+        /// <summary>
+        /// Getter-Setter for threads.
+        /// </summary>
+        public int Tasks{ get => tasks; set => tasks = value; }
 
         /// <summary>
         /// Connection string.
@@ -1467,7 +1487,7 @@ namespace BIM.OpenFOAMExport
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
             //SSH
-            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/", true, true, 22);
+            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/", true, true, true, 22, numberOfSubdomains);
 
             //General
             m_OpenFOAM = openFoam;

@@ -7,15 +7,24 @@ using System.Xml.Linq;
 namespace BIM.OpenFOAMExport
 {
     /// <summary>
-    /// 
+    /// This class is in use for handling the xml-config file.
     /// </summary>
     public class XMLHandler
     {
         /// <summary>
-        /// 
+        /// Constructor.
+        /// </summary>
+        /// <param name="settings">Settings-object for current project.</param>
+        public XMLHandler(Settings settings)
+        {
+            CreateConfig(settings);
+        }
+
+        /// <summary>
+        /// Read the config file and add entries to settings.
         /// </summary>
         /// <param name="path"></param>
-        private void ReadConfig(string path)
+        private void ReadConfig(string path, Settings settings)
         {
             if (File.Exists(path))
             {
@@ -61,7 +70,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Create config file if it doesn't exist.
         /// </summary>
-        private void CreateConfig(Dictionary<string, object> dict)
+        private void CreateConfig(Settings settings)
         {
             //remove file:///
             string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
@@ -79,7 +88,9 @@ namespace BIM.OpenFOAMExport
                     new XElement("OpenFOAMEnv"),
                     new XElement("SSH")
                 );
+
                 var defaultElement = new XElement("DefaultParameter");
+                Dictionary<string, object> dict = settings.SimulationDefault;
                 CreateXMLTree(defaultElement, dict);
                 elements.Add(defaultElement);
 
@@ -87,12 +98,21 @@ namespace BIM.OpenFOAMExport
 
                 XElement ssh = config.Root.Element("SSH");
                 ssh.Add(
-                        new XElement("user", "name"),
-                        new XElement("host", "111.122.1.123"),
-                        new XElement("serverCasePath", "/home/\"User\"/OpenFOAMRemote/"),
-                        new XElement("ofAlias", "source/opt/openfoam6/etc/bashrc")
+                        new XElement("user", settings.SSH.User),
+                        new XElement("host", settings.SSH.ServerIP),
+                        new XElement("serverCasePath", settings.SSH.ServerCaseFolder),
+                        new XElement("ofAlias", settings.SSH.OfAlias),
+                        new XElement("port", settings.SSH.Port.ToString()),
+                        new XElement("tasks", settings.SSH.Tasks.ToString()),
+                        new XElement("download",settings.SSH.Download),
+                        new XElement("delete", settings.SSH.Delete),
+                        new XElement("slurm", settings.SSH.Slurm)
                 );
                 config.Save(configPath);
+            }
+            else
+            {
+                ReadConfig(configPath, settings);
             }
         }
 
@@ -134,13 +154,13 @@ namespace BIM.OpenFOAMExport
             }
 
             var criticalXMLCharacters = new Dictionary<string, string>()
-        {
-            { "(", "lpar" },
-            { ")", "rpar" },
-            { ",", "comma" },
-            { "*", "ast" },
-            { " ", "nbsp" }
-        };
+            {
+                { "(", "lpar" },
+                { ")", "rpar" },
+                { ",", "comma" },
+                { "*", "ast" },
+                { " ", "nbsp" }
+            };
 
             foreach (var critical in criticalXMLCharacters)
             {
