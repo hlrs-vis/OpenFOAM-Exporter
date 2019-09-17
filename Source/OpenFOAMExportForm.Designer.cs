@@ -69,6 +69,8 @@ namespace BIM.OpenFOAMExport
             this.tbOpenFOAM = new System.Windows.Forms.TabPage();
             this.gbDefault = new System.Windows.Forms.GroupBox();
             this.gbGeneral = new System.Windows.Forms.GroupBox();
+            this.txtBoxLocationInMesh = new System.Windows.Forms.TextBox();
+            this.lblLocationInMesh = new System.Windows.Forms.Label();
             this.lblTransportModel = new System.Windows.Forms.Label();
             this.comboBoxTransportModel = new System.Windows.Forms.ComboBox();
             this.textBoxCPU = new System.Windows.Forms.TextBox();
@@ -79,6 +81,8 @@ namespace BIM.OpenFOAMExport
             this.lblEnv = new System.Windows.Forms.Label();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.tbSSH = new System.Windows.Forms.TabPage();
+            this.txtBoxTasks = new System.Windows.Forms.TextBox();
+            this.lblTasks = new System.Windows.Forms.Label();
             this.txtBoxPort = new System.Windows.Forms.TextBox();
             this.lblPort = new System.Windows.Forms.Label();
             this.cbDelete = new System.Windows.Forms.CheckBox();
@@ -89,8 +93,7 @@ namespace BIM.OpenFOAMExport
             this.lblCaseFolder = new System.Windows.Forms.Label();
             this.lblAlias = new System.Windows.Forms.Label();
             this.lblUserHost = new System.Windows.Forms.Label();
-            this.lblLocationInMesh = new System.Windows.Forms.Label();
-            this.txtBoxLocationInMesh = new System.Windows.Forms.TextBox();
+            this.cbSlurm = new System.Windows.Forms.CheckBox();
             this.tpCategories.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.gbSTLFormat.SuspendLayout();
@@ -264,6 +267,20 @@ namespace BIM.OpenFOAMExport
             this.gbGeneral.Name = "gbGeneral";
             this.gbGeneral.TabStop = false;
             // 
+            // txtBoxLocationInMesh
+            // 
+            resources.ApplyResources(this.txtBoxLocationInMesh, "txtBoxLocationInMesh");
+            this.txtBoxLocationInMesh.Name = "txtBoxLocationInMesh";
+            this.txtBoxLocationInMesh.Click += new System.EventHandler(this.TxtBoxLocationInMesh_Click);
+            this.txtBoxLocationInMesh.TextChanged += new System.EventHandler(this.TxtBoxLocationInMesh_ValueChanged);
+            this.txtBoxLocationInMesh.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBoxLocationInMesh_KeyPress);
+            this.txtBoxLocationInMesh.Leave += new System.EventHandler(this.TxtBoxLocationInMesh_Leave);
+            // 
+            // lblLocationInMesh
+            // 
+            resources.ApplyResources(this.lblLocationInMesh, "lblLocationInMesh");
+            this.lblLocationInMesh.Name = "lblLocationInMesh";
+            // 
             // lblTransportModel
             // 
             resources.ApplyResources(this.lblTransportModel, "lblTransportModel");
@@ -274,7 +291,7 @@ namespace BIM.OpenFOAMExport
             this.comboBoxTransportModel.FormattingEnabled = true;
             resources.ApplyResources(this.comboBoxTransportModel, "comboBoxTransportModel");
             this.comboBoxTransportModel.Name = "comboBoxTransportModel";
-            this.comboBoxTransportModel.SelectedValueChanged += new System.EventHandler(ComboBoxTransport_SelectedValueChanged);
+            this.comboBoxTransportModel.SelectedValueChanged += new System.EventHandler(this.ComboBoxTransport_SelectedValueChanged);
             // 
             // textBoxCPU
             // 
@@ -318,6 +335,9 @@ namespace BIM.OpenFOAMExport
             // tbSSH
             // 
             this.tbSSH.BackColor = System.Drawing.SystemColors.Control;
+            this.tbSSH.Controls.Add(this.cbSlurm);
+            this.tbSSH.Controls.Add(this.txtBoxTasks);
+            this.tbSSH.Controls.Add(this.lblTasks);
             this.tbSSH.Controls.Add(this.txtBoxPort);
             this.tbSSH.Controls.Add(this.lblPort);
             this.tbSSH.Controls.Add(this.cbDelete);
@@ -331,14 +351,22 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.tbSSH, "tbSSH");
             this.tbSSH.Name = "tbSSH";
             // 
+            // txtBoxTasks
+            // 
+            resources.ApplyResources(this.txtBoxTasks, "txtBoxTasks");
+            this.txtBoxTasks.Name = "txtBoxTasks";
+            this.txtBoxTasks.TextChanged += new System.EventHandler(this.TxtBoxTasks_ValueChanged);
+            // 
+            // lblTasks
+            // 
+            resources.ApplyResources(this.lblTasks, "lblTasks");
+            this.lblTasks.Name = "lblTasks";
+            // 
             // txtBoxPort
             // 
             resources.ApplyResources(this.txtBoxPort, "txtBoxPort");
             this.txtBoxPort.Name = "txtBoxPort";
             this.txtBoxPort.TextChanged += new System.EventHandler(this.TxtBoxPort_ValueChanged);
-            //this.txtBoxPort.Click += new System.EventHandler(this.TxtBoxPort_Click);
-            //this.txtBoxPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBoxPort_KeyPress);
-            //this.txtBoxPort.Leave += new System.EventHandler(this.TxtBoxPort_Leave);
             // 
             // lblPort
             // 
@@ -368,27 +396,18 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.txtBoxCaseFolder, "txtBoxCaseFolder");
             this.txtBoxCaseFolder.Name = "txtBoxCaseFolder";
             this.txtBoxCaseFolder.TextChanged += new System.EventHandler(this.TxtBoxServerCaseFolder_ValueChanged);
-            //this.txtBoxCaseFolder.Click += new System.EventHandler(this.TxtBoxServerCaseFolder_Click);
-            //this.txtBoxCaseFolder.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBoxServerCaseFolder_KeyPress);
-            //this.txtBoxCaseFolder.Leave += new System.EventHandler(this.TxtBoxServerCaseFolder_Leave);
             // 
             // txtBoxAlias
             // 
             resources.ApplyResources(this.txtBoxAlias, "txtBoxAlias");
             this.txtBoxAlias.Name = "txtBoxAlias";
             this.txtBoxAlias.TextChanged += new System.EventHandler(this.TxtBoxAlias_ValueChanged);
-            //this.txtBoxAlias.Click += new System.EventHandler(this.TxtBoxAlias_Click);
-            //this.txtBoxAlias.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBoxAlias_KeyPress);
-            //this.txtBoxAlias.Leave += new System.EventHandler(this.TxtBoxAlias_Leave);
             // 
             // txtBoxUserIP
             // 
             resources.ApplyResources(this.txtBoxUserIP, "txtBoxUserIP");
             this.txtBoxUserIP.Name = "txtBoxUserIP";
             this.txtBoxUserIP.TextChanged += new System.EventHandler(this.TxtBoxUserIP_ValueChanged);
-            //this.txtBoxUserIP.Click += new System.EventHandler(this.TxtBoxUserIP_Click);
-            //this.txtBoxUserIP.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtBoxUserIP_KeyPress);
-            //this.txtBoxUserIP.Leave += new System.EventHandler(this.TxtBoxUserIP_Leave);
             // 
             // lblCaseFolder
             // 
@@ -405,19 +424,14 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.lblUserHost, "lblUserHost");
             this.lblUserHost.Name = "lblUserHost";
             // 
-            // lblLocationInMesh
+            // cbSlurm
             // 
-            resources.ApplyResources(this.lblLocationInMesh, "lblLocationInMesh");
-            this.lblLocationInMesh.Name = "lblLocationInMesh";
-            // 
-            // txtBoxLocationInMesh
-            // 
-            resources.ApplyResources(this.txtBoxLocationInMesh, "txtBoxLocationInMesh");
-            this.txtBoxLocationInMesh.Name = "txtBoxLocationInMesh";
-            this.txtBoxLocationInMesh.Click += new System.EventHandler(TxtBoxLocationInMesh_Click);
-            this.txtBoxLocationInMesh.TextChanged += new System.EventHandler(TxtBoxLocationInMesh_ValueChanged);
-            this.txtBoxLocationInMesh.KeyPress += new System.Windows.Forms.KeyPressEventHandler(TxtBoxLocationInMesh_KeyPress);
-            this.txtBoxLocationInMesh.Leave += new System.EventHandler(TxtBoxLocationInMesh_Leave);
+            resources.ApplyResources(this.cbSlurm, "cbSlurm");
+            this.cbSlurm.Checked = true;
+            this.cbSlurm.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbSlurm.Name = "cbSlurm";
+            this.cbSlurm.UseVisualStyleBackColor = true;
+            this.cbSlurm.CheckedChanged += new System.EventHandler(this.CbSlurm_CheckedChanged);
             // 
             // OpenFOAMExportForm
             // 
@@ -490,5 +504,8 @@ namespace BIM.OpenFOAMExport
         private System.Windows.Forms.Label lblPort;
         private System.Windows.Forms.TextBox txtBoxLocationInMesh;
         private System.Windows.Forms.Label lblLocationInMesh;
+        private System.Windows.Forms.TextBox txtBoxTasks;
+        private System.Windows.Forms.Label lblTasks;
+        private System.Windows.Forms.CheckBox cbSlurm;
     }
 }

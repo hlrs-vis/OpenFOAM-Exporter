@@ -996,8 +996,98 @@
   <data name="&gt;&gt;tbOpenFOAM.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
+  <data name="cbSlurm.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="cbSlurm.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="cbSlurm.Location" type="System.Drawing.Point, System.Drawing">
+    <value>25, 385</value>
+  </data>
+  <data name="cbSlurm.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="cbSlurm.Size" type="System.Drawing.Size, System.Drawing">
+    <value>95, 21</value>
+  </data>
+  <data name="cbSlurm.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="cbSlurm.Text" xml:space="preserve">
+    <value>Use Slurm</value>
+  </data>
+  <data name="&gt;&gt;cbSlurm.Name" xml:space="preserve">
+    <value>cbSlurm</value>
+  </data>
+  <data name="&gt;&gt;cbSlurm.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbSlurm.Parent" xml:space="preserve">
+    <value>tbSSH</value>
+  </data>
+  <data name="&gt;&gt;cbSlurm.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="txtBoxTasks.Location" type="System.Drawing.Point, System.Drawing">
+    <value>152, 210</value>
+  </data>
+  <data name="txtBoxTasks.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="txtBoxTasks.Size" type="System.Drawing.Size, System.Drawing">
+    <value>284, 22</value>
+  </data>
+  <data name="txtBoxTasks.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="&gt;&gt;txtBoxTasks.Name" xml:space="preserve">
+    <value>txtBoxTasks</value>
+  </data>
+  <data name="&gt;&gt;txtBoxTasks.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;txtBoxTasks.Parent" xml:space="preserve">
+    <value>tbSSH</value>
+  </data>
+  <data name="&gt;&gt;txtBoxTasks.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="lblTasks.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblTasks.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="lblTasks.Location" type="System.Drawing.Point, System.Drawing">
+    <value>25, 210</value>
+  </data>
+  <data name="lblTasks.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
+  </data>
+  <data name="lblTasks.Size" type="System.Drawing.Size, System.Drawing">
+    <value>46, 17</value>
+  </data>
+  <data name="lblTasks.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="lblTasks.Text" xml:space="preserve">
+    <value>Tasks</value>
+  </data>
+  <data name="&gt;&gt;lblTasks.Name" xml:space="preserve">
+    <value>lblTasks</value>
+  </data>
+  <data name="&gt;&gt;lblTasks.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblTasks.Parent" xml:space="preserve">
+    <value>tbSSH</value>
+  </data>
+  <data name="&gt;&gt;lblTasks.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
   <data name="txtBoxPort.Location" type="System.Drawing.Point, System.Drawing">
-    <value>152, 159</value>
+    <value>152, 165</value>
   </data>
   <data name="txtBoxPort.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -1018,13 +1108,13 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxPort.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>3</value>
   </data>
   <data name="lblPort.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="lblPort.Location" type="System.Drawing.Point, System.Drawing">
-    <value>25, 162</value>
+    <value>25, 165</value>
   </data>
   <data name="lblPort.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 0, 4, 0</value>
@@ -1048,7 +1138,7 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblPort.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>4</value>
   </data>
   <data name="cbDelete.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1057,7 +1147,7 @@
     <value>NoControl</value>
   </data>
   <data name="cbDelete.Location" type="System.Drawing.Point, System.Drawing">
-    <value>25, 275</value>
+    <value>25, 330</value>
   </data>
   <data name="cbDelete.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -1081,13 +1171,13 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;cbDelete.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>5</value>
   </data>
   <data name="cbDownload.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="cbDownload.Location" type="System.Drawing.Point, System.Drawing">
-    <value>25, 212</value>
+    <value>25, 275</value>
   </data>
   <data name="cbDownload.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -1111,10 +1201,10 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;cbDownload.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>6</value>
   </data>
   <data name="txtBoxCaseFolder.Location" type="System.Drawing.Point, System.Drawing">
-    <value>152, 115</value>
+    <value>152, 120</value>
   </data>
   <data name="txtBoxCaseFolder.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -1135,10 +1225,10 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxCaseFolder.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>7</value>
   </data>
   <data name="txtBoxAlias.Location" type="System.Drawing.Point, System.Drawing">
-    <value>152, 71</value>
+    <value>152, 75</value>
   </data>
   <data name="txtBoxAlias.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -1159,10 +1249,10 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxAlias.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>8</value>
   </data>
   <data name="txtBoxUserIP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>152, 28</value>
+    <value>152, 30</value>
   </data>
   <data name="txtBoxUserIP.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 4, 4, 4</value>
@@ -1183,7 +1273,7 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;txtBoxUserIP.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>9</value>
   </data>
   <data name="lblCaseFolder.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1192,7 +1282,7 @@
     <value>NoControl</value>
   </data>
   <data name="lblCaseFolder.Location" type="System.Drawing.Point, System.Drawing">
-    <value>25, 119</value>
+    <value>25, 120</value>
   </data>
   <data name="lblCaseFolder.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 0, 4, 0</value>
@@ -1216,7 +1306,7 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblCaseFolder.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>10</value>
   </data>
   <data name="lblAlias.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1246,13 +1336,13 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblAlias.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>11</value>
   </data>
   <data name="lblUserHost.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="lblUserHost.Location" type="System.Drawing.Point, System.Drawing">
-    <value>25, 31</value>
+    <value>25, 30</value>
   </data>
   <data name="lblUserHost.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 0, 4, 0</value>
@@ -1276,7 +1366,7 @@
     <value>tbSSH</value>
   </data>
   <data name="&gt;&gt;lblUserHost.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>12</value>
   </data>
   <data name="tbSSH.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 25</value>

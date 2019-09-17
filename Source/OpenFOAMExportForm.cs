@@ -258,7 +258,7 @@ namespace BIM.OpenFOAMExport
 
             // create settings object to save setting information
             m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked, cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                false, 0, 100, 1, 100, 0, 6, 6, 4, selectedCategories, dup);
+                false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
             if (!InitBIMData())
             {
                 return;
@@ -528,8 +528,10 @@ namespace BIM.OpenFOAMExport
             txtBoxAlias.Text = m_Settings.SSH.OfAlias;
             txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
             txtBoxPort.Text = m_Settings.SSH.Port.ToString();
+            txtBoxTasks.Text = m_Settings.SSH.Tasks.ToString();
             cbDelete.Checked = m_Settings.SSH.Delete;
             cbDownload.Checked = m_Settings.SSH.Download;
+
         }
 
         /// <summary>
@@ -1320,6 +1322,56 @@ namespace BIM.OpenFOAMExport
         //{
         //    TextBox_Clicked();
         //}
+
+        /// <summary>
+        /// ValueChanged event for txtBoxTasks.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void TxtBoxTasks_ValueChanged(object sender, EventArgs e)
+        {
+            //TextBox_ValueChanged();
+            string txtBox = txtBoxTasks.Text;
+
+            if (m_RegPort.IsMatch(txtBox))
+            {
+                SSH ssh = m_Settings.SSH;
+                ssh.Tasks = Convert.ToInt32(txtBox);
+                m_Settings.SSH = ssh;
+            }
+            else
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            //TO - DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        }
+
+        /// <summary>
+        /// Checked event for cbSlurm.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event args.</param>
+        private void CbSlurm_CheckedChanged(object sender, EventArgs e)
+        {
+            SSH ssh = m_Settings.SSH;
+            ssh.Slurm = cbSlurm.Checked;
+            m_Settings.SSH = ssh;
+
+            if(cbSlurm.Checked)
+            {
+                txtBoxTasks.Enabled = true;
+            }
+            else
+            {
+                txtBoxTasks.Enabled = false;
+                ssh.Tasks = 0;
+            }
+            //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
+        }
+
 
         /// <summary>
         /// Checked event for cbDownload.
