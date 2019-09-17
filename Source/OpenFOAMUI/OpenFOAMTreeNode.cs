@@ -106,33 +106,33 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         }
         #endregion
 
-        /// <summary>
-        /// This method is in use to change the corresponding attribute of the value
-        /// that is stored in this node in settings.
-        /// </summary>
-        public virtual void UpdateSettings()
-        {
-            Dictionary<string, object> att = m_Settings.SimulationDefault;
-            foreach (string s in m_KeyPath)
-            {
-                if (att[s] is Dictionary<string, object>)
-                {
-                    Dictionary<string, object> newLevel = att[s] as Dictionary<string, object>;
-                    att = newLevel;
-                }
-                else if (att[s] is FOAMParameterPatch<dynamic> patch)
-                {
-                    att = patch.Attributes;
-                }
-                else
-                {
-                    if (att.ContainsKey(s))
-                    {
-                        att[s] = m_Value;
-                    }
-                }
-            }
-        }
+        ///// <summary>
+        ///// This method is in use to change the corresponding attribute of the value
+        ///// that is stored in this node in settings.
+        ///// </summary>
+        //public virtual void UpdateSettingsEntry()
+        //{
+        //    Dictionary<string, object> att = m_Settings.SimulationDefault;
+        //    foreach (string s in m_KeyPath)
+        //    {
+        //        if (att[s] is Dictionary<string, object>)
+        //        {
+        //            Dictionary<string, object> newLevel = att[s] as Dictionary<string, object>;
+        //            att = newLevel;
+        //        }
+        //        else if (att[s] is FOAMParameterPatch<dynamic> patch)
+        //        {
+        //            att = patch.Attributes;
+        //        }
+        //        else
+        //        {
+        //            if (att.ContainsKey(s))
+        //            {
+        //                att[s] = m_Value;
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Getter-Setter for value that is stored in the node.
@@ -146,7 +146,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
             set
             {
                 m_Value = value;
-                UpdateSettings();
+                m_Settings.UpdateSettingsEntry(m_KeyPath, m_Value);
             }
         }
     }

@@ -11,66 +11,186 @@ namespace BIM.OpenFOAMExport
     /// </summary>
     public class XMLHandler
     {
+        Settings m_Settings;
+
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="settings">Settings-object for current project.</param>
         public XMLHandler(Settings settings)
         {
-            CreateConfig(settings);
+            m_Settings = settings;
+            CreateConfig();
         }
 
         /// <summary>
         /// Read the config file and add entries to settings.
         /// </summary>
         /// <param name="path"></param>
-        private void ReadConfig(string path, Settings settings)
+        private void ReadConfig(string path)
         {
             if (File.Exists(path))
             {
-                XmlTextReader reader = new XmlTextReader(path);
-                while (reader.Read())
+                XmlDocument doc = new XmlDocument();
+                doc.Load(path);
+
+                Dictionary<string, object> dict = m_Settings.SimulationDefault;
+                List<string> keyPath = new List<string>();
+                //keyPath.Add("OpenFOAMConfig");
+                //keyPath.Add("DefaultParameter");
+                UpdateSettings(doc, keyPath, dict);
+
+                //XmlTextReader reader = new XmlTextReader(path);
+                //while (reader.Read())
+                //{
+                //    switch (reader.NodeType)
+                //    {
+                //        case XmlNodeType.Element:
+                //            {
+                //                // The node is an element.
+                //                Console.Write("<" + reader.Name);
+
+                //                while (reader.MoveToNextAttribute())
+                //                {
+                //                    // Read the attributes.
+                //                    Console.Write(" " + reader.Name + "='" + reader.Value + "'");
+                //                }
+
+                //                Console.WriteLine(">");
+                //                break;
+                //            }
+                //        case XmlNodeType.Text:
+                //            {
+                //                //Display the text in each element.
+                //                Console.WriteLine(reader.Value);
+                //                break;
+                //            }
+                //        case XmlNodeType.EndElement:
+                //            {
+                //                //Display the end of the element.
+                //                Console.Write("</" + reader.Name);
+                //                Console.WriteLine(">");
+                //                break;
+                //            }
+                //    }
+
+                //}
+                //reader.Close();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="dict"></param>
+        private void UpdateSettings(XmlDocument doc, List<string> keyPath, Dictionary<string, object> dict)
+        {
+            foreach (var entry in dict)
+            {
+                if (entry.Value is Dictionary<string, object> newLevel)
                 {
-                    switch (reader.NodeType)
-                    {
-                        case XmlNodeType.Element:
-                            {
-                                // The node is an element.
-                                Console.Write("<" + reader.Name);
-
-                                while (reader.MoveToNextAttribute())
-                                {
-                                    // Read the attributes.
-                                    Console.Write(" " + reader.Name + "='" + reader.Value + "'");
-                                }
-
-                                Console.WriteLine(">");
-                                break;
-                            }
-                        case XmlNodeType.Text:
-                            {
-                                //Display the text in each element.
-                                Console.WriteLine(reader.Value);
-                                break;
-                            }
-                        case XmlNodeType.EndElement:
-                            {
-                                //Display the end of the element.
-                                Console.Write("</" + reader.Name);
-                                Console.WriteLine(">");
-                                break;
-                            }
-                    }
-
+                    keyPath.Add(entry.Key);
+                    UpdateSettings(doc, keyPath, newLevel);
+                    break;
+                }
+                else if (entry.Value is System.Collections.ArrayList newLevelArray)
+                {
+                }
+                else if (entry.Value is FOAMParameterPatch<dynamic> patch)
+                {
+                    keyPath.Add(entry.Key);
+                    UpdateSettings(doc, keyPath, patch.Attributes);
+                }
+                else
+                {
+                    UpdateSettingsBasedOnXmlEntry(doc, keyPath, entry.Key, entry.Value);
                 }
             }
         }
 
-        /**********************TO-DO: IMPLEMENT READ FOR XML-CONFIG BEFORE INSERT THIS**********************/
+        /// <summary>
+        /// Update settings.
+        /// </summary>
+        /// <param name="doc">Xml document.</param>
+        /// <param name="keyPath">Path to attribute in SimulationDefault in Settings.</param>
+        /// <param name="entryName">Name of node in settings.</param>
+        /// <param name="entryValue">Value in settings.</param>
+        private void UpdateSettingsBasedOnXmlEntry(XmlDocument doc, List<string> keyPath, string entryName, object entryValue)
+        {
+            keyPath.Add(entryName);
+            string xmlPath = GetXmlPath(keyPath);
+            XmlNode node = doc.SelectSingleNode(xmlPath);
+            object value = null;
+            if (entryValue is double)
+            {
+                value = Convert.ToDouble(node.FirstChild.Value, System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+            }
+            else if (entryValue is int)
+            {
+                value = Convert.ToInt32(node.FirstChild.Value);
+            }
+            else if (entryValue is System.Windows.Media.Media3D.Vector3D)
+            {
+                List<double> vec = new List<double>();
+                foreach (var vecEntry in node.FirstChild.Value.Split(';'))
+                {
+                    vec.Add(Convert.ToDouble(vecEntry, System.Globalization.CultureInfo.GetCultureInfo("en-US")));
+                }
+                value = new System.Windows.Media.Media3D.Vector3D(vec[0], vec[1], vec[2]);
+            }
+            else if (entryValue is System.Windows.Vector)
+            {
+                List<double> vec = new List<double>();
+                foreach (var vecEntry in node.FirstChild.Value.Split(';'))
+                {
+                    vec.Add(Convert.ToDouble(vecEntry, System.Globalization.CultureInfo.GetCultureInfo("en-US")));
+                }
+                value = new System.Windows.Vector(vec[0], vec[1]);
+            }
+            else if (entryValue is bool)
+            {
+                value = Convert.ToBoolean(node.FirstChild.Value);
+            }
+            else if (entryValue is Enum e)
+            {
+                foreach(var enu in Enum.GetValues(e.GetType()))
+                {
+                    if(node.FirstChild.Value.Equals(enu))
+                    {
+                        value = enu;
+                    }
+                }
+            }
+            else if (entryValue is string s)
+            {
+                value = node.FirstChild.Value;
+            }
+            if(value != null)
+            {
+                m_Settings.UpdateSettingsEntry(keyPath, value);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyPath"></param>
+        /// <returns></returns>
+        private string GetXmlPath(List<string> keyPath)
+        {
+            string xmlPath = "OpenFOAMConfig[1]/DefaultParameter[1]";
+            foreach (string s in keyPath)
+            {
+                xmlPath += "/" + s + "[1]";
+            }
+            return xmlPath;
+        }
+
         /// <summary>
         /// Create config file if it doesn't exist.
         /// </summary>
-        private void CreateConfig(Settings settings)
+        private void CreateConfig()
         {
             //remove file:///
             string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
@@ -90,7 +210,7 @@ namespace BIM.OpenFOAMExport
                 );
 
                 var defaultElement = new XElement("DefaultParameter");
-                Dictionary<string, object> dict = settings.SimulationDefault;
+                Dictionary<string, object> dict = m_Settings.SimulationDefault;
                 CreateXMLTree(defaultElement, dict);
                 elements.Add(defaultElement);
 
@@ -98,21 +218,21 @@ namespace BIM.OpenFOAMExport
 
                 XElement ssh = config.Root.Element("SSH");
                 ssh.Add(
-                        new XElement("user", settings.SSH.User),
-                        new XElement("host", settings.SSH.ServerIP),
-                        new XElement("serverCasePath", settings.SSH.ServerCaseFolder),
-                        new XElement("ofAlias", settings.SSH.OfAlias),
-                        new XElement("port", settings.SSH.Port.ToString()),
-                        new XElement("tasks", settings.SSH.Tasks.ToString()),
-                        new XElement("download",settings.SSH.Download),
-                        new XElement("delete", settings.SSH.Delete),
-                        new XElement("slurm", settings.SSH.Slurm)
+                        new XElement("user", m_Settings.SSH.User),
+                        new XElement("host", m_Settings.SSH.ServerIP),
+                        new XElement("serverCasePath", m_Settings.SSH.ServerCaseFolder),
+                        new XElement("ofAlias", m_Settings.SSH.OfAlias),
+                        new XElement("port", m_Settings.SSH.Port.ToString()),
+                        new XElement("tasks", m_Settings.SSH.Tasks.ToString()),
+                        new XElement("download", m_Settings.SSH.Download),
+                        new XElement("delete", m_Settings.SSH.Delete),
+                        new XElement("slurm", m_Settings.SSH.Slurm)
                 );
                 config.Save(configPath);
             }
             else
             {
-                ReadConfig(configPath, settings);
+                ReadConfig(configPath);
             }
         }
 
@@ -127,6 +247,8 @@ namespace BIM.OpenFOAMExport
             {
                 string nameNode = element.Key;
                 nameNode = PrepareXMLString(nameNode);
+                if (nameNode.Equals("null"))
+                    continue;
                 var elem = new XElement(nameNode);
                 if (element.Value is Dictionary<string, object>)
                 {
@@ -134,7 +256,14 @@ namespace BIM.OpenFOAMExport
                 }
                 else
                 {
-                    elem.Value = element.Value.ToString();
+                    if(element.Value is FOAMParameterPatch<dynamic> patch)
+                    {
+                        CreateXMLTree(elem, patch.Attributes);
+                    }
+                    else
+                    {
+                        elem.Value = element.Value.ToString();
+                    }
                 }
                 e.Add(elem);
             }

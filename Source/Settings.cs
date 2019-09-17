@@ -1847,8 +1847,9 @@ namespace BIM.OpenFOAMExport
         {
             InitSystemDictionary();
             InitConstantDictionary();
-            InitNullDictionary();            
+            InitNullDictionary();
 
+            //XMLHandler handler = new XMLHandler(this);
             //CREATES XML BASED ON DEFAULT SETTINGS => NO READ FUNCTION FOR SETTINGS AND OPENFOAMEXPORTFORM IMPLEMENTED YET
             //CreateConfig();
         }
@@ -2412,9 +2413,9 @@ namespace BIM.OpenFOAMExport
                 case InitialFOAMParameter.k:
                     {
                         parameter = new InitialParameter(param.ToString(), 0.1, model);
-                        CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, false/*true*/);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, false/*true*/);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false/*true*/);
+                        CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false*/true);
                         foreach (var outlet in parameter.Patches)
                         {
                             if (outlet.Value.Type == PatchType.outlet)
@@ -2427,9 +2428,9 @@ namespace BIM.OpenFOAMExport
                 case InitialFOAMParameter.epsilon:
                     {
                         parameter = new InitialParameter(param.ToString(), 0.01, model);
-                        CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, /*true*/false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, false/* true*/);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false /*true*/);
+                        CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, true/*false*/);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, /*false */true);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false */true);
                         foreach(var outlet in parameter.Patches)
                         {
                             if(outlet.Value.Type == PatchType.outlet)
@@ -2541,7 +2542,7 @@ namespace BIM.OpenFOAMExport
                                 }
                                 else if(param.Name.Equals(InitialFOAMParameter.U.ToString()))
                                 {
-                                    v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z)*properties.MeanFlowVelocity;
+                                    v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z) * properties.MeanFlowVelocity;
                                 }
                                 //v = properties.MeanFlowVelocity;
                                 _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v/*inlet.Value*/, pType);
@@ -2657,6 +2658,34 @@ namespace BIM.OpenFOAMExport
         private void CreateTurbulencePropertiesDictionary()
         {
             m_Constant.Add("turbulenceProperties", m_TurbulenceParameter.ToDictionary());
+        }
+
+        /// <summary>
+        /// This method is in use to change the corresponding attribute of the value
+        /// that is stored at the keypath in settings.
+        /// </summary>
+        public void UpdateSettingsEntry<T>(List<string> keyPath, T value)
+        {
+            Dictionary<string, object> att = SimulationDefault;
+            foreach (string s in keyPath)
+            {
+                if (att[s] is Dictionary<string, object>)
+                {
+                    Dictionary<string, object> newLevel = att[s] as Dictionary<string, object>;
+                    att = newLevel;
+                }
+                else if (att[s] is FOAMParameterPatch<dynamic> patch)
+                {
+                    att = patch.Attributes;
+                }
+                else
+                {
+                    if (att.ContainsKey(s))
+                    {
+                        att[s] = value;
+                    }
+                }
+            }
         }
     }
 }
