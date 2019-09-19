@@ -29,10 +29,20 @@ using BIM.OpenFOAMExport.OpenFOAM;
 namespace BIM.OpenFOAMExport
 {
     /// <summary>
-    /// Properties of a surface like inlet/outlet.
+    /// Properties of a duct terminal.
     /// </summary>
-    public struct SurfaceProperties
+    public struct DuctProperties
     {
+        /// <summary>
+        /// RPM for swirl diffuser.
+        /// </summary>
+        public int RPM { get; set; }
+
+        /// <summary>
+        /// External pressure.
+        /// </summary>
+        public double ExternalPressure { get; set; }
+
         /// <summary>
         /// Area of the surface.
         /// </summary>
@@ -42,6 +52,11 @@ namespace BIM.OpenFOAMExport
         /// Boundary of the surface.
         /// </summary>
         public double Boundary { get; set; }
+
+        /// <summary>
+        /// Air flow rate in m³/s.
+        /// </summary>
+        public double FlowRate { get; set; }
 
         /// <summary>
         /// Mean flow velocity through surface.
@@ -745,6 +760,8 @@ namespace BIM.OpenFOAMExport
         outlet
     }
 
+    //TO-DO: ADD INLET OUTLET BOUNDARY TYPE ENUMS LIKE FIXEDFLUXPRESSURE OR FIXEDVALUE.
+
     /// <summary>
     /// Enum-Objects for simulationmodel LES.
     /// </summary>
@@ -1420,8 +1437,6 @@ namespace BIM.OpenFOAMExport
             double writePrecision, double timePrecision, int numberOfSubdomains, List<Category> selectedCategories,
             DisplayUnitType units)
         {
-            //TO-DO: CONFIG CREATE IS IMPLEMENTED BELOW AND COMMENTED OUT
-            //READ FUNCTION NEEDS TO BE IMPLEMENTED
             m_Outlets = new Dictionary<string, object>();
             m_Inlets = new Dictionary<string, object>();
 
@@ -2384,7 +2399,7 @@ namespace BIM.OpenFOAMExport
                         parameter = new InitialParameter(param.ToString(), 0.0, model);
                         CreateFOAMParameterPatches<int>(parameter, "zeroGradient", "", default, PatchType.wall, false);
                         CreateFOAMParameterPatches<int>(parameter, "zeroGradient","", default, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.0, PatchType.outlet, false);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.0, PatchType.outlet, true);
                         break;
                     }
                 case InitialFOAMParameter.U:
@@ -2397,6 +2412,9 @@ namespace BIM.OpenFOAMExport
                         {
                             if (outlet.Value.Type == PatchType.outlet)
                             {
+                                if (outlet.Value.Attributes.ContainsKey("rpm"))
+                                    break;
+
                                 outlet.Value.Attributes.Add("inletValue uniform", new Vector3D(0.0, 0.0, 0.0));
                             }
                         }
@@ -2459,14 +2477,6 @@ namespace BIM.OpenFOAMExport
 
                 case InitialFOAMParameter.T:
                     {
-                        //double kelvin = 273.15;
-                        ////double tempWall = kelvin + 25;
-                        ////double tempOutlet = kelvin + 25;
-                        ////double tempInlet = kelvin + 29;
-                        //m_TempWall = kelvin + 25;
-                        //m_TempOutlet = kelvin + 25;
-                        //m_TempInlet = kelvin + 29;
-
                         parameter = new InitialParameter(param.ToString(), m_TransportModelParameter["TRef"], model);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempWall, PatchType.wall, false);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempInlet, PatchType.inlet, false);
@@ -2479,7 +2489,7 @@ namespace BIM.OpenFOAMExport
                         parameter = new InitialParameter(param.ToString(), 0.0, model);
                         CreateFOAMParameterPatches(parameter, "fixedFluxPressure", "uniform", 0.0, PatchType.wall, false);
                         CreateFOAMParameterPatches<int>(parameter, "zeroGradient", "", default, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.0, PatchType.outlet, false);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.0, PatchType.outlet, true);
                         foreach(var wall in parameter.Patches)
                         {
                             if(wall.Value.Type == PatchType.wall)
@@ -2528,7 +2538,7 @@ namespace BIM.OpenFOAMExport
                         {
                             foreach(var inlet in Inlet)
                             {
-                                var properties = (SurfaceProperties)inlet.Value;
+                                var properties = (DuctProperties)inlet.Value;
                                 object v = default;
                                 if(param.Name.Equals(InitialFOAMParameter.k.ToString()))
                                 {
@@ -2542,10 +2552,32 @@ namespace BIM.OpenFOAMExport
                                 }
                                 else if(param.Name.Equals(InitialFOAMParameter.U.ToString()))
                                 {
+                                    if (properties.RPM != 0)
+                                    {
+                                        type = "swirlFlowRateInletVelocity";
+                                        v = new Vector3D(0, 0, 0);
+                                        _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
+                                        _inlet.Attributes.Add("rpm", properties.RPM.ToString());
+                                        _inlet.Attributes.Add("flowRate", properties.FlowRate.ToString());
+                                        param.Patches.Add(inlet.Key, _inlet);
+                                        continue;
+                                    }
                                     v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z) * properties.MeanFlowVelocity;
                                 }
+                                //else if (param.Name.Equals(InitialFOAMParameter.p.ToString()))
+                                //{
+                                //    //density of air at 20 degree and 1 bar in kg/m³ = 1.204
+                                //    //rho-normalized pressure
+                                //    OpenFOAMCalculator calculator = new OpenFOAMCalculator();
+                                //    v = calculator.CalculateRhoNormalizedPressur(properties.ExternalPressure, 1.204);
+                                //}
+                                else
+                                {
+                                    v = value;
+                                }
+
                                 //v = properties.MeanFlowVelocity;
-                                _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v/*inlet.Value*/, pType);
+                                _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                 param.Patches.Add(inlet.Key, _inlet);
                             }
                         }
@@ -2564,7 +2596,7 @@ namespace BIM.OpenFOAMExport
                         {
                             foreach(var outlet in Outlet)
                             {
-                                var properties = (SurfaceProperties)outlet.Value;
+                                var properties = (DuctProperties)outlet.Value;
                                 object v = default;
                                 if (param.Name.Equals(InitialFOAMParameter.k.ToString()))
                                 {
@@ -2578,9 +2610,46 @@ namespace BIM.OpenFOAMExport
                                 }
                                 else if (param.Name.Equals(InitialFOAMParameter.U.ToString()))
                                 {
+                                    if (properties.RPM != 0)
+                                    {
+                                        type = "swirlFlowRateInletVelocity";
+                                        v = new Vector3D(0, 0, 0);
+                                        _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
+                                        _outlet.Attributes.Add("rpm", properties.RPM.ToString());
+                                        _outlet.Attributes.Add("flowRate", properties.FlowRate.ToString());
+                                        param.Patches.Add(outlet.Key, _outlet);
+                                        continue;
+                                    }
                                     v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z) * properties.MeanFlowVelocity;
                                 }
-                                _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v/*outlet.Value*/, pType);
+                                else if (param.Name.Equals(InitialFOAMParameter.p.ToString()))
+                                {
+                                    //density of air at 20 degree and 1 bar in kg/m³ = 1.204
+                                    //rho-normalized pressure
+                                    OpenFOAMCalculator calculator = new OpenFOAMCalculator();
+                                    if(properties.ExternalPressure != 0)
+                                    {
+                                        v = calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
+                                    }
+                                    else
+                                    {
+                                        v = value;
+                                    }
+                                }
+                                else if(param.Name.Equals(InitialFOAMParameter.p_rgh.ToString()))
+                                {
+                                    //p_rgh = p - rho*g*h => not implemented h => TO-DO: GET H 
+                                    OpenFOAMCalculator calculator = new OpenFOAMCalculator();
+                                    if (properties.ExternalPressure != 0)
+                                    {
+                                        v = calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
+                                    }
+                                }
+                                else
+                                {
+                                    v = value;
+                                }
+                                _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                 param.Patches.Add(outlet.Key, _outlet);
                             }
                         }

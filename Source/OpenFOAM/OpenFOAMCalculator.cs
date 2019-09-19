@@ -91,6 +91,17 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         }
 
         /// <summary>
+        /// Returns the rho-normalized pressure.
+        /// </summary>
+        /// <param name="externalPressure">External pressure.</param>
+        /// <param name="rho">Density of fluid.</param>
+        /// <returns>rho-normalized pressure as double.</returns>
+        public double CalculateRhoNormalizedPressure(double externalPressure, double rho)
+        {
+            return externalPressure / rho;
+        }
+
+        /// <summary>
         /// Estimate turbulence length scale for pipe flows.
         /// </summary>
         /// <param name="hydraulicDiameter">Hydraulic Diameter of the pipe.</param>

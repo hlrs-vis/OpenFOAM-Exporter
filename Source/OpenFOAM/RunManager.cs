@@ -180,7 +180,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                         else if (command.Equals("simpleFoam")  || command.Equals("buoyantBoussinesqSimpleFoam"))
                         {
                             runCommands.Add("decomposePar");
-                            runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
+                            //runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
                             runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
                             runCommands.Add("reconstructPar -latestTime");
                             continue;
@@ -601,7 +601,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 sw.WriteLine(command);
                 return;
             }
-            if (command.Contains("ssh") || /*command.Contains("source")*/ CheckAlias(command))
+            if (command.Contains("ssh") || CheckAlias(command))
             {
                 sw.Write(command);
                 return;

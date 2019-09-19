@@ -290,7 +290,7 @@ namespace BIM.OpenFOAMExport
                 "\nrm -r processor*" +
                 "\nrm -rf log.decomposePar" +
                 "\nrunApplication decomposePar" +
-                "\nrunParallel renumberMesh -overwrite" +
+                //"\nrunParallel renumberMesh -overwrite" +
                 "\nrunParallel $(getApplication)" +
                 "\n" +
                 "\nrunApplication reconstructPar -latestTime" +

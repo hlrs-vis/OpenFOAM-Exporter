@@ -29,6 +29,7 @@ using System.Text.RegularExpressions;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using System.IO;
+using Autodesk.Revit.UI.Selection;
 
 namespace BIM.OpenFOAMExport
 {
@@ -140,6 +141,7 @@ namespace BIM.OpenFOAMExport
             m_Revit.ViewActivating += Revit_ViewActivating;            
             
             m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
+            
             tbSSH.Enabled = false;
             tbOpenFOAM.Enabled = false;
 
@@ -283,110 +285,114 @@ namespace BIM.OpenFOAMExport
             //get materials
             m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, m_DuctTerminals);
 
-            return InitAirFlowVelocity();
+            return InitDuctParameters();
         }
 
         /// <summary>
-        /// Searches for inlet/outlet to compute airflow velocity based on airflow volume and surface area.
+        /// Initialize duct terminal parameters like flowRate, meanFlowVelocity and area.
         /// </summary>
         /// <returns>True, if there is no error while computing.</returns>
-        private bool InitAirFlowVelocity()
+        private bool InitDuctParameters()
         {
             bool succeed = false;
             foreach (FamilyInstance instance in m_DuctTerminals)
             {
-                double paramValue = 0;
+                XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
+                double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
+                double flowRate = 0;
+                double meanFlowVelocity = 0;
+                double externalPressure = 0;
+                int rpm = 0;
                 double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
                 foreach (Parameter param in instance.Parameters)
                 {
-                    paramValue = 0;
                     try
                     {
-                        paramValue = ComputeAirFlowValue(paramValue, surfaceArea, param);
+                        if (flowRate == 0)
+                        {
+                            flowRate = GetParamValue(param, DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND, 
+                                () => param.Definition.ParameterType == ParameterType.HVACAirflow, ConvertParameterToDisplayUnitType);
+                            if(flowRate != 0)
+                            {
+                                meanFlowVelocity = flowRate / surfaceArea;
+                                continue;
+                            }
+                        }
+
+                        if(externalPressure == 0)
+                        {
+                            externalPressure = GetParamValue(param, DisplayUnitType.DUT_PASCALS,
+                                () => param.Definition.Name.Equals("static Pressure") && param.Definition.ParameterType == ParameterType.HVACPressure, ConvertParameterToDisplayUnitType);
+                            if (externalPressure != 0)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if(rpm == 0)
+                        {
+                            rpm = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
+                                () => param.Definition.Name.Equals("RPM"), ConvertParameterToDisplayUnitType);
+
+                            if (rpm != 0)
+                            {
+                                continue;
+                            }
+                        }
                     }
                     catch (Exception)
                     {
-                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method InitDuctParameters.", OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
+                }
 
-                    if (paramValue != 0)
-                    {
-                        FamilySymbol famSym = instance.Symbol;
+                FamilySymbol famSym = instance.Symbol;
 
-                        //get FaceNormal
-                        XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
-                        double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
-
-                        string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
-                        string nameDuct = nameDuctFam.Replace(" ", "_");
-                        if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
-                        {
-                            //negate faceNormal = outlet.
-                            SurfaceProperties sProp = new SurfaceProperties
-                            {
-                                Area = surfaceArea,
-                                Boundary = faceBoundary,
-                                FaceNormal = faceNormal,
-                                MeanFlowVelocity = -paramValue
-                            };
-                            m_Settings.Outlet.Add(nameDuct, sProp);
-                            succeed = true;
-                        }
-                        else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
-                        {
-                            SurfaceProperties sProp = new SurfaceProperties
-                            {
-                                Area = surfaceArea,
-                                Boundary = faceBoundary,
-                                FaceNormal = faceNormal,
-                                MeanFlowVelocity = paramValue
-                            };
-                            m_Settings.Inlet.Add(nameDuct, sProp);
-                            succeed = true;
-                        }
-                        break;
-                    }
+                string nameDuctFam = famSym.Family.Name + "_" + instance.Id.ToString();
+                string nameDuct = nameDuctFam.Replace(" ", "_");
+                if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
+                {
+                    //negate faceNormal = outlet.
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    m_Settings.Outlet.Add(nameDuct, dProp);
+                    succeed = true;
+                }
+                else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
+                {
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    m_Settings.Inlet.Add(nameDuct, dProp);
+                    succeed = true;
                 }
             }
             return succeed;
         }
 
-        ///// <summary>
-        ///// Search for inlet/outlet face and return the surfaceArea.
-        ///// </summary>
-        ///// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
-        ///// <returns>Surfacearea as double.</returns>
-        //private double GetSurfaceArea(FamilyInstance instance)
-        //{
-        //    double area = 0;
-        //    var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
-        //    m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
-
-        //    var geometry = instance.get_Geometry(m_ViewOptions);
-        //    Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
-        //    if (solid == default)
-        //        return area;
-
-        //    Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
-        //    if(face != null)
-        //    {
-        //        var edges = face.EdgeLoops;
-        //        double boundary = 0;
-        //        if (!edges.IsEmpty)
-        //        {
-        //            foreach (Edge edge in edges.get_Item(0) as EdgeArray)
-        //            {
-        //                boundary += UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS);
-        //            }
-        //        }
-
-        //        //convert from imperial unit system to metric
-        //        area = UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
-        //    }
-        //    return area;
-        //}
+        /// <summary>
+        /// Creates a new struct DuctProperties which includes parameter for the duct terminal.
+        /// </summary>
+        /// <param name="faceNormal">Face normal.</param>
+        /// <param name="faceBoundary">Boundary of the surface.</param>
+        /// <param name="flowRate">The flow rate in duct terminal in m³/s.</param>
+        /// <param name="meanFlowVelocity">Mean flow velocity through terminal.</param>
+        /// <param name="externalPressure">External Pressure.</param>
+        /// <param name="rpm">Revolution per minute.</param>
+        /// <param name="surfaceArea">Area of the surface.</param>
+        /// <returns>Ductproperties with given parameters.</returns>
+        private static DuctProperties CreateDuctProperties(XYZ faceNormal, double faceBoundary, double flowRate, double meanFlowVelocity, double externalPressure, int rpm, double surfaceArea)
+        {
+            return new DuctProperties
+            {
+                Area = surfaceArea,
+                Boundary = faceBoundary,
+                FaceNormal = faceNormal,
+                MeanFlowVelocity = -meanFlowVelocity,
+                FlowRate = flowRate,
+                RPM = rpm,
+                ExternalPressure = externalPressure
+            };
+        }
 
         /// <summary>
         /// Get surface parameter based on given Face-Function. 
@@ -454,69 +460,37 @@ namespace BIM.OpenFOAMExport
             return boundary;
         }
 
-
-        ///// <summary>
-        ///// Search for inlet/outlet face and return the faceNormal.
-        ///// </summary>
-        ///// <param name="instance">FamilyInstance for searching inlet/outlet face.</param>
-        ///// <returns>Face normal.</returns>
-        //private XYZ GetOrientationInletOutlet(FamilyInstance instance)
-        //{
-        //    XYZ faceNormal = new XYZ(0, 0, 0);
-        //    var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
-        //    m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
-
-        //    var geometry = instance.get_Geometry(m_ViewOptions);
-        //    Solid solid = DataGenerator.ExtractSolid(m_ActiveDocument, geometry, null);
-
-        //    if (solid == default)
-        //        return faceNormal;
-
-        //    Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
-        //    if(face != null)
-        //    {
-        //        UV point = new UV();
-        //        faceNormal = face.ComputeNormal(point);
-        //    }
-            
-        //    return faceNormal;
-        //}
+        /// <summary>
+        /// Checks if the given parameter fulfills the given lambda-equation and return the converted parameter as T.
+        /// </summary>
+        /// <param name="param">Parameter object.</param>
+        /// <param name="type">DisplayUnitType to convert.</param
+        /// <param name="lambda">Lambda expression.</param>
+        /// <param name="convertFunc">Convert-function Func<Parameter, DisplayUnitType, T>.</param>
+        /// <returns>Converted Parameter as T.</returns>
+        private T GetParamValue<T>(Parameter param, DisplayUnitType type, Func<bool> lambda, Func<Parameter, DisplayUnitType, T> convertFunc)
+        {
+            T paramValue = default;
+            if(lambda())
+            {
+                paramValue = convertFunc(param, type);
+            }
+            return paramValue;
+        }
 
         /// <summary>
-        /// Initialize paramValue with the airflow parameter as double.
+        /// Convert given parameter in type with UnitUtils function ConvertFromInternalUnits.
         /// </summary>
-        /// <param name="paramValue">Parameter value empty.</param>
-        /// <param name="area">Surface area.</param>
-        /// <param name="param">Parameter object.</param>
-        /// <returns>Double.</returns>
-        private static double ComputeAirFlowValue(double paramValue, double area, Parameter param)
+        /// <param name="param">Parameter of object.</param>
+        /// <param name="type">DisplayUnitType.</param>
+        /// <returns>Parameter value as double.</returns>
+        private double ConvertParameterToDisplayUnitType(Parameter param, DisplayUnitType type)
         {
-            bool volumenFlow = false;
-            switch (param.Definition.ParameterType)
+            if(DisplayUnitType.DUT_UNDEFINED == type)
             {
-                //volumeflow
-                case ParameterType.HVACAirflow:
-                    {
-                        //m³/h => m³/s
-                        paramValue = UnitUtils.ConvertFromInternalUnits(param.AsDouble(), DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND);
-                        volumenFlow = true;
-                        break;
-                    }
-                //pressure loss
-                //case ParameterType.HVACPressure:
-                //    {
-                //        //Not implemented yet.
-                //        break;
-                //    }
-                    //****************ADD HER MORE PARAMETERTYPE TO HANDLE THEM****************//
+                return param.AsInteger();
             }
-
-            if(volumenFlow && area != 0)
-            {
-                paramValue = paramValue / area;
-            }
-
-            return paramValue;
+            return UnitUtils.ConvertFromInternalUnits(param.AsDouble(), type);
         }
 
         /// <summary>
@@ -1040,66 +1014,6 @@ namespace BIM.OpenFOAMExport
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
 
-        ///// <summary>
-        ///// Changes ssh user and server ip in settings.
-        ///// </summary>
-        //private void TxtBoxUserIP_ChangeValue()
-        //{
-        //    if (!m_Changed)
-        //    {
-        //        return;
-        //    }
-
-        //    string txtBox = txtBoxUserIP.Text;
-
-        //    if (m_RegUserIP.IsMatch(txtBox))
-        //    {
-        //        SSH ssh = m_Settings.SSH;
-        //        ssh.User = txtBox.Split('@')[0];
-        //        ssh.ServerIP = txtBox.Split('@')[1];
-        //        m_Settings.SSH = ssh;
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-        //                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        //        txtBoxUserIP.Text = m_Settings.SSH.ConnectionString();
-        //        //return;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// KeyPress-Event txtBoxUserIp.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">KeyPressEventArgs.</param>
-        //private void TxtBoxUserIP_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    TextBox_KeyPress(e, TxtBoxUserIP_ChangeValue);
-        //}
-
-        ///// <summary>
-        ///// Leave-Event txtBoxUserIP.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxUserIP_Leave(object sender, EventArgs e)
-        //{
-        //    TextBox_Leave();
-        //    //m_Clicked = !m_Clicked;
-        //    //m_Changed = !m_Changed;
-        //}
-
-        ///// <summary>
-        ///// Click-Event txtBoxUserIP.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxUserIP_Click(object sender, EventArgs e)
-        //{
-        //    TextBox_Clicked();
-        //}
-
         /// <summary>
         /// ValueChanged event for txtBoxAlias.
         /// </summary>
@@ -1115,50 +1029,6 @@ namespace BIM.OpenFOAMExport
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
-
-        ///// <summary>
-        ///// Change the corresponding value in settings of the txtBoxAlias.
-        ///// </summary>
-        //private void TxtBoxAlias_ChangeValue()
-        //{
-        //    if (!m_Changed)
-        //        return;
-
-        //    string txt = txtBoxAlias.Text;
-        //    SSH ssh = m_Settings.SSH;
-        //    ssh.OfAlias = txt;
-        //    m_Settings.SSH = ssh;
-        //}
-
-        ///// <summary>
-        ///// KeyPress-Event txtBoxAlias.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">KeyPressEventArgs.</param>
-        //private void TxtBoxAlias_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    TextBox_KeyPress(e, TxtBoxAlias_ChangeValue);
-        //}
-
-        ///// <summary>
-        ///// Leave-Event txtBoxAlias.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxAlias_Leave(object sender, EventArgs e)
-        //{
-        //    TextBox_Leave();
-        //}
-
-        ///// <summary>
-        ///// Click-Event txtBoxAlias.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxAlias_Click(object sender, EventArgs e)
-        //{
-        //    TextBox_Clicked();
-        //}
 
         /// <summary>
         /// ValueChanged for txtBoxServerCaseFolder.
@@ -1186,62 +1056,6 @@ namespace BIM.OpenFOAMExport
 
         }
 
-        ///// <summary>
-        ///// Change the corresponding value in settings of the txtServerCaseFolder.
-        ///// </summary>
-        //private void TxtBoxServerCaseFolder_ChangeValue()
-        //{
-        //    if (!m_Changed)
-        //        return;
-
-        //    string txtBox = txtBoxCaseFolder.Text;
-
-        //    if (m_RegServerCasePath.IsMatch(txtBox))
-        //    {
-        //        SSH ssh = m_Settings.SSH;
-        //        ssh.ServerCaseFolder = txtBox;
-        //        m_Settings.SSH = ssh;
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-        //                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        //        txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
-        //        //return;
-        //    }
-        //    //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
-        //}
-
-        ///// <summary>
-        ///// KeyPress-Event txtBoxServerCaseFolder.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">KeyPressEventArgs.</param>
-        //private void TxtBoxServerCaseFolder_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    TextBox_KeyPress(e, TxtBoxServerCaseFolder_ChangeValue);
-        //}
-
-        ///// <summary>
-        ///// Leave-Event txtBoxServerCaseFolder.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxServerCaseFolder_Leave(object sender, EventArgs e)
-        //{
-        //    TextBox_Leave();
-        //}
-
-        ///// <summary>
-        ///// Click-Event txtBoxServerCaseFolder.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxServerCaseFolder_Click(object sender, EventArgs e)
-        //{
-        //    TextBox_Clicked();
-        //}
-
         /// <summary>
         /// ValueChanged event for txtBoxPort.
         /// </summary>
@@ -1267,61 +1081,6 @@ namespace BIM.OpenFOAMExport
 
             //TO - DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
-
-        ///// <summary>
-        ///// Change the corresponding value in settings of the txtBoxPort.
-        ///// </summary>
-        //private void TxtBoxPort_ChangeValue()
-        //{
-        //    if (!m_Changed)
-        //        return;
-
-        //    string txtBox = txtBoxPort.Text;
-
-        //    if (m_RegPort.IsMatch(txtBox))
-        //    {
-        //        SSH ssh = m_Settings.SSH;
-        //        ssh.Port = Convert.ToInt32(txtBox);
-        //        m_Settings.SSH = ssh;
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-        //                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        //        txtBoxPort.Text = m_Settings.SSH.Port.ToString();
-        //        //return;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// KeyPress-Event txtBoxPort.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">KeyPressEventArgs.</param>
-        //private void TxtBoxPort_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    TextBox_KeyPress(e, TxtBoxPort_ChangeValue);
-        //}
-
-        ///// <summary>
-        ///// Leave-Event txtBoxPort.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxPort_Leave(object sender, EventArgs e)
-        //{
-        //    TextBox_Leave();
-        //}
-
-        ///// <summary>
-        ///// Click-Event txtBoxPort.
-        ///// </summary>
-        ///// <param name="sender">Sender.</param>
-        ///// <param name="e">EventArgs.</param>
-        //private void TxtBoxPort_Click(object sender, EventArgs e)
-        //{
-        //    TextBox_Clicked();
-        //}
 
         /// <summary>
         /// ValueChanged event for txtBoxTasks.
@@ -1400,65 +1159,6 @@ namespace BIM.OpenFOAMExport
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
-
-
-
-        /**********************BOUNDING BOX FOR ROOM**********************/
-        //TO-DO: ADD BUTTON TO SELECT BOUNDING-BOX
-
-
-        /////<summary>
-        ///// Create and return a solid representing 
-        ///// the bounding box of the input solid.
-        ///// Source: https://thebuildingcoder.typepad.com/blog/2016/09/solid-from-bounding-box-and-forge-webinar-4.html#2
-        ///// Assumption: aligned with Z axis.
-        ///// Written, described and tested by Owen Merrick for 
-        ///// http://forums.autodesk.com/t5/revit-api-forum/create-solid-from-boundingbox/m-p/6592486
-        ///// </summary>
-        //public static Solid CreateSolidFromBoundingBox(Solid inputSolid)
-        //{
-        //    BoundingBoxXYZ bbox = inputSolid.GetBoundingBox();
-
-        //    // Corners in BBox coords
-
-        //    XYZ pt0 = new XYZ(bbox.Min.X, bbox.Min.Y, bbox.Min.Z);
-        //    XYZ pt1 = new XYZ(bbox.Max.X, bbox.Min.Y, bbox.Min.Z);
-        //    XYZ pt2 = new XYZ(bbox.Max.X, bbox.Max.Y, bbox.Min.Z);
-        //    XYZ pt3 = new XYZ(bbox.Min.X, bbox.Max.Y, bbox.Min.Z);
-
-        //    // Edges in BBox coords
-
-        //    Line edge0 = Line.CreateBound(pt0, pt1);
-        //    Line edge1 = Line.CreateBound(pt1, pt2);
-        //    Line edge2 = Line.CreateBound(pt2, pt3);
-        //    Line edge3 = Line.CreateBound(pt3, pt0);
-
-        //    // Create loop, still in BBox coords
-
-        //    List<Curve> edges = new List<Curve>();
-        //    edges.Add(edge0);
-        //    edges.Add(edge1);
-        //    edges.Add(edge2);
-        //    edges.Add(edge3);
-
-        //    double height = bbox.Max.Z - bbox.Min.Z;
-
-        //    CurveLoop baseLoop = CurveLoop.Create(edges);
-
-        //    List<CurveLoop> loopList = new List<CurveLoop>();
-        //    loopList.Add(baseLoop);
-
-        //    Solid preTransformBox = GeometryCreationUtilities
-        //      .CreateExtrusionGeometry(loopList, XYZ.BasisZ,
-        //        height);
-
-        //    Solid transformBox = SolidUtils.CreateTransformed(
-        //      preTransformBox, bbox.Transform);
-
-        //    return transformBox;
-        //}
-
-
         
         /// <summary>
         /// Click-Event for txtBoxLocationInMesh.
@@ -1474,7 +1174,8 @@ namespace BIM.OpenFOAMExport
 
                 //Create sphere
                 XYZ xyz = ConvertLocationInMeshToInternalUnit()/*new XYZ(location.X, location.Y, location.Z)*/;
-                CreateSphereDirectShape(xyz);
+                if(m_SphereLocationInMesh == null)
+                    CreateSphereDirectShape(xyz);
                 m_Clicked = true;
             }
         }
@@ -1512,6 +1213,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="location">Location point.</param>
         public void CreateSphereDirectShape(XYZ location)
         {
+            //current u can only select the directshape at the edge of the view => instead of solid use tesselatedGeometry.
             Solid sphere = CreateSolidSphere(location, 1.0);
 
             using (Transaction t = new Transaction(m_ActiveDocument, "Create sphere direct shape"))
@@ -1526,6 +1228,8 @@ namespace BIM.OpenFOAMExport
                 //create direct shape and assign the sphere shape
                 DirectShape ds = DirectShape.CreateElement(m_ActiveDocument, new ElementId(BuiltInCategory.OST_GenericModel));
                 ds.SetShape(new GeometryObject[] { sphere });
+                ds.ApplicationDataId = "LocationInMesh id";
+                ds.ApplicationDataId = "GeometeryObject id";
                 m_SphereLocationInMesh = ds.Id;
                 t.Commit();
             }
@@ -1534,7 +1238,11 @@ namespace BIM.OpenFOAMExport
             ids.Add(m_SphereLocationInMesh);
             HighlightElementInScene(m_ActiveDocument, m_SphereLocationInMesh, 98);
             m_Revit.ActiveUIDocument.Selection.SetElementIds(ids);
-           
+
+            //Helps to select the directShape in scene but cannot find a function to cancel the method.
+
+            //ISelectionFilter filter = new ElementSelectionFilter(m_SphereLocationInMesh);
+            //m_ReferenceSphere =  m_Revit.ActiveUIDocument.Selection.PickObject(ObjectType.Element, filter, "Set the locationInMesh.");
         }
 
         /// <summary>
@@ -1580,10 +1288,15 @@ namespace BIM.OpenFOAMExport
                 foreach (Element e in new FilteredElementCollector(doc, doc.ActiveView.Id).WhereElementIsNotElementType())
                 {
                     if (e.Id == elementIdToIsolate || elementIdToIsolate == null)
+                    {
                         doc.ActiveView.SetElementOverrides(e.Id, ogsIsolate);
+                    }
                     else
                     {
                         doc.ActiveView.SetElementOverrides(e.Id, ogsFade);
+                        e.CanBeLocked();
+                       
+                        //m_Revit.ActiveUIDocument.Selection.
                         e.Pinned = true;
                     }
                 }
@@ -1714,7 +1427,6 @@ namespace BIM.OpenFOAMExport
         private void TxtBoxLocationInMesh_Leave(object sender, EventArgs e)
         {
             TextBox_Leave();
-
             TopMost = false;
 
             var vector = GetLocationOfElementAsVector(m_SphereLocationInMesh);
@@ -1856,6 +1568,51 @@ namespace BIM.OpenFOAMExport
         private void OpenFOAMExportForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             TxtBoxLocationInMesh_Leave(sender, e);
+        }
+    }
+
+    /// <summary>
+    /// Class to filter the element selection in revit scene.
+    /// </summary>
+    public class ElementSelectionFilter : ISelectionFilter
+    {
+        /// <summary>
+        /// Element that will be selectable.
+        /// </summary>
+        ElementId elementSelect;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="elementId">ElementId of the selectable element.</param>
+        public ElementSelectionFilter(ElementId elementId)
+        {
+            elementSelect = elementId;
+        }
+
+        /// <summary>
+        /// Returns true if elementId of given element is equal to elementSelect.
+        /// </summary>
+        /// <param name="element">Element that is selected under cursor.</param>
+        /// <returns>True if element equal elementSelect.</returns>
+        public bool AllowElement(Element element)
+        {
+            if (element.Id.Equals(elementSelect))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns ture if reference of selected Element can be extracted.
+        /// </summary>
+        /// <param name="refer">Reference.</param>
+        /// <param name="point">Point of selected element.</param>
+        /// <returns>false.</returns>
+        public bool AllowReference(Reference refer, XYZ point)
+        {
+            return false;
         }
     }
 }
