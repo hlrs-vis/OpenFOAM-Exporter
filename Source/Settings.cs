@@ -2528,7 +2528,7 @@ namespace BIM.OpenFOAMExport
             {
                 case PatchType.inlet:
                     {
-                        FOAMParameterPatch<dynamic> _inlet;
+                        FOAMParameterPatch<dynamic> _inlet = default;
                         if(Inlet.Count == 0 || !useBIM)
                         {
                             _inlet = new FOAMParameterPatch<dynamic>(type, uniform, value, pType);
@@ -2643,6 +2643,10 @@ namespace BIM.OpenFOAMExport
                                     if (properties.ExternalPressure != 0)
                                     {
                                         v = calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
+                                    }
+                                    else
+                                    {
+                                        v = value;
                                     }
                                 }
                                 else

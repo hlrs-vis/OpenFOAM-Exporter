@@ -299,11 +299,11 @@ namespace BIM.OpenFOAMExport
             {
                 XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
                 double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
+                double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
                 double flowRate = 0;
                 double meanFlowVelocity = 0;
                 double externalPressure = 0;
                 int rpm = 0;
-                double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
                 foreach (Parameter param in instance.Parameters)
                 {
                     try
@@ -355,13 +355,13 @@ namespace BIM.OpenFOAMExport
                 if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                 {
                     //negate faceNormal = outlet.
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, externalPressure, rpm, surfaceArea);
                     m_Settings.Outlet.Add(nameDuct, dProp);
                     succeed = true;
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
                     m_Settings.Inlet.Add(nameDuct, dProp);
                     succeed = true;
                 }
@@ -387,7 +387,7 @@ namespace BIM.OpenFOAMExport
                 Area = surfaceArea,
                 Boundary = faceBoundary,
                 FaceNormal = faceNormal,
-                MeanFlowVelocity = -meanFlowVelocity,
+                MeanFlowVelocity = meanFlowVelocity,
                 FlowRate = flowRate,
                 RPM = rpm,
                 ExternalPressure = externalPressure

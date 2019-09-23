@@ -312,12 +312,15 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                     throw format;
                 }
             }
-            catch (FormatException)
+            catch (Exception)
             {
-                System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT
-                    + " " + valueString + "\nFormat: " + m_CurrentOFTxtBoxTreeNode.Format
-                    , OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT +
+                    " " + valueString + "\nFormat: " + m_CurrentOFTxtBoxTreeNode.Format +
+                    ". Error in class OpenFOAMTreeView in methode TextBox_ChangeValue()",
+                    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                m_CurrentOFTxtBoxTreeNode.TxtBox.Text = m_CurrentOFTxtBoxTreeNode.Value;
             }
         }
 
