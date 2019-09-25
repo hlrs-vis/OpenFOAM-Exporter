@@ -2562,6 +2562,8 @@ namespace BIM.OpenFOAMExport
                                         param.Patches.Add(inlet.Key, _inlet);
                                         continue;
                                     }
+                                    if (properties.FaceNormal == null)
+                                        properties.FaceNormal = new XYZ(0,0,0);
                                     v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z) * properties.MeanFlowVelocity;
                                 }
                                 //else if (param.Name.Equals(InitialFOAMParameter.p.ToString()))
@@ -2620,6 +2622,8 @@ namespace BIM.OpenFOAMExport
                                         param.Patches.Add(outlet.Key, _outlet);
                                         continue;
                                     }
+                                    if (properties.FaceNormal == null)
+                                        properties.FaceNormal = new XYZ(0, 0, 0);
                                     v = new Vector3D(properties.FaceNormal.X, properties.FaceNormal.Y, properties.FaceNormal.Z) * properties.MeanFlowVelocity;
                                 }
                                 else if (param.Name.Equals(InitialFOAMParameter.p.ToString()))

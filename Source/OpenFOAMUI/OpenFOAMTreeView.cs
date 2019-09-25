@@ -320,7 +320,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                     OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-                m_CurrentOFTxtBoxTreeNode.TxtBox.Text = m_CurrentOFTxtBoxTreeNode.Value;
+                //m_CurrentOFTxtBoxTreeNode.TxtBox.Text = m_CurrentOFTxtBoxTreeNode.Value;
             }
         }
 
