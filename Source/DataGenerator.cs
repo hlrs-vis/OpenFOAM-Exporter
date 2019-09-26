@@ -317,7 +317,7 @@ namespace BIM.OpenFOAMExport
 
             if (CreateGeneralFile(path, "Allrun.", allrun))
             {
-                commands.Add("bash ./Allrun");
+                commands.Add("./Allrun");
 
                 string allclean = "#!/bin/sh" +
                     "\ncd ${0%/*} || exit 1    # run from this directory" +

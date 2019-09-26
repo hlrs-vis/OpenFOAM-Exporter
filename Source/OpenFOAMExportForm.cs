@@ -355,13 +355,15 @@ namespace BIM.OpenFOAMExport
                 if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                 {
                     //negate faceNormal = outlet.
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, -meanFlowVelocity, externalPressure, rpm, surfaceArea);
                     m_Settings.Outlet.Add(nameDuct, dProp);
                     succeed = true;
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flow direction default
+                    //=> -flowRate
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
                     m_Settings.Inlet.Add(nameDuct, dProp);
                     succeed = true;
                 }

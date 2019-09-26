@@ -560,7 +560,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
 
             if(m_Settings.SSH.Slurm)
             {
-                shellCommands.Add("; eval salloc n:" + m_Settings.SSH.Tasks);
+                shellCommands.Add("; eval salloc -n " + m_Settings.SSH.Tasks + " /bin/bash ");
             }
 
             return shellCommands;
@@ -601,12 +601,21 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 sw.WriteLine(command);
                 return;
             }
-            if (command.Contains("ssh") || CheckAlias(command))
+            if (command.Contains("ssh") || command.Contains("/bin/bash") || CheckAlias(command))
             {
                 sw.Write(command);
                 return;
             }
-            sw.Write("; eval " + command);
+
+            if (m_Settings.SSH.Slurm)
+            {
+                //current state => only Allrun
+                sw.Write(command + ";");
+            }
+            else
+            {
+                sw.Write("; eval " + command);
+            }
         }
 
         /// <summary>
