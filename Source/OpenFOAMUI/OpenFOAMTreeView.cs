@@ -295,11 +295,20 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
                         int j = Convert.ToInt32(value);
                         m_CurrentOFTxtBoxTreeNode.Value = j;
                     }
-                    else
+                    else if(m_CurrentOFTxtBoxTreeNode.Value is double)
                     {
                         double j;
-                        double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out j);
+                        if(!double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out j))
+                        {
+                            FormatException format = new FormatException();
+                            throw format;
+                        } 
                         m_CurrentOFTxtBoxTreeNode.Value = j;
+                    }
+                    else
+                    {
+                        FormatException format = new FormatException();
+                        throw format;
                     }
                 }
                 else if(m_CurrentOFTxtBoxTreeNode.Value is string)
@@ -316,7 +325,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
             {
                 System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT +
                     " " + valueString + "\nFormat: " + m_CurrentOFTxtBoxTreeNode.Format +
-                    ". Error in class OpenFOAMTreeView in methode TextBox_ChangeValue()",
+                    ". Could be a Format-Error in class OpenFOAMTreeView in methode TextBox_ChangeValue()",
                     OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
