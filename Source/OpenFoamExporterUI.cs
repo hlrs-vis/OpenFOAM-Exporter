@@ -44,7 +44,6 @@ namespace BIM.OpenFOAMExport
             MessageBox.Show(exception.ToString(), "OpenFOAM Exporter for Revit");
             return Result.Failed;
          }
-
       }
 
       private static System.Windows.Media.ImageSource LoadPNGImageFromResource(string imageResourceName)
