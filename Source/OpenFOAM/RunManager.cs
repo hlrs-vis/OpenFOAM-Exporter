@@ -560,6 +560,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
 
             if(m_Settings.SSH.Slurm)
             {
+                //-c cause distribute between processors and not tasks?
                 shellCommands.Add("; eval salloc -n " + m_Settings.SSH.Tasks + " /bin/bash ");
             }
 

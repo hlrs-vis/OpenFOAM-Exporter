@@ -268,8 +268,8 @@ namespace BIM.OpenFOAMExport
         /// <param name="commands">List of commands.</param>
         private void SetupLinux(string path, List<string> commands)
         {
-            string allrun = string.Empty;
-            if(m_Settings.NumberOfSubdomains != 1)
+            string allrun;
+            if (m_Settings.NumberOfSubdomains != 1)
             {
                 allrun = "#!/bin/sh" +
                 "\ncd ${0%/*} || exit 1    # run from this directory" +
