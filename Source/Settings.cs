@@ -2691,8 +2691,14 @@ namespace BIM.OpenFOAMExport
             double turbulenceLengthScale = calculator.EstimateTurbulencLengthScalePipe(characteristicLength);
             double turbulenceIntensity = calculator.EstimateTurbulenceIntensityPipe(reynoldsNumber);
 
-            double k = calculator.CalculateK(Math.Abs(meanFlowVelocity), turbulenceIntensity);
-            double epsilon = calculator.CalculateEpsilon(turbulenceLengthScale, k);
+            double k = 0;
+            double epsilon = 0;
+            if(meanFlowVelocity != 0)
+            {
+                k = calculator.CalculateK(Math.Abs(meanFlowVelocity), turbulenceIntensity);
+                epsilon = calculator.CalculateEpsilon(turbulenceLengthScale, k);
+            }
+            
 
             KEpsilon kepsilon = new KEpsilon()
             {

@@ -929,6 +929,7 @@ namespace BIM.OpenFOAMExport
             {
                 rbBinary.Enabled = false;
                 comboBox_DUT.SelectedIndex = comboBox_DUT.Items.IndexOf("Meter");
+                btnHelp.Enabled = false;
                 tbOpenFOAM.Enabled = true;
                 m_Settings.OpenFOAM = true;
                 cbExportColor.Enabled = false;
@@ -938,6 +939,7 @@ namespace BIM.OpenFOAMExport
             }
             else
             {
+                btnHelp.Enabled = true;
                 tbOpenFOAM.Enabled = false;
                 cbExportColor.Enabled = true;
                 cbExportSharedCoordinates.Enabled = true;
