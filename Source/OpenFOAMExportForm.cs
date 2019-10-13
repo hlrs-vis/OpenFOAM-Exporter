@@ -302,7 +302,7 @@ namespace BIM.OpenFOAMExport
                 double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
                 double flowRate = 0;
                 double meanFlowVelocity = 0;
-                double externalPressure = 0;
+                double staticPressure = 0;
                 int rpm = 0;
                 foreach (Parameter param in instance.Parameters)
                 {
@@ -319,11 +319,11 @@ namespace BIM.OpenFOAMExport
                             }
                         }
 
-                        if(externalPressure == 0)
+                        if(staticPressure == 0)
                         {
-                            externalPressure = GetParamValue(param, DisplayUnitType.DUT_PASCALS,
+                            staticPressure = GetParamValue(param, DisplayUnitType.DUT_PASCALS,
                                 () => param.Definition.Name.Equals("static Pressure") && param.Definition.ParameterType == ParameterType.HVACPressure, ConvertParameterToDisplayUnitType);
-                            if (externalPressure != 0)
+                            if (staticPressure != 0)
                             {
                                 continue;
                             }
@@ -355,15 +355,18 @@ namespace BIM.OpenFOAMExport
                 if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                 {
                     //negate faceNormal = outlet.
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, -meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    /************************************************************/
+                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards
+                    //=> -flowRate
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Outlet.Add(nameDuct, dProp);
                     succeed = true;
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
-                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flow direction default
+                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards
                     //=> -flowRate
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, meanFlowVelocity, externalPressure, rpm, surfaceArea);
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Inlet.Add(nameDuct, dProp);
                     succeed = true;
                 }

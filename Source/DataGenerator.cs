@@ -216,7 +216,7 @@ namespace BIM.OpenFOAMExport
             OpenFOAM.Version version = new OpenFOAM.Version();
             openFOAMDictionaries = new List<FOAMDict>();
 
-            //Init folders
+            //init folders
             InitSystemFolder(version, system);
             InitNullFolder(version, nullFolder);
             InitConstantFolder(version, constant);
@@ -228,7 +228,7 @@ namespace BIM.OpenFOAMExport
 
             List<string> commands = new List<string>();
 
-            //commands as string
+            //commands
             if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.ssh)
             {
                 SetupLinux(path, commands);
@@ -281,7 +281,6 @@ namespace BIM.OpenFOAMExport
                 "\n" +
                 "\nrunApplication blockMesh" +
                 "\n" +
-                //"\n[ ! -d 0 ] && cp -r 0.orig 0" +
                 "\nrunApplication decomposePar -copyZero" +
                 "\nrunParallel snappyHexMesh -overwrite" +
                 "\n" +
@@ -308,7 +307,6 @@ namespace BIM.OpenFOAMExport
                 "\n" +
                 "\nrunApplication blockMesh" +
                 "\n" +
-                //"\n[ ! -d 0 ] && cp -r 0.orig 0" +
                 "\nrunApplication snappyHexMesh -overwrite" +
                 "\n" +
                 "\nrunApplication $(getApplication)" +
@@ -610,14 +608,14 @@ namespace BIM.OpenFOAMExport
         public GeneratorStatus SaveSTLFile(string fileName, Settings settings)
         {
             m_Settings = settings;
-            ///***********************************************PLS INSERT LATER********************************************************************///
-                                                                                                                                                   ///*********************************************************************************************************************************///
-                                                                                                                                                   ///********************************************************************************************************************************///
-                                                                                                                                                   ///*******************************************************************************************************************************///
-                                                      //try
-                                                      //{
+            ///***********************************************Easier to Debug without try and catch********************************************************************///
+            ///*********************************************************************************************************************************///
+            ///********************************************************************************************************************************///
+            ///*******************************************************************************************************************************///
+            try
+            {
 
-                                                      m_StlExportCancel.Show();
+                m_StlExportCancel.Show();
 
                 // save data in certain STL file
                 if (SaveFormat.binary == settings.SaveFormat)
@@ -663,24 +661,25 @@ namespace BIM.OpenFOAMExport
                     m_Writer.TriangularNumber = m_TriangularNumber;
                     m_Writer.AddTriangularNumberSection();
                 }
-                //m_Writer.CloseFile();
-            //}
-            //catch (SecurityException)
-            //{
-            //    MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-            //                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-            //    m_StlExportCancel.Close();
-            //    return GeneratorStatus.FAILURE;
-            //}
-            //catch (Exception)
-            //{
-            //    MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-            //                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                m_Writer.CloseFile();
+            }
+            catch (SecurityException)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_SECURITY_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-            //    m_StlExportCancel.Close();
-            //    return GeneratorStatus.FAILURE;
-            //}
+                m_StlExportCancel.Close();
+                return GeneratorStatus.FAILURE;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                m_StlExportCancel.Close();
+                return GeneratorStatus.FAILURE;
+            }
 
             m_StlExportCancel.Close();
             return GeneratorStatus.SUCCESS;

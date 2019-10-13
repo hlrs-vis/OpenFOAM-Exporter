@@ -2399,7 +2399,7 @@ namespace BIM.OpenFOAMExport
                         parameter = new InitialParameter(param.ToString(), 0.0, model);
                         CreateFOAMParameterPatches<int>(parameter, "zeroGradient", "", default, PatchType.wall, false);
                         CreateFOAMParameterPatches<int>(parameter, "zeroGradient","", default, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.0, PatchType.outlet, true);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", -1.5, PatchType.outlet, true);
                         break;
                     }
                 case InitialFOAMParameter.U:
@@ -2489,7 +2489,7 @@ namespace BIM.OpenFOAMExport
                         parameter = new InitialParameter(param.ToString(), 0.0, model);
                         CreateFOAMParameterPatches(parameter, "fixedFluxPressure", "uniform", 0.0, PatchType.wall, false);
                         CreateFOAMParameterPatches<int>(parameter, "zeroGradient", "", default, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.0, PatchType.outlet, true);
+                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", -1.5, PatchType.outlet, true);
                         foreach(var wall in parameter.Patches)
                         {
                             if(wall.Value.Type == PatchType.wall)
@@ -2557,8 +2557,8 @@ namespace BIM.OpenFOAMExport
                                         type = "swirlFlowRateInletVelocity";
                                         v = new Vector3D(0, 0, 0);
                                         _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
-                                        _inlet.Attributes.Add("rpm", properties.RPM.ToString());
-                                        _inlet.Attributes.Add("flowRate", properties.FlowRate.ToString());
+                                        _inlet.Attributes.Add("rpm      constant", properties.RPM);
+                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate);
                                         param.Patches.Add(inlet.Key, _inlet);
                                         continue;
                                     }
@@ -2617,8 +2617,8 @@ namespace BIM.OpenFOAMExport
                                         type = "swirlFlowRateInletVelocity";
                                         v = new Vector3D(0, 0, 0);
                                         _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
-                                        _outlet.Attributes.Add("rpm", properties.RPM.ToString());
-                                        _outlet.Attributes.Add("flowRate", properties.FlowRate.ToString());
+                                        _outlet.Attributes.Add("rpm     constant", properties);
+                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate);
                                         param.Patches.Add(outlet.Key, _outlet);
                                         continue;
                                     }
@@ -2633,7 +2633,7 @@ namespace BIM.OpenFOAMExport
                                     OpenFOAMCalculator calculator = new OpenFOAMCalculator();
                                     if(properties.ExternalPressure != 0)
                                     {
-                                        v = calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
+                                        v = -calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
                                     }
                                     else
                                     {
@@ -2646,7 +2646,7 @@ namespace BIM.OpenFOAMExport
                                     OpenFOAMCalculator calculator = new OpenFOAMCalculator();
                                     if (properties.ExternalPressure != 0)
                                     {
-                                        v = calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
+                                        v = -calculator.CalculateRhoNormalizedPressure(properties.ExternalPressure, 1.204);
                                     }
                                     else
                                     {
