@@ -1,4 +1,5 @@
-//
+//GNU License ENTRY FROM STL-EXPORTER
+//Source Code: https://github.com/Autodesk/revit-stl-extension
 // STL exporter library: this library works with Autodesk(R) Revit(R) to export an STL file containing model geometry.
 // Copyright (C) 2013  Autodesk, Inc.
 // 
@@ -16,6 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
+// Modified version
+// Author: Marko Djuric
 
 using System;
 using System.IO;
@@ -106,12 +109,12 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// OpenFOAM-Dictionaries
         /// </summary>
-        private List<FOAMDict> openFOAMDictionaries;
+        private List<FOAMDict> m_OpenFOAMDictionaries;
 
         /// <summary>
         /// Faces of the inlet/outlet for openFOAM-Simulation
         /// </summary>
-        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> faces;
+        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
 
         /// <summary>
         /// Number of triangles in exported Revit document.
@@ -214,14 +217,14 @@ namespace BIM.OpenFOAMExport
 
             //generate files
             OpenFOAM.Version version = new OpenFOAM.Version();
-            openFOAMDictionaries = new List<FOAMDict>();
+            m_OpenFOAMDictionaries = new List<FOAMDict>();
 
             //init folders
             InitSystemFolder(version, system);
             InitNullFolder(version, nullFolder);
             InitConstantFolder(version, constant);
 
-            foreach (FOAMDict openFOAMDictionary in openFOAMDictionaries)
+            foreach (FOAMDict openFOAMDictionary in m_OpenFOAMDictionaries)
             {
                 openFOAMDictionary.Init();
             }
@@ -430,18 +433,18 @@ namespace BIM.OpenFOAMExport
             DecomposeParDict decomposeParDictionary = new DecomposeParDict(version, decomposeParDict, null, SaveFormat.ascii, m_Settings);
             FvSchemes fvSchemesDictionary = new FvSchemes(version, fvSchemes, null, SaveFormat.ascii, m_Settings);
             FvSolution fvSolutionDictionary = new FvSolution(version, fvSolution, null, SaveFormat.ascii, m_Settings);
-            SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_Settings, m_STLName, m_STLWallName, faces);
+            SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_Settings, m_STLName, m_STLWallName, m_Faces);
 
             //runmanager have to know how much cpu's should be used
             m_RunManager.DecomposeParDict = decomposeParDictionary;
 
-            openFOAMDictionaries.Add(blockMeshDictionary);
-            openFOAMDictionaries.Add(controlDictionary);
-            openFOAMDictionaries.Add(surfaceFeatureExtractDictionary);
-            openFOAMDictionaries.Add(decomposeParDictionary);
-            openFOAMDictionaries.Add(fvSchemesDictionary);
-            openFOAMDictionaries.Add(fvSolutionDictionary);
-            openFOAMDictionaries.Add(snappyHexMeshDictionary);
+            m_OpenFOAMDictionaries.Add(blockMeshDictionary);
+            m_OpenFOAMDictionaries.Add(controlDictionary);
+            m_OpenFOAMDictionaries.Add(surfaceFeatureExtractDictionary);
+            m_OpenFOAMDictionaries.Add(decomposeParDictionary);
+            m_OpenFOAMDictionaries.Add(fvSchemesDictionary);
+            m_OpenFOAMDictionaries.Add(fvSolutionDictionary);
+            m_OpenFOAMDictionaries.Add(snappyHexMeshDictionary);
         }
 
         /// <summary>
@@ -462,7 +465,7 @@ namespace BIM.OpenFOAMExport
             //Extract inlet/outlet-names
             List<string> inletNames = new List<string>();
             List<string> outletNames = new List<string>();
-            foreach (var face in faces)
+            foreach (var face in m_Faces)
             {
                 string name = face.Key.Key.Replace(" ", "_");
                 if (name.Contains("Zuluft") || name.Contains("Inlet"))
@@ -527,7 +530,7 @@ namespace BIM.OpenFOAMExport
                 {
                     parameter = new U(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
                 }
-                openFOAMDictionaries.Add(parameter);
+                m_OpenFOAMDictionaries.Add(parameter);
             }
         }
 
@@ -546,9 +549,9 @@ namespace BIM.OpenFOAMExport
             G gDictionary = new G(version, g, null, SaveFormat.ascii, m_Settings);
             TurbulenceProperties turbulencePropertiesDictionary = new TurbulenceProperties(version, turbulenceProperties, null, SaveFormat.ascii, m_Settings);
 
-            openFOAMDictionaries.Add(transportPropertiesDictionary);
-            openFOAMDictionaries.Add(gDictionary);
-            openFOAMDictionaries.Add(turbulencePropertiesDictionary);
+            m_OpenFOAMDictionaries.Add(transportPropertiesDictionary);
+            m_OpenFOAMDictionaries.Add(gDictionary);
+            m_OpenFOAMDictionaries.Add(turbulencePropertiesDictionary);
         }
 
         /// <summary>
@@ -927,7 +930,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="stlName">String that represents the name of the STL.</param>
         private void WriteAirTerminalsToSTL(Dictionary<Document, List<Element>> terminals, string stlName)
         {
-            faces = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face,Transform>>();
+            m_Faces = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face,Transform>>();
             foreach (var elements in terminals)
             {
                 foreach (Element elem in elements.Value)
@@ -944,18 +947,18 @@ namespace BIM.OpenFOAMExport
                     {
                         FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
                         KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
-                        faces.Add(inletOutletID, inletOutlet);
+                        m_Faces.Add(inletOutletID, inletOutlet);
                     }
                 }
             }
 
             m_Writer.WriteSolidName(stlName, false);
 
-            if(faces.Count == 0)
+            if(m_Faces.Count == 0)
             {
                 return;
             }
-            foreach (var face in faces)
+            foreach (var face in m_Faces)
             {
                 Face currentFace = face.Value.Key;
 

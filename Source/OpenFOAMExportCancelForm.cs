@@ -1,4 +1,5 @@
-﻿//
+﻿//GNU License ENTRY FROM STL-EXPORTER
+//Source Code: https://github.com/Autodesk/revit-stl-extension
 // STL exporter library: this library works with Autodesk(R) Revit(R) to export an STL file containing model geometry.
 // Copyright (C) 2013  Autodesk, Inc.
 // 
@@ -16,6 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
+// Modified version
+// Author: Marko Djuric
 
 using System;
 using System.Collections.Generic;

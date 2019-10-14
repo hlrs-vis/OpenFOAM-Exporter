@@ -11,21 +11,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// Number of cpu cores
         /// </summary>        
         private int m_NumberOfSubdomains;
-
-        /// <summary>
-        /// SimpleCoeffs-Dictionary
-        /// </summary>
-        private readonly Dictionary<string, object> m_SimpleCoeffs;
-
-        /// <summary>
-        /// HierarchicalCoeffs-Dictionary
-        /// </summary>
-        private readonly Dictionary<string, object> m_HierarchicalCoeffs;
-
-        /// <summary>
-        /// ManualCoeffs-Dicitonary
-        /// </summary>
-        private readonly Dictionary<string, object> m_ManualCoeffs;
         
         /// <summary>
         /// Getter for numberOfSubdomains
@@ -43,9 +28,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         public DecomposeParDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
             : base("decomposeParDict", "dictionary", version, path, attributes, format, settings)
         {
-            m_SimpleCoeffs = new Dictionary<string, object>();
-            m_HierarchicalCoeffs = new Dictionary<string, object>();
-            m_ManualCoeffs = new Dictionary<string, object>();
+            //m_SimpleCoeffs = new Dictionary<string, object>();
+            //m_HierarchicalCoeffs = new Dictionary<string, object>();
+            //m_ManualCoeffs = new Dictionary<string, object>();
             InitAttributes();
         }
 
