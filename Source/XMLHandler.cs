@@ -223,7 +223,7 @@ namespace BIM.OpenFOAMExport
                         new XElement("serverCasePath", m_Settings.SSH.ServerCaseFolder),
                         new XElement("ofAlias", m_Settings.SSH.OfAlias),
                         new XElement("port", m_Settings.SSH.Port.ToString()),
-                        new XElement("tasks", m_Settings.SSH.Tasks.ToString()),
+                        new XElement("tasks", m_Settings.SSH.SlurmCommand.ToString()),
                         new XElement("download", m_Settings.SSH.Download),
                         new XElement("delete", m_Settings.SSH.Delete),
                         new XElement("slurm", m_Settings.SSH.Slurm)

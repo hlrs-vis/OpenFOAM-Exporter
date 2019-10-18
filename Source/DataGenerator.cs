@@ -114,8 +114,9 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Faces of the inlet/outlet for openFOAM-Simulation
         /// </summary>
-        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
+        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_FacesInletOutlet;
 
+        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_FacesDuct;
         /// <summary>
         /// Number of triangles in exported Revit document.
         /// </summary>
@@ -433,7 +434,7 @@ namespace BIM.OpenFOAMExport
             DecomposeParDict decomposeParDictionary = new DecomposeParDict(version, decomposeParDict, null, SaveFormat.ascii, m_Settings);
             FvSchemes fvSchemesDictionary = new FvSchemes(version, fvSchemes, null, SaveFormat.ascii, m_Settings);
             FvSolution fvSolutionDictionary = new FvSolution(version, fvSolution, null, SaveFormat.ascii, m_Settings);
-            SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_Settings, m_STLName, m_STLWallName, m_Faces);
+            SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_Settings, m_STLName, m_STLWallName, m_FacesInletOutlet);
 
             //runmanager have to know how much cpu's should be used
             m_RunManager.DecomposeParDict = decomposeParDictionary;
@@ -465,7 +466,7 @@ namespace BIM.OpenFOAMExport
             //Extract inlet/outlet-names
             List<string> inletNames = new List<string>();
             List<string> outletNames = new List<string>();
-            foreach (var face in m_Faces)
+            foreach (var face in m_FacesInletOutlet)
             {
                 string name = face.Key.Key.Replace(" ", "_");
                 if (name.Contains("Zuluft") || name.Contains("Inlet"))
@@ -576,7 +577,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="doc">Document-object which will used for searching in.</param>
         /// <param name="elements">Element-List which will used for searching in.</param>
         /// <returns>List of ElementId's from the materials.</returns>
-        public static List<ElementId> GetMaterialList(Document doc, List<Element> elements)
+        public static List<ElementId> GetMaterialList(Document doc, List<Element> elements, List<string> materialNames)
         {
             List<ElementId> materialIds = new List<ElementId>();
             foreach (Element elem in elements)
@@ -590,12 +591,20 @@ namespace BIM.OpenFOAMExport
                         continue;
                     }
 
-                    //materials differentiate from the the original materials which 
+                    //coloring with materials differentiate from the the original materials which 
                     //will be listed in a component list (colored surface with other material)
-                    if(material.Name.Equals("Inlet") || material.Name.Equals("Outlet"))
+                    foreach(string matName in materialNames)
                     {
-                        materialIds.Add(id);
+                        if(material.Name.Equals(matName))
+                        {
+                            materialIds.Add(id);
+                        }
                     }
+
+                    //if(material.Name.Equals("Inlet") || material.Name.Equals("Outlet"))
+                    //{
+                    //    materialIds.Add(id);
+                    //}
                 }
             }
 
@@ -826,7 +835,7 @@ namespace BIM.OpenFOAMExport
                 {
                     //get the category list seperated via FamilyInstance in the current document
                     m_DuctTerminalsInDoc = GetDefaultCategoryListOfClass<FamilyInstance>(doc, BuiltInCategory.OST_DuctTerminal);
-                    m_InletOutletMaterials = GetMaterialList(doc, m_DuctTerminalsInDoc);
+                    m_InletOutletMaterials = GetMaterialList(doc, m_DuctTerminalsInDoc, new List<string> { "Inlet", "Outlet" });
                 }
 
                 collector.WhereElementIsNotElementType();
@@ -930,7 +939,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="stlName">String that represents the name of the STL.</param>
         private void WriteAirTerminalsToSTL(Dictionary<Document, List<Element>> terminals, string stlName)
         {
-            m_Faces = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face,Transform>>();
+            m_FacesInletOutlet = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face,Transform>>();
             foreach (var elements in terminals)
             {
                 foreach (Element elem in elements.Value)
@@ -941,24 +950,29 @@ namespace BIM.OpenFOAMExport
                     {
                         continue;
                     }
-
-                    KeyValuePair<Face,Transform> inletOutlet = ExtractInletOutlet(elements.Key, geometry, null);
+                    FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
+                    KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
+                    KeyValuePair<Face,Transform> inletOutlet = ExtractMaterialFaces/*ExtractInletOutlet*/(elements.Key, geometry, null, m_InletOutletMaterials);
                     if (inletOutlet.Key != null)
                     {
-                        FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
-                        KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
-                        m_Faces.Add(inletOutletID, inletOutlet);
+                        //FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
+                        //KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
+                        m_FacesInletOutlet.Add(inletOutletID, inletOutlet);
+                    }
+                    else
+                    {
+
                     }
                 }
             }
 
             m_Writer.WriteSolidName(stlName, false);
 
-            if(m_Faces.Count == 0)
+            if(m_FacesInletOutlet.Count == 0)
             {
                 return;
             }
-            foreach (var face in m_Faces)
+            foreach (var face in m_FacesInletOutlet)
             {
                 Face currentFace = face.Value.Key;
 
@@ -976,26 +990,71 @@ namespace BIM.OpenFOAMExport
             }
         }
 
-        /// <summary>
-        /// Extract the inlet/outlet of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
-        /// </summary>
-        /// <param name="document">Current document in which the geometry is included.</param>
-        /// <param name="geometry">The geometry that contains the inlet/outlet.</param>
-        /// <param name="transform">Specifies the transformation of the geometry.</param>
-        /// <returns>KeyValuePair that contains the inlet/outlet as Face-object and the corresponding Transform.</returns>
-        private KeyValuePair<Face,Transform> ExtractInletOutlet(Document document, GeometryElement geometry, Transform transform)
+        ///// <summary>
+        ///// Extract the inlet/outlet of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
+        ///// </summary>
+        ///// <param name="document">Current document in which the geometry is included.</param>
+        ///// <param name="geometry">The geometry that contains the inlet/outlet.</param>
+        ///// <param name="transform">Specifies the transformation of the geometry.</param>
+        ///// <returns>KeyValuePair that contains the inlet/outlet as Face-object and the corresponding Transform.</returns>
+        //private KeyValuePair<Face,Transform> ExtractInletOutlet(Document document, GeometryElement geometry, Transform transform)
+        //{
+        //    KeyValuePair<Face,Transform> face = new KeyValuePair<Face, Transform>();
+        //    foreach (GeometryObject gObject in geometry)
+        //    {
+        //        Solid solid = gObject as Solid;
+        //        if (null != solid)
+        //        {
+        //            KeyValuePair<Face, Transform> keyValuePair = new KeyValuePair<Face, Transform>(ScanForInletOutlet(document, solid, transform), transform);
+        //            if (keyValuePair.Key != null)
+        //            {
+        //                face = keyValuePair;
+        //                //remove break if duct terminals should be visible
+        //                break;
+        //            }
+        //            continue;
+        //        }
+
+        //        // if the type of the geometric primitive is instance
+        //        GeometryInstance instance = gObject as GeometryInstance;
+        //        if (null != instance)
+        //        {
+        //            Transform newTransform;
+        //            if (null == transform)
+        //            {
+        //                newTransform = instance.Transform;
+        //            }
+        //            else
+        //            {
+        //                newTransform = transform.Multiply(instance.Transform);  // get a transformation of the affine 3-space
+        //            }
+        //            face = ExtractInletOutlet(document, instance.SymbolGeometry, newTransform);
+        //            break;
+        //        }
+
+        //        GeometryElement geomElement = gObject as GeometryElement;
+        //        if (null != geomElement)
+        //        {
+        //            face = ExtractInletOutlet(document, geomElement, transform);
+        //            break;
+        //        }
+        //    }
+        //    return face;
+        //}
+
+        private KeyValuePair<Face, Transform> ExtractMaterialFaces(Document document, GeometryElement geometry,
+            Transform transform, List<ElementId> materialList)
         {
-            KeyValuePair<Face,Transform> face = new KeyValuePair<Face, Transform>();
+            KeyValuePair<Face, Transform> face = new KeyValuePair<Face, Transform>();
             foreach (GeometryObject gObject in geometry)
             {
                 Solid solid = gObject as Solid;
                 if (null != solid)
                 {
-                    KeyValuePair<Face, Transform> keyValuePair = new KeyValuePair<Face, Transform>(ScanForInletOutlet(document, solid, transform), transform);
+                    KeyValuePair<Face, Transform> keyValuePair = new KeyValuePair<Face, Transform>(ScanForMaterialFace(document, solid, transform, materialList), transform);
                     if (keyValuePair.Key != null)
                     {
                         face = keyValuePair;
-                        //remove break if duct terminals should be visible
                         break;
                     }
                     continue;
@@ -1014,14 +1073,14 @@ namespace BIM.OpenFOAMExport
                     {
                         newTransform = transform.Multiply(instance.Transform);  // get a transformation of the affine 3-space
                     }
-                    face = ExtractInletOutlet(document, instance.SymbolGeometry, newTransform);
+                    face = ExtractMaterialFaces(document, instance.SymbolGeometry, newTransform, materialList);
                     break;
                 }
 
                 GeometryElement geomElement = gObject as GeometryElement;
                 if (null != geomElement)
                 {
-                    face = ExtractInletOutlet(document, geomElement, transform);
+                    face = ExtractMaterialFaces(document, geomElement, transform, materialList);
                     break;
                 }
             }
@@ -1035,7 +1094,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="solid">Solid object that includes the inlet/outlet.</param>
         /// <param name="transform">The transformation.</param>
         /// <returns>Inlet/Outlet as a Face-object.</returns>
-        private Face ScanForInletOutlet(Document document, Solid solid, Transform transform)
+        private Face ScanForMaterialFace(Document document, Solid solid, Transform transform, List<ElementId> materialList)
         {
             Face faceItem = null;
 
@@ -1063,7 +1122,7 @@ namespace BIM.OpenFOAMExport
                 }
 
                 m_TriangularNumber += mesh.NumTriangles;
-                if(m_InletOutletMaterials.Contains(face.MaterialElementId))
+                if (materialList.Contains(face.MaterialElementId))
                 {
                     faceItem = face;
                     continue;
@@ -1074,6 +1133,53 @@ namespace BIM.OpenFOAMExport
             }
             return faceItem;//valuePair;
         }
+
+        ///// <summary>
+        ///// Scans for Inlet/Outlet-face and returns it.
+        ///// </summary>
+        ///// <param name="document">Current cocument in which the geometry is included.</param>
+        ///// <param name="solid">Solid object that includes the inlet/outlet.</param>
+        ///// <param name="transform">The transformation.</param>
+        ///// <returns>Inlet/Outlet as a Face-object.</returns>
+        //private Face ScanForInletOutlet(Document document, Solid solid, Transform transform)
+        //{
+        //    Face faceItem = null;
+
+        //    // a solid has many faces
+        //    FaceArray faces = solid.Faces;
+        //    if (0 == faces.Size)
+        //    {
+        //        return faceItem;
+        //    }
+        //    foreach (Face face in faces)
+        //    {
+        //        if (face == null)
+        //        {
+        //            continue;
+        //        }
+        //        if (face.Visibility != Visibility.Visible)
+        //        {
+        //            continue;
+        //        }
+
+        //        Mesh mesh = face.Triangulate();
+        //        if (null == mesh)
+        //        {
+        //            continue;
+        //        }
+
+        //        m_TriangularNumber += mesh.NumTriangles;
+        //        if(m_InletOutletMaterials.Contains(face.MaterialElementId))
+        //        {
+        //            faceItem = face;
+        //            continue;
+        //        }
+
+        //        //if face is not a inlet/outlet write it to the wall section of the stl.
+        //        WriteFaceToSTL(document, mesh, face, transform);
+        //    }
+        //    return faceItem;//valuePair;
+        //}
 
 
         /// <summary>

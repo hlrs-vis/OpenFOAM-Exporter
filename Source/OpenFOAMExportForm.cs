@@ -57,7 +57,9 @@ namespace BIM.OpenFOAMExport
         /// Current duct terminals in scene of the active document.
         /// </summary>
         private List<Element> m_DuctTerminals;
-        
+
+        private List<Element> m_MeshResolutionObjects;
+
         /// <summary>
         /// Current inlet/outlet material that specify the surfaces.
         /// </summary>
@@ -286,9 +288,9 @@ namespace BIM.OpenFOAMExport
             m_DuctTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
 
             //get materials
-            m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, m_DuctTerminals);
+            m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, m_DuctTerminals, new List<string> { "Inlet", "Outlet" });
 
-            return InitDuctParameters();
+            return InitDuctParameters() && InitMeshResolutionObjects();
         }
 
         /// <summary>
@@ -372,6 +374,13 @@ namespace BIM.OpenFOAMExport
                     succeed = true;
                 }
             }
+            return succeed;
+        }
+
+        private bool InitMeshResolutionObjects()
+        {
+            bool succeed = false;
+            
             return succeed;
         }
 
@@ -508,7 +517,7 @@ namespace BIM.OpenFOAMExport
             txtBoxAlias.Text = m_Settings.SSH.OfAlias;
             txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
             txtBoxPort.Text = m_Settings.SSH.Port.ToString();
-            txtBoxTasks.Text = m_Settings.SSH.Tasks.ToString();
+            txtBoxSlurmCmd.Text = m_Settings.SSH.SlurmCommand/*.ToString()*/;
             cbDelete.Checked = m_Settings.SSH.Delete;
             cbDownload.Checked = m_Settings.SSH.Download;
 
@@ -1095,23 +1104,23 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event args.</param>
-        private void TxtBoxTasks_ValueChanged(object sender, EventArgs e)
+        private void TxtBoxSlurmCommands_ValueChanged(object sender, EventArgs e)
         {
             //TextBox_ValueChanged();
-            string txtBox = txtBoxTasks.Text;
+            string txtBox = txtBoxSlurmCmd.Text;
 
-            if (m_RegPort.IsMatch(txtBox))
-            {
+            //if (m_RegServerCasePath.IsMatch(txtBox))
+            //{
                 SSH ssh = m_Settings.SSH;
-                ssh.Tasks = Convert.ToInt32(txtBox);
+                ssh.SlurmCommand = txtBox/*Convert.ToInt32(txtBox)*/;
                 m_Settings.SSH = ssh;
-            }
-            else
-            {
-                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
+            //}
+            //else
+            //{
+            //    MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+            //                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            //    return;
+            //}
 
             //TO - DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
@@ -1129,12 +1138,12 @@ namespace BIM.OpenFOAMExport
 
             if(cbSlurm.Checked)
             {
-                txtBoxTasks.Enabled = true;
+                txtBoxSlurmCmd.Enabled = true;
             }
             else
             {
-                txtBoxTasks.Enabled = false;
-                ssh.Tasks = 0;
+                txtBoxSlurmCmd.Enabled = false;
+                ssh.SlurmCommand = "";
             }
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }

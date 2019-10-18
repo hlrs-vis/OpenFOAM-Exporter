@@ -81,8 +81,9 @@ namespace BIM.OpenFOAMExport
             this.lblEnv = new System.Windows.Forms.Label();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.tbSSH = new System.Windows.Forms.TabPage();
-            this.txtBoxTasks = new System.Windows.Forms.TextBox();
-            this.lblTasks = new System.Windows.Forms.Label();
+            this.cbSlurm = new System.Windows.Forms.CheckBox();
+            this.txtBoxSlurmCmd = new System.Windows.Forms.TextBox();
+            this.lblSlurmCmd = new System.Windows.Forms.Label();
             this.txtBoxPort = new System.Windows.Forms.TextBox();
             this.lblPort = new System.Windows.Forms.Label();
             this.cbDelete = new System.Windows.Forms.CheckBox();
@@ -93,7 +94,6 @@ namespace BIM.OpenFOAMExport
             this.lblCaseFolder = new System.Windows.Forms.Label();
             this.lblAlias = new System.Windows.Forms.Label();
             this.lblUserHost = new System.Windows.Forms.Label();
-            this.cbSlurm = new System.Windows.Forms.CheckBox();
             this.tpCategories.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.gbSTLFormat.SuspendLayout();
@@ -336,8 +336,8 @@ namespace BIM.OpenFOAMExport
             // 
             this.tbSSH.BackColor = System.Drawing.SystemColors.Control;
             this.tbSSH.Controls.Add(this.cbSlurm);
-            this.tbSSH.Controls.Add(this.txtBoxTasks);
-            this.tbSSH.Controls.Add(this.lblTasks);
+            this.tbSSH.Controls.Add(this.txtBoxSlurmCmd);
+            this.tbSSH.Controls.Add(this.lblSlurmCmd);
             this.tbSSH.Controls.Add(this.txtBoxPort);
             this.tbSSH.Controls.Add(this.lblPort);
             this.tbSSH.Controls.Add(this.cbDelete);
@@ -351,16 +351,25 @@ namespace BIM.OpenFOAMExport
             resources.ApplyResources(this.tbSSH, "tbSSH");
             this.tbSSH.Name = "tbSSH";
             // 
-            // txtBoxTasks
+            // cbSlurm
             // 
-            resources.ApplyResources(this.txtBoxTasks, "txtBoxTasks");
-            this.txtBoxTasks.Name = "txtBoxTasks";
-            this.txtBoxTasks.TextChanged += new System.EventHandler(this.TxtBoxTasks_ValueChanged);
+            resources.ApplyResources(this.cbSlurm, "cbSlurm");
+            this.cbSlurm.Checked = true;
+            this.cbSlurm.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbSlurm.Name = "cbSlurm";
+            this.cbSlurm.UseVisualStyleBackColor = true;
+            this.cbSlurm.CheckedChanged += new System.EventHandler(this.CbSlurm_CheckedChanged);
             // 
-            // lblTasks
+            // txtBoxSlurmCmd
             // 
-            resources.ApplyResources(this.lblTasks, "lblTasks");
-            this.lblTasks.Name = "lblTasks";
+            resources.ApplyResources(this.txtBoxSlurmCmd, "txtBoxSlurmCmd");
+            this.txtBoxSlurmCmd.Name = "txtBoxSlurmCmd";
+            this.txtBoxSlurmCmd.TextChanged += new System.EventHandler(this.TxtBoxSlurmCommands_ValueChanged);
+            // 
+            // lblSlurmCmd
+            // 
+            resources.ApplyResources(this.lblSlurmCmd, "lblSlurmCmd");
+            this.lblSlurmCmd.Name = "lblSlurmCmd";
             // 
             // txtBoxPort
             // 
@@ -423,15 +432,6 @@ namespace BIM.OpenFOAMExport
             // 
             resources.ApplyResources(this.lblUserHost, "lblUserHost");
             this.lblUserHost.Name = "lblUserHost";
-            // 
-            // cbSlurm
-            // 
-            resources.ApplyResources(this.cbSlurm, "cbSlurm");
-            this.cbSlurm.Checked = true;
-            this.cbSlurm.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbSlurm.Name = "cbSlurm";
-            this.cbSlurm.UseVisualStyleBackColor = true;
-            this.cbSlurm.CheckedChanged += new System.EventHandler(this.CbSlurm_CheckedChanged);
             // 
             // OpenFOAMExportForm
             // 
@@ -504,8 +504,8 @@ namespace BIM.OpenFOAMExport
         private System.Windows.Forms.Label lblPort;
         private System.Windows.Forms.TextBox txtBoxLocationInMesh;
         private System.Windows.Forms.Label lblLocationInMesh;
-        private System.Windows.Forms.TextBox txtBoxTasks;
-        private System.Windows.Forms.Label lblTasks;
+        private System.Windows.Forms.TextBox txtBoxSlurmCmd;
+        private System.Windows.Forms.Label lblSlurmCmd;
         private System.Windows.Forms.CheckBox cbSlurm;
     }
 }

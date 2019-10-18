@@ -31,6 +31,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private readonly Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
 
+        /// <summary>
+        /// Simulation default.
+        /// </summary>
         private Dictionary<string, object> m_SettingsCMC;
 
         //Default-Dictionaries in SnappyHexMeshDict
