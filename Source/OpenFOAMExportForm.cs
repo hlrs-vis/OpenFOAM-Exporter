@@ -367,8 +367,6 @@ namespace BIM.OpenFOAMExport
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
-                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards
-                    //=> -flowRate
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Inlet.Add(nameDuct, dProp);
                     succeed = true;

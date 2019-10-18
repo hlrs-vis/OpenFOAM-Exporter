@@ -35,7 +35,7 @@ using System.Threading;
 namespace BIM.OpenFOAMExport
 {
     /// <summary>
-    /// Class STLExportCommand is the entry of the AddIn program and contains the method to save STL file and creates OpenFOAM case.
+    /// Class OpenFOAMExportCommand is the entry of the AddIn program.
     /// </summary>
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
@@ -64,6 +64,7 @@ namespace BIM.OpenFOAMExport
         /// </returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            //for repeating click-events
             var iterator = System.Windows.Forms.Application.OpenForms.GetEnumerator();
             while(iterator.MoveNext())
             {

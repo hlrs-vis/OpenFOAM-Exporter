@@ -21,16 +21,6 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
     /// </summary>
     public class OpenFOAMTreeView : TreeView
     {
-        #region Constructors
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:OpenFOAMTreeView"/> class.
-        /// </summary>
-        public OpenFOAMTreeView()
-            : base()
-        {
-
-        }
-        #endregion
 
         /// <summary>
         /// We'll use this variable to keep track of the current node that is being edited.
@@ -46,7 +36,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// <summary>
         /// True if the current node (OpenFOAMDropDown-/OpenFOAMTextBox-Node) has been changed.
         /// </summary>
-        private bool m_ChangeValue=false;
+        private bool m_ChangeValue = false;
 
         /// <summary>
         /// Negative and positive decimal number regular expression.
@@ -56,7 +46,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// <summary>
         /// Regular Expresion for Vector3D.
         /// </summary>
-        private readonly Regex m_Vector3DReg = new Regex("^"+ d + "\\s+" + d + "\\s+" + d + "$");
+        private readonly Regex m_Vector3DReg = new Regex("^" + d + "\\s+" + d + "\\s+" + d + "$");
 
         /// <summary>
         /// Regular Expression for Vector.
@@ -67,6 +57,17 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// Regular Expression for number.
         /// </summary>
         private readonly Regex m_SingleReg = new Regex("^" + d);
+
+        #region Constructors
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:OpenFOAMTreeView"/> class.
+        /// </summary>
+        public OpenFOAMTreeView()
+            : base()
+        {
+
+        }
+        #endregion
 
         /// <summary>
         /// Occurs when the <see cref="E:System.Windows.Forms.TreeView.NodeMouseClick"></see> event is fired
