@@ -1134,6 +1134,7 @@ namespace BIM.OpenFOAMExport
         private int m_FeatureLevel;
         private Vector m_WallLevel;
         private Vector m_OutletLevel;
+
         private Vector m_InletLevel;
         private Vector3D m_LocationInMesh;
         private Dictionary<string, object> m_RefinementRegions;
@@ -1507,7 +1508,8 @@ namespace BIM.OpenFOAMExport
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
             //SSH
-            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/", true, true, true, 22, "eval salloc -n "+ numberOfSubdomains + " -c %d");
+            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/",
+                true, true, true, 22, "eval salloc -n "+ numberOfSubdomains + " -c %d");
 
             //General
             m_OpenFOAM = openFoam;

@@ -58,6 +58,9 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private List<Element> m_DuctTerminals;
 
+        /// <summary>
+        /// Current objects in scenes with parameter mesh resoluton.
+        /// </summary>
         private List<Element> m_MeshResolutionObjects;
 
         /// <summary>
@@ -377,10 +380,34 @@ namespace BIM.OpenFOAMExport
             return succeed;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private bool InitMeshResolutionObjects()
         {
             bool succeed = false;
-            
+            FilteredElementCollector collector = new FilteredElementCollector(m_Revit.ActiveUIDocument.Document);
+            collector.WhereElementIsNotElementType();
+
+            FilteredElementIterator iterator = collector.GetElementIterator();
+
+            while (iterator.MoveNext())
+            {
+                Application.DoEvents();
+                //Element element = iterator.Current;
+                Element currentElement = iterator.Current;
+                FamilyInstance instance = currentElement as FamilyInstance;
+                foreach(Parameter param in instance.Parameters)
+                {
+                    int meshResolution = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
+                        () => param.Definition.Name.Equals("Mesh Resoluton"), ConvertParameterToDisplayUnitType);
+                    if(meshResolution != 0)
+                    {
+                        
+                    }
+                }
+            }
             return succeed;
         }
 

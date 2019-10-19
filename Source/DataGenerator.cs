@@ -116,7 +116,6 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_FacesInletOutlet;
 
-        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_FacesDuct;
         /// <summary>
         /// Number of triangles in exported Revit document.
         /// </summary>
