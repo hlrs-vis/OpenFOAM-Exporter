@@ -58,6 +58,9 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private List<Element> m_DuctTerminals;
 
+        /// <summary>
+        /// Current objects in scenes with parameter mesh resoluton.
+        /// </summary>
         private List<Element> m_MeshResolutionObjects;
 
         /// <summary>
@@ -413,7 +416,6 @@ namespace BIM.OpenFOAMExport
                                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
-
                 }
             }
             return succeed;
