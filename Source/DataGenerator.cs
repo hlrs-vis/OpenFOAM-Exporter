@@ -886,23 +886,36 @@ namespace BIM.OpenFOAMExport
 
                     if(m_Settings.OpenFOAM)
                     {
-                        if(IsGeometryInList(m_DuctTerminalsInDoc,geometry))
+                        if(IsGeometryInList(m_DuctTerminalsInDoc, geometry))
+                        {
+                            continue;
+                        }
+                        else if(IsGeometryInList(m_Settings.MeshResolution.Keys.ToList(), geometry))
                         {
                             continue;
                         }
                     }
 
                     // get the solids in GeometryElement
-                    ScanGeomElement(doc,geometry, null);
+                    ScanGeomElement(doc, geometry, null);
                 }
-                terminalListOfAllDocuments.Add(doc,m_DuctTerminalsInDoc);
+                terminalListOfAllDocuments.Add(doc, m_DuctTerminalsInDoc);
             }
 
             if (m_Settings.OpenFOAM && terminalListOfAllDocuments.Count != 0)
             {
-                WriteAirTerminalsToSTL(terminalListOfAllDocuments, stlName);
-                m_Writer.CloseFile();
-                status = CreateOpenFOAMCase(pathFolder);
+                if(terminalListOfAllDocuments.Count != 0)
+                {
+                    WriteAirTerminalsToSTL(terminalListOfAllDocuments, stlName);
+                    //m_Writer.CloseFile();
+                    if (m_Settings.MeshResolution.Count != 0)
+                    {
+                        WriteMeshResolutionObjectsToSTL(stlName);
+                        //m_Writer.CloseFile();
+                    }
+                    m_Writer.CloseFile();
+                    status = CreateOpenFOAMCase(pathFolder);
+                }
             }
             else
             {
@@ -950,18 +963,14 @@ namespace BIM.OpenFOAMExport
                     {
                         continue;
                     }
-                    FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
-                    KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
+                    //FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
+                    //KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
                     KeyValuePair<Face,Transform> inletOutlet = ExtractMaterialFaces/*ExtractInletOutlet*/(elements.Key, geometry, null, m_InletOutletMaterials);
                     if (inletOutlet.Key != null)
                     {
-                        //FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
-                        //KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
+                        FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
+                        KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
                         m_FacesInletOutlet.Add(inletOutletID, inletOutlet);
-                    }
-                    else
-                    {
-
                     }
                 }
             }
@@ -987,6 +996,47 @@ namespace BIM.OpenFOAMExport
                 //face.Key.Value = Document ; face.Value.Value = transform
                 WriteFaceToSTL(face.Key.Value, mesh, currentFace, face.Value.Value);
                 m_Writer.WriteSolidName(face.Key.Key, false);
+            }
+        }
+
+        /// <summary>
+        /// Write objects with parameter "Mesh Resolution" to stl.
+        /// </summary>
+        /// <param name="stlName">String that represents the name of the STL.</param>
+        private void WriteMeshResolutionObjectsToSTL(string stlName)
+        {
+            foreach (var element in m_Settings.MeshResolution.Keys)
+            {
+                
+                FamilyInstance instance = element as FamilyInstance;
+                string name = instance.Symbol.Family.Name + "_" + instance.Name.Replace(' ','_') + "_" + element.Id;
+                m_Writer.WriteSolidName(name, true);
+
+                GeometryElement geometry = null;
+                geometry = element.get_Geometry(m_ViewOptions);
+                if (null == geometry)
+                {
+                    continue;
+                }
+
+                Solid solid = ExtractSolid(m_ActiveDocument, geometry, null);
+                if(solid != null)
+                {
+                    FaceArray faces = solid.Faces;
+                    foreach(Face face in faces)
+                    {
+                        //m_Writer.WriteSolidName(name, true);
+                        Mesh mesh = face.Triangulate();
+                        if (mesh == null)
+                        {
+                            continue;
+                        }
+
+                        WriteFaceToSTL(m_ActiveDocument, mesh, face, null);
+                        //m_Writer.WriteSolidName(name, false);
+                    }
+                }
+                m_Writer.WriteSolidName(name, false);
             }
         }
 

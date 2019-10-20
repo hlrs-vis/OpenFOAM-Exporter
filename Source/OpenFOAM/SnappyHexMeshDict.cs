@@ -183,6 +183,13 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 }
                 m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
             }
+            foreach (var entry in m_Settings.MeshResolution)
+            {
+                FamilyInstance instance = entry.Key as FamilyInstance;
+                name = instance.Symbol.Family.Name + "_" + instance.Name.Replace(' ', '_') + "_" + entry.Key.Id;
+                vec = new Vector(entry.Value, entry.Value);
+                m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
+            }
         }
 
         /// <summary>

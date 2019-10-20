@@ -762,7 +762,8 @@ namespace BIM.OpenFOAMExport
     {
         wall = 0,
         inlet,
-        outlet
+        outlet,
+        none
     }
 
     //TO-DO: ADD INLET OUTLET BOUNDARY TYPE ENUMS LIKE FIXEDFLUXPRESSURE OR FIXEDVALUE.
@@ -1053,6 +1054,8 @@ namespace BIM.OpenFOAMExport
 
         private OpenFOAMEnvironment m_openFOAMEnvironment;
 
+        private Dictionary<Element, int> m_MeshResolutionObjects;
+
         private double m_TempWall;
         private double m_TempOutlet;
         private double m_TempInlet;
@@ -1236,10 +1239,13 @@ namespace BIM.OpenFOAMExport
         //Getter-Setter-SSH
         public SSH SSH { get => m_SSH; set => m_SSH = value; }
 
-        //Getter-Setter for Outlets.
+        //Getter for Outlets.
         public Dictionary<string, object> Outlet { get => m_Outlets; }
-        //Getter-Setter for Inlets.
+        //Getter for Inlets.
         public Dictionary<string, object> Inlet { get => m_Inlets; }
+
+        //Getter for Mesh Resolution.
+        public Dictionary<Element, int> MeshResolution { get => m_MeshResolutionObjects; }
 
         /// <summary>
         /// Binary or ASCII STL file.
@@ -1444,6 +1450,7 @@ namespace BIM.OpenFOAMExport
         {
             m_Outlets = new Dictionary<string, object>();
             m_Inlets = new Dictionary<string, object>();
+            m_MeshResolutionObjects = new Dictionary<Element, int>();
 
             //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
@@ -2092,6 +2099,17 @@ namespace BIM.OpenFOAMExport
             m_CastellatedMeshControls.Add("wallLevel", m_WallLevel);
             m_CastellatedMeshControls.Add("outletLevel", m_OutletLevel);
             m_CastellatedMeshControls.Add("inletLevel", m_InletLevel);
+
+            if(m_MeshResolutionObjects.Count > 0)
+            {
+                foreach (var entry in m_MeshResolutionObjects)
+                {
+                    FamilyInstance instance = entry.Key as FamilyInstance;
+                    m_CastellatedMeshControls.Add(instance.Symbol.Family.Name + "_" + instance.Name.Replace(' ', '_') + "_" +
+                        entry.Key.Id, new Vector(entry.Value, entry.Value));
+                }
+            }
+
             m_CastellatedMeshControls.Add("resolveFeatureAngle", m_ResolveFeatureAngle);
             m_CastellatedMeshControls.Add("refinementRegions", m_RefinementRegions);
             m_CastellatedMeshControls.Add("allowFreeStandingZoneFaces", m_AllowFreeStandingZoneFaces);
@@ -2526,7 +2544,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="uniform">Uniform / Nonuniform.</param>
         /// <param name="value">Value that will be stored in patch.</param>
         /// <param name="pType">PatchType: Inlet, Outlet, Wall</param>
-        /// <param name="useBIM">Use BIM Data-Dictionaries Outlet/Inlet</param>
+        /// <param name="useBIM">Use BIM Data-Dictionaries Outlet/Inlet or Meshresolution</param>
         private void CreateFOAMParameterPatches<T>(InitialParameter param, string type, string uniform, T value, PatchType pType, bool useBIM)
         {
             switch(pType)
@@ -2673,6 +2691,17 @@ namespace BIM.OpenFOAMExport
                     {
                         FOAMParameterPatch<dynamic> wall = new FOAMParameterPatch<dynamic>(type, uniform, value, PatchType.wall);
                         param.Patches.Add(pType.ToString(), wall);
+                        break;
+                    }
+                case PatchType.none:
+                    {
+                        foreach (var entry in m_MeshResolutionObjects)
+                        {
+                            FOAMParameterPatch<dynamic> mesh = new FOAMParameterPatch<dynamic>(type, uniform, value, PatchType.none);
+                            FamilyInstance instance = entry.Key as FamilyInstance;
+                            param.Patches.Add(instance.Name + "_" + entry.Key.Id, mesh);
+
+                        }
                         break;
                     }
             }

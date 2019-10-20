@@ -290,7 +290,7 @@ namespace BIM.OpenFOAMExport
             //get materials
             m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, m_DuctTerminals, new List<string> { "Inlet", "Outlet" });
 
-            return InitDuctParameters() && InitMeshResolutionObjects();
+            return InitDuctParameters() && SearchForObjects();
         }
 
         /// <summary>
@@ -377,10 +377,45 @@ namespace BIM.OpenFOAMExport
             return succeed;
         }
 
-        private bool InitMeshResolutionObjects()
+        /// <summary>
+        /// Search for specific objects in scene and adds them to settings.
+        /// </summary>
+        /// <returns>True if everything went well.</returns>
+        private bool SearchForObjects()
         {
             bool succeed = false;
-            
+            FilteredElementCollector collector = new FilteredElementCollector(m_Revit.ActiveUIDocument.Document);
+            collector.WhereElementIsNotElementType();
+            FilteredElementIterator iterator = collector.GetElementIterator();
+            while (iterator.MoveNext())
+            {
+                Application.DoEvents();
+                //Element element = iterator.Current;
+                FamilyInstance instance = iterator.Current as FamilyInstance;
+                if (instance == null)
+                    continue;
+
+                foreach (Parameter param in instance.Parameters)
+                {
+                    try
+                    {
+                        int meshResolution = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
+                            () => param.Definition.Name.Equals("Mesh Resolution"), ConvertParameterToDisplayUnitType);
+                        if (meshResolution != 0)
+                        {
+                            m_Settings.MeshResolution.Add(iterator.Current, meshResolution);
+                            succeed = true;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.", OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        return false;
+                    }
+
+                }
+            }
             return succeed;
         }
 
@@ -395,7 +430,8 @@ namespace BIM.OpenFOAMExport
         /// <param name="rpm">Revolution per minute.</param>
         /// <param name="surfaceArea">Area of the surface.</param>
         /// <returns>Ductproperties with given parameters.</returns>
-        private static DuctProperties CreateDuctProperties(XYZ faceNormal, double faceBoundary, double flowRate, double meanFlowVelocity, double externalPressure, int rpm, double surfaceArea)
+        private static DuctProperties CreateDuctProperties(XYZ faceNormal, double faceBoundary, double flowRate,
+            double meanFlowVelocity, double externalPressure, int rpm, double surfaceArea)
         {
             return new DuctProperties
             {
