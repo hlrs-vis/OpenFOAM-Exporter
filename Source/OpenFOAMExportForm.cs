@@ -382,35 +382,35 @@ namespace BIM.OpenFOAMExport
             return true;
         }
 
-        /// <summary>
-        /// Add duct terminal parameters to settings.
-        /// </summary>
-        /// <param name="nameDuct">Name of the duct.</param>
-        /// <param name="faceNormal">Normal of the inlet/outlet.</param>
-        /// <param name="faceBoundary">Boundary of inlet/outlet face.</param>
-        /// <param name="surfaceArea">Area of inlet/outlet face.</param>
-        /// <param name="flowRate">Flow rate through inlet/oulet.</param>
-        /// <param name="meanFlowVelocity">Meanflowvelocity through inlet/oulet.</param>
-        /// <param name="staticPressure">Pressure at inlet/oulet.</param>
-        /// <param name="rpm">RPM of driller.</param>
-        /// <returns>True if everything is well.</returns>
-        private void AddDuctParameterToSettings(string nameDuct, XYZ faceNormal, double faceBoundary,
-            double surfaceArea, double flowRate, double meanFlowVelocity, double staticPressure, int rpm)
-        {
-            if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
-            {
-                //negate faceNormal = outlet.
-                //...............................................
-                //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
-                DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
-                m_Settings.Outlet.Add(nameDuct, dProp);
-            }
-            else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
-            {
-                DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
-                m_Settings.Inlet.Add(nameDuct, dProp);
-            }
-        }
+        ///// <summary>
+        ///// Add duct terminal parameters to settings.
+        ///// </summary>
+        ///// <param name="nameDuct">Name of the duct.</param>
+        ///// <param name="faceNormal">Normal of the inlet/outlet.</param>
+        ///// <param name="faceBoundary">Boundary of inlet/outlet face.</param>
+        ///// <param name="surfaceArea">Area of inlet/outlet face.</param>
+        ///// <param name="flowRate">Flow rate through inlet/oulet.</param>
+        ///// <param name="meanFlowVelocity">Meanflowvelocity through inlet/oulet.</param>
+        ///// <param name="staticPressure">Pressure at inlet/oulet.</param>
+        ///// <param name="rpm">RPM of driller.</param>
+        ///// <returns>True if everything is well.</returns>
+        //private void AddDuctParameterToSettings(string nameDuct, XYZ faceNormal, double faceBoundary,
+        //    double surfaceArea, double flowRate, double meanFlowVelocity, double staticPressure, int rpm)
+        //{
+        //    if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
+        //    {
+        //        //negate faceNormal = outlet.
+        //        //...............................................
+        //        //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
+        //        DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
+        //        m_Settings.Outlet.Add(nameDuct, dProp);
+        //    }
+        //    else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
+        //    {
+        //        DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
+        //        m_Settings.Inlet.Add(nameDuct, dProp);
+        //    }
+        //}
 
         /// <summary>
         /// Search for specific objects in scene and adds them to settings.
