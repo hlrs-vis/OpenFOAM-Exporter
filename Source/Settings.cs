@@ -28,6 +28,7 @@ using System.Windows;
 using System.Windows.Media.Media3D;
 using System;
 using BIM.OpenFOAMExport.OpenFOAM;
+using utils;
 
 namespace BIM.OpenFOAMExport
 {
@@ -2102,15 +2103,14 @@ namespace BIM.OpenFOAMExport
             m_CastellatedMeshControls.Add("outletLevel", m_OutletLevel);
             m_CastellatedMeshControls.Add("inletLevel", m_InletLevel);
 
-            //if(m_MeshResolutionObjects.Count > 0)
-            //{
-            //    foreach (var entry in m_MeshResolutionObjects)
-            //    {
-            //        FamilyInstance instance = entry.Key as FamilyInstance;
-            //        m_CastellatedMeshControls.Add(instance.Symbol.Family.Name.Replace(' ', '_') + "_" + instance.Name.Replace(' ', '_') + "_" +
-            //            entry.Key.Id, new Vector(entry.Value, entry.Value));
-            //    }
-            //}
+            if (m_MeshResolutionObjects.Count > 0)
+            {
+                foreach (var entry in m_MeshResolutionObjects)
+                {
+                    FamilyInstance instance = entry.Key as FamilyInstance;
+                    m_CastellatedMeshControls.Add(AutodeskHelperFunctions.GenerateNameFromElement(entry.Key), new Vector(entry.Value, entry.Value));
+                }
+            }
 
             m_CastellatedMeshControls.Add("resolveFeatureAngle", m_ResolveFeatureAngle);
             m_CastellatedMeshControls.Add("refinementRegions", m_RefinementRegions);

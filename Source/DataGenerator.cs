@@ -909,11 +909,9 @@ namespace BIM.OpenFOAMExport
                 if(terminalListOfAllDocuments.Count != 0)
                 {
                     WriteAirTerminalsToSTL(terminalListOfAllDocuments, stlName);
-                    //m_Writer.CloseFile();
                     if (m_Settings.MeshResolution.Count != 0)
                     {
                         WriteMeshResolutionObjectsToSTL(stlName);
-                        //m_Writer.CloseFile();
                     }
                     m_Writer.CloseFile();
                     status = CreateOpenFOAMCase(pathFolder);
@@ -965,24 +963,27 @@ namespace BIM.OpenFOAMExport
                     {
                         continue;
                     }
-                    //FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
-                    //KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
-                    KeyValuePair<Face,Transform> inletOutlet = ExtractMaterialFaces/*ExtractInletOutlet*/(elements.Key, geometry, null, m_InletOutletMaterials);
+
+                    //need transform for inlet/outlet-face and the face itself.
+                    KeyValuePair<Face,Transform> inletOutlet = ExtractMaterialFaces(elements.Key, geometry, null, m_InletOutletMaterials);
                     if (inletOutlet.Key != null)
                     {
-                        FamilySymbol famSym = elements.Key.GetElement(elem.GetTypeId()) as FamilySymbol;
-                        KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(famSym.Family.Name + "_" + elem.Id.ToString(), elements.Key);
+                        KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(
+                            AutodeskHelperFunctions.GenerateNameFromElement(elem), elements.Key);
                         m_FacesInletOutlet.Add(inletOutletID, inletOutlet);
                     }
                 }
             }
 
+            //close wall section
             m_Writer.WriteSolidName(stlName, false);
 
             if(m_FacesInletOutlet.Count == 0)
             {
                 return;
             }
+
+            //begin to write inlet/oulet-face to stl
             foreach (var face in m_FacesInletOutlet)
             {
                 Face currentFace = face.Value.Key;
@@ -1009,10 +1010,7 @@ namespace BIM.OpenFOAMExport
         {
             foreach (var element in m_Settings.MeshResolution.Keys)
             {
-                
-                FamilyInstance instance = element as FamilyInstance;
-                string name = instance.Symbol.Family.Name.Replace(' ', '_') + "_" + instance.Name.Replace(' ','_') + "_" + element.Id;
-                name = UnicodeNormalizer.Normalize(name);
+                string name = AutodeskHelperFunctions.GenerateNameFromElement(element);
                 m_Writer.WriteSolidName(name, true);
 
                 GeometryElement geometry = null;
@@ -1021,63 +1019,20 @@ namespace BIM.OpenFOAMExport
                 {
                     continue;
                 }
+                //write to stl-file
                 ScanGeomElement(m_ActiveDocument, geometry, null);
                 m_Writer.WriteSolidName(name, false);
             }
         }
 
-        ///// <summary>
-        ///// Extract the inlet/outlet of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
-        ///// </summary>
-        ///// <param name="document">Current document in which the geometry is included.</param>
-        ///// <param name="geometry">The geometry that contains the inlet/outlet.</param>
-        ///// <param name="transform">Specifies the transformation of the geometry.</param>
-        ///// <returns>KeyValuePair that contains the inlet/outlet as Face-object and the corresponding Transform.</returns>
-        //private KeyValuePair<Face,Transform> ExtractInletOutlet(Document document, GeometryElement geometry, Transform transform)
-        //{
-        //    KeyValuePair<Face,Transform> face = new KeyValuePair<Face, Transform>();
-        //    foreach (GeometryObject gObject in geometry)
-        //    {
-        //        Solid solid = gObject as Solid;
-        //        if (null != solid)
-        //        {
-        //            KeyValuePair<Face, Transform> keyValuePair = new KeyValuePair<Face, Transform>(ScanForInletOutlet(document, solid, transform), transform);
-        //            if (keyValuePair.Key != null)
-        //            {
-        //                face = keyValuePair;
-        //                //remove break if duct terminals should be visible
-        //                break;
-        //            }
-        //            continue;
-        //        }
-
-        //        // if the type of the geometric primitive is instance
-        //        GeometryInstance instance = gObject as GeometryInstance;
-        //        if (null != instance)
-        //        {
-        //            Transform newTransform;
-        //            if (null == transform)
-        //            {
-        //                newTransform = instance.Transform;
-        //            }
-        //            else
-        //            {
-        //                newTransform = transform.Multiply(instance.Transform);  // get a transformation of the affine 3-space
-        //            }
-        //            face = ExtractInletOutlet(document, instance.SymbolGeometry, newTransform);
-        //            break;
-        //        }
-
-        //        GeometryElement geomElement = gObject as GeometryElement;
-        //        if (null != geomElement)
-        //        {
-        //            face = ExtractInletOutlet(document, geomElement, transform);
-        //            break;
-        //        }
-        //    }
-        //    return face;
-        //}
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="geometry"></param>
+        /// <param name="transform"></param>
+        /// <param name="materialList"></param>
+        /// <returns></returns>
         private KeyValuePair<Face, Transform> ExtractMaterialFaces(Document document, GeometryElement geometry,
             Transform transform, List<ElementId> materialList)
         {
@@ -1170,105 +1125,13 @@ namespace BIM.OpenFOAMExport
             return faceItem;//valuePair;
         }
 
-        ///// <summary>
-        ///// Scans for Inlet/Outlet-face and returns it.
-        ///// </summary>
-        ///// <param name="document">Current cocument in which the geometry is included.</param>
-        ///// <param name="solid">Solid object that includes the inlet/outlet.</param>
-        ///// <param name="transform">The transformation.</param>
-        ///// <returns>Inlet/Outlet as a Face-object.</returns>
-        //private Face ScanForInletOutlet(Document document, Solid solid, Transform transform)
-        //{
-        //    Face faceItem = null;
-
-        //    // a solid has many faces
-        //    FaceArray faces = solid.Faces;
-        //    if (0 == faces.Size)
-        //    {
-        //        return faceItem;
-        //    }
-        //    foreach (Face face in faces)
-        //    {
-        //        if (face == null)
-        //        {
-        //            continue;
-        //        }
-        //        if (face.Visibility != Visibility.Visible)
-        //        {
-        //            continue;
-        //        }
-
-        //        Mesh mesh = face.Triangulate();
-        //        if (null == mesh)
-        //        {
-        //            continue;
-        //        }
-
-        //        m_TriangularNumber += mesh.NumTriangles;
-        //        if(m_InletOutletMaterials.Contains(face.MaterialElementId))
-        //        {
-        //            faceItem = face;
-        //            continue;
-        //        }
-
-        //        //if face is not a inlet/outlet write it to the wall section of the stl.
-        //        WriteFaceToSTL(document, mesh, face, transform);
-        //    }
-        //    return faceItem;//valuePair;
-        //}
-
-
         /// <summary>
-        /// Extract solid of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
+        /// Extract solids of the given geometry. Therefore the GeometryObjects needs to be converted into Solid. 
         /// </summary>
         /// <param name="document">Current document in which the geometry is included.</param>
         /// <param name="geometry">The geometry that contains the inlet/outlet.</param>
         /// <param name="transform">Specifies the transformation of the geometry.</param>
-        /// <returns>Solid.</returns>
-        public static Solid ExtractSolid(Document document, GeometryElement geometry, Transform transform)
-        {
-            Solid value = default;
-            foreach (GeometryObject gObject in geometry)
-            {
-                Solid solid = gObject as Solid;
-                if (null != solid)
-                {
-                    return solid;
-                }
-
-                // if the type of the geometric primitive is instance
-                GeometryInstance instance = gObject as GeometryInstance;
-                if (null != instance)
-                {
-                    Transform newTransform;
-                    if (null == transform)
-                    {
-                        newTransform = instance.Transform;
-                    }
-                    else
-                    {
-                        newTransform = transform.Multiply(instance.Transform);  // get a transformation of the affine 3-space
-                    }
-                    value = ExtractSolid(document, instance.SymbolGeometry, newTransform);
-                    break;
-                }
-
-                GeometryElement geomElement = gObject as GeometryElement;
-                if (null != geomElement)
-                {
-                    value = ExtractSolid(document, instance.SymbolGeometry, transform);
-                    break;
-                }
-            }
-            return value;
-        }
-
-        /// <summary>
-        /// Extract solid of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
-        /// </summary>
-        /// <param name="document">Current document in which the geometry is included.</param>
-        /// <param name="geometry">The geometry that contains the inlet/outlet.</param>
-        /// <param name="transform">Specifies the transformation of the geometry.</param>
+        /// <param name="solids">List solids will be insterted.</param>
         /// <returns>Solid list.</returns>
         public static void ExtractSolidList(Document document, GeometryElement geometry, Transform transform, List<Solid> solids)
         {
@@ -1314,7 +1177,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="faceNormal">Reference of the face normal.</param>
         /// <param name="solid">Solid that will be checked.</param>
         /// <returns>Face normal as XYZ object.</returns>
-        public static Face GetFace(List<ElementId> materialIds, /*ref Face refFace*//*XYZ faceNormal*/ Solid solid)
+        public static Face GetFace(List<ElementId> materialIds, Solid solid)
         {
             // a solid has many faces
             FaceArray faces = solid.Faces;
@@ -1336,9 +1199,6 @@ namespace BIM.OpenFOAMExport
                 if (materialIds.Contains(face.MaterialElementId))
                 {
                     return face;
-                    //UV point = new UV();
-                    //faceNormal = face.ComputeNormal(point);
-                    //break;
                 }
             }
             return null;
@@ -1725,6 +1585,25 @@ namespace utils
             if (@this.IsDisposed)
                 return DialogResult.OK;
             return @this.ShowDialog();
+        }
+    }
+
+    /// <summary>
+    /// Helper functions for this implementation.
+    /// </summary>
+    public static class AutodeskHelperFunctions
+    {
+        /// <summary>
+        /// Generate a name from given element.
+        /// </summary>
+        /// <param name="element">Element object.</param>
+        /// <returns>String with name as as "familyName + familyInstanceName + elementId".</returns>
+        public static string GenerateNameFromElement(Element element)
+        {
+            FamilyInstance instance = element as FamilyInstance;
+            string name = instance.Symbol.Family.Name.Replace(' ', '_') + "_" + instance.Name.Replace(' ', '_') + "_" + element.Id;
+            name = UnicodeNormalizer.Normalize(name);
+            return name;
         }
     }
 }

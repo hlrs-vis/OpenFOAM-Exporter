@@ -187,9 +187,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             }
             foreach (var entry in m_Settings.MeshResolution)
             {
-                FamilyInstance instance = entry.Key as FamilyInstance;
-                name = instance.Symbol.Family.Name.Replace(' ', '_') + "_" + instance.Name.Replace(' ', '_') + "_" + entry.Key.Id;
-                name = UnicodeNormalizer.Normalize(name);
+                name = AutodeskHelperFunctions.GenerateNameFromElement(entry.Key);
                 vec = new Vector(entry.Value, entry.Value);
                 m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
             }
