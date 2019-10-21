@@ -35,6 +35,9 @@ using RevitView = Autodesk.Revit.DB.View;
 using BIM.OpenFOAMExport.OpenFOAM;
 using Material = Autodesk.Revit.DB.Material;
 using System.Security;
+using System.Text;
+using utils;
+using System.Threading.Tasks;
 
 namespace BIM.OpenFOAMExport
 {
@@ -1008,7 +1011,8 @@ namespace BIM.OpenFOAMExport
             {
                 
                 FamilyInstance instance = element as FamilyInstance;
-                string name = instance.Symbol.Family.Name + "_" + instance.Name.Replace(' ','_') + "_" + element.Id;
+                string name = instance.Symbol.Family.Name.Replace(' ', '_') + "_" + instance.Name.Replace(' ','_') + "_" + element.Id;
+                name = UnicodeNormalizer.Normalize(name);
                 m_Writer.WriteSolidName(name, true);
 
                 GeometryElement geometry = null;
@@ -1017,24 +1021,7 @@ namespace BIM.OpenFOAMExport
                 {
                     continue;
                 }
-
-                Solid solid = ExtractSolid(m_ActiveDocument, geometry, null);
-                if(solid != null)
-                {
-                    FaceArray faces = solid.Faces;
-                    foreach(Face face in faces)
-                    {
-                        //m_Writer.WriteSolidName(name, true);
-                        Mesh mesh = face.Triangulate();
-                        if (mesh == null)
-                        {
-                            continue;
-                        }
-
-                        WriteFaceToSTL(m_ActiveDocument, mesh, face, null);
-                        //m_Writer.WriteSolidName(name, false);
-                    }
-                }
+                ScanGeomElement(m_ActiveDocument, geometry, null);
                 m_Writer.WriteSolidName(name, false);
             }
         }
@@ -1274,6 +1261,50 @@ namespace BIM.OpenFOAMExport
                 }
             }
             return value;
+        }
+
+        /// <summary>
+        /// Extract solid of the given geometry. Therefore the GeometryObject needs to be converted into Solid. 
+        /// </summary>
+        /// <param name="document">Current document in which the geometry is included.</param>
+        /// <param name="geometry">The geometry that contains the inlet/outlet.</param>
+        /// <param name="transform">Specifies the transformation of the geometry.</param>
+        /// <returns>Solid list.</returns>
+        public static void ExtractSolidList(Document document, GeometryElement geometry, Transform transform, List<Solid> solids)
+        {
+            foreach (GeometryObject gObject in geometry)
+            {
+                Solid solid = gObject as Solid;
+                if (null != solid)
+                {
+                    solids.Add(solid);
+                    continue;
+                }
+
+                // if the type of the geometric primitive is instance
+                GeometryInstance instance = gObject as GeometryInstance;
+                if (null != instance)
+                {
+                    Transform newTransform;
+                    if (null == transform)
+                    {
+                        newTransform = instance.Transform;
+                    }
+                    else
+                    {
+                        newTransform = transform.Multiply(instance.Transform);  // get a transformation of the affine 3-space
+                    }
+                    ExtractSolidList(document, instance.SymbolGeometry, newTransform, solids);
+                    break;
+                }
+
+                GeometryElement geomElement = gObject as GeometryElement;
+                if (null != geomElement)
+                {
+                    ExtractSolidList(document, instance.SymbolGeometry, transform, solids);
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -1603,7 +1634,67 @@ namespace BIM.OpenFOAMExport
 
             return linkElements;
         }
+    }
+}
 
+namespace utils
+{
+    /// <summary>
+    /// Unicode utizer.
+    /// Source: http://codepad.org/dUMpGlgg
+    /// </summary>
+    public static class UnicodeNormalizer
+    {
+        /// <summary>
+        /// Map for critical chars.
+        /// </summary>
+        private static Dictionary<char, string> charmap = new Dictionary<char, string>() {
+            {'À', "A"}, {'Á', "A"}, {'Â', "A"}, {'Ã', "A"}, {'Ä', "Ae"}, {'Å', "A"}, {'Æ', "Ae"},
+            {'Ç', "C"},
+            {'È', "E"}, {'É', "E"}, {'Ê', "E"}, {'Ë', "E"},
+            {'Ì', "I"}, {'Í', "I"}, {'Î', "I"}, {'Ï', "I"},
+            {'Ð', "Dh"}, {'Þ', "Th"},
+            {'Ñ', "N"},
+            {'Ò', "O"}, {'Ó', "O"}, {'Ô', "O"}, {'Õ', "O"}, {'Ö', "Oe"}, {'Ø', "Oe"},
+            {'Ù', "U"}, {'Ú', "U"}, {'Û', "U"}, {'Ü', "Ue"},
+            {'Ý', "Y"},
+            {'ß', "ss"},
+            {'à', "a"}, {'á', "a"}, {'â', "a"}, {'ã', "a"}, {'ä', "ae"}, {'å', "a"}, {'æ', "ae"},
+            {'ç', "c"},
+            {'è', "e"}, {'é', "e"}, {'ê', "e"}, {'ë', "e"},
+            {'ì', "i"}, {'í', "i"}, {'î', "i"}, {'ï', "i"},
+            {'ð', "dh"}, {'þ', "th"},
+            {'ñ', "n"},
+            {'ò', "o"}, {'ó', "o"}, {'ô', "o"}, {'õ', "o"}, {'ö', "oe"}, {'ø', "oe"},
+            {'ù', "u"}, {'ú', "u"}, {'û', "u"}, {'ü', "ue"},
+            {'ý', "y"}, {'ÿ', "y"}
+        };
+
+        /// <summary>
+        /// Substitute critical chars with unicode conform chars.
+        /// </summary>
+        /// <param name="text">String that will be used for substitution.</param>
+        /// <returns>string with substitute critical chars.</returns>
+        public static string Normalize(this string text)
+        {
+            return text.Aggregate(
+              new StringBuilder(),
+              (sb, c) => {
+                  string r;
+                  if (charmap.TryGetValue(c, out r))
+                  {
+                      return sb.Append(r);
+                  }
+                  return sb.Append(c);
+              }).ToString();
+        }
+    }
+
+    /// <summary>
+    /// General coverting function.
+    /// </summary>
+    public static class ConverterUtil
+    {
         /// <summary>
         /// Convert-Assist-Function.
         /// </summary>
@@ -1611,9 +1702,29 @@ namespace BIM.OpenFOAMExport
         /// <typeparam name="U">Initial type</typeparam>
         /// <param name="value">Value to convert.</param>
         /// <returns>Converted value.</returns>
-        public static T ConvertValue<T,U>(U value)/* where U : IConvertible*/
+        public static T ConvertValue<T, U>(U value)
         {
             return (T)Convert.ChangeType(value, typeof(T));
+        }
+    }
+
+    /// <summary>
+    /// Call Window.ShowDialog asynchron extension.
+    /// </summary>
+    public static class ShowDialogAsyncExt
+    {
+        /// <summary>
+        /// ExtensionMethod for asynchronous use of showDialog().
+        /// Source:https://stackoverflow.com/questions/33406939/async-showdialog/43420090#43420090
+        /// </summary>
+        /// <param name="this">Windows form object.</param>
+        /// <returns>DialogResult in Task.</returns>
+        public static async Task<DialogResult> ShowDialogAsync(this System.Windows.Forms.Form @this)
+        {
+            await Task.Yield();
+            if (@this.IsDisposed)
+                return DialogResult.OK;
+            return @this.ShowDialog();
         }
     }
 }

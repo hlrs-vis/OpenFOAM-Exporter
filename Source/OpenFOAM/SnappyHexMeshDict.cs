@@ -3,6 +3,8 @@ using System.Windows;
 using Autodesk.Revit.DB;
 using System.Windows.Media.Media3D;
 using System.Collections;
+using System.Text;
+using utils;
 
 namespace BIM.OpenFOAMExport.OpenFOAM
 {
@@ -186,7 +188,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             foreach (var entry in m_Settings.MeshResolution)
             {
                 FamilyInstance instance = entry.Key as FamilyInstance;
-                name = instance.Symbol.Family.Name + "_" + instance.Name.Replace(' ', '_') + "_" + entry.Key.Id;
+                name = instance.Symbol.Family.Name.Replace(' ', '_') + "_" + instance.Name.Replace(' ', '_') + "_" + entry.Key.Id;
+                name = UnicodeNormalizer.Normalize(name);
                 vec = new Vector(entry.Value, entry.Value);
                 m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
             }

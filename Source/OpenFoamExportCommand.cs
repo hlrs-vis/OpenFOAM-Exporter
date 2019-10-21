@@ -23,14 +23,12 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AsyncShowDialog;
+using utils;
 
 using Autodesk.Revit;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using System.Windows;
-using System.Threading;
 
 namespace BIM.OpenFOAMExport
 {
@@ -109,36 +107,13 @@ namespace BIM.OpenFOAMExport
                 //Start modal form with with responsive messageloop.
                 System.Windows.Forms.Application.Run(exportForm);
 
-                if(exportForm.DialogResult == DialogResult.Cancel)
+                if (exportForm.DialogResult == DialogResult.Cancel)
                 {
                     return Result.Cancelled;
                 }
             }
 
             return Result.Succeeded;
-        }
-    }
-}
-
-namespace AsyncShowDialog
-{
-    /// <summary>
-    /// Call Window.ShowDialog asynchron extension.
-    /// </summary>
-    public static class ShowDialogAsyncExt
-    {
-        /// <summary>
-        /// ExtensionMethod for asynchronous use of showDialog().
-        /// Source:https://stackoverflow.com/questions/33406939/async-showdialog/43420090#43420090
-        /// </summary>
-        /// <param name="this">Windows form object.</param>
-        /// <returns>DialogResult in Task.</returns>
-        public static async Task<DialogResult> ShowDialogAsync(this System.Windows.Forms.Form @this)
-        {
-            await Task.Yield();
-            if (@this.IsDisposed)
-                return DialogResult.OK;
-            return @this.ShowDialog();
         }
     }
 }
