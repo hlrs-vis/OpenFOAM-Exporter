@@ -188,6 +188,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             foreach (var entry in m_Settings.MeshResolution)
             {
                 name = AutodeskHelperFunctions.GenerateNameFromElement(entry.Key);
+                if(name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
+                {
+                    name = "Terminal_" + name;
+                }
                 vec = new Vector(entry.Value, entry.Value);
                 m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
             }

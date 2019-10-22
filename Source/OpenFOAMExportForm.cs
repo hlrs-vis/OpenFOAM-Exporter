@@ -425,7 +425,7 @@ namespace BIM.OpenFOAMExport
             while (iterator.MoveNext())
             {
                 Application.DoEvents();
-                //Element element = iterator.Current; blub
+                //Element element = iterator.Current;
                 FamilyInstance instance = iterator.Current as FamilyInstance;
                 if (instance == null)
                     continue;

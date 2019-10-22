@@ -952,11 +952,16 @@ namespace BIM.OpenFOAMExport
         /// <param name="stlName">String that represents the name of the STL.</param>
         private void WriteAirTerminalsToSTL(Dictionary<Document, List<Element>> terminals, string stlName)
         {
+            //close wall section
+            m_Writer.WriteSolidName(stlName, false);
             m_FacesInletOutlet = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face,Transform>>();
             foreach (var elements in terminals)
             {
                 foreach (Element elem in elements.Value)
                 {
+                    m_Writer.WriteSolidName("Terminal_" + AutodeskHelperFunctions.GenerateNameFromElement(elem), true);
+
+
                     GeometryElement geometry = null;
                     geometry = elem.get_Geometry(m_ViewOptions);
                     if (null == geometry)
@@ -965,18 +970,20 @@ namespace BIM.OpenFOAMExport
                     }
 
                     //need transform for inlet/outlet-face and the face itself.
-                    KeyValuePair<Face,Transform> inletOutlet = ExtractMaterialFaces(elements.Key, geometry, null, m_InletOutletMaterials);
+                    KeyValuePair<Face, Transform> inletOutlet = ExtractMaterialFaces(elements.Key, geometry, null, m_InletOutletMaterials);
                     if (inletOutlet.Key != null)
                     {
                         KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(
                             AutodeskHelperFunctions.GenerateNameFromElement(elem), elements.Key);
                         m_FacesInletOutlet.Add(inletOutletID, inletOutlet);
                     }
+
+                    m_Writer.WriteSolidName("Terminal_" + AutodeskHelperFunctions.GenerateNameFromElement(elem), false);
                 }
             }
 
-            //close wall section
-            m_Writer.WriteSolidName(stlName, false);
+            ////close wall section
+            //m_Writer.WriteSolidName(stlName, false);
 
             if(m_FacesInletOutlet.Count == 0)
             {
@@ -1011,7 +1018,7 @@ namespace BIM.OpenFOAMExport
             foreach (var element in m_Settings.MeshResolution.Keys)
             {
                 string name = AutodeskHelperFunctions.GenerateNameFromElement(element);
-                m_Writer.WriteSolidName(name, true);
+                //m_Writer.WriteSolidName(name, true);
 
                 GeometryElement geometry = null;
                 geometry = element.get_Geometry(m_ViewOptions);
@@ -1019,9 +1026,17 @@ namespace BIM.OpenFOAMExport
                 {
                     continue;
                 }
-                //write to stl-file
-                ScanGeomElement(m_ActiveDocument, geometry, null);
-                m_Writer.WriteSolidName(name, false);
+                if(!IsGeometryInList(m_DuctTerminalsInDoc, geometry))
+                {
+                    m_Writer.WriteSolidName(name, true);
+
+                    //write geometry as faces to stl-file
+                    ScanGeomElement(m_ActiveDocument, geometry, null);
+                    m_Writer.WriteSolidName(name, false);
+                }
+                ////write to stl-file
+                //ScanGeomElement(m_ActiveDocument, geometry, null);
+                //m_Writer.WriteSolidName(name, false);
             }
         }
 
@@ -1046,7 +1061,7 @@ namespace BIM.OpenFOAMExport
                     if (keyValuePair.Key != null)
                     {
                         face = keyValuePair;
-                        break;
+                        //break;
                     }
                     continue;
                 }
