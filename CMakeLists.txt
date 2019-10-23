@@ -8,16 +8,16 @@ Source/DataGenerator.cs
 Source/OpenFoamDialogManager.cs
 Source/OpenFoamExportCommand.cs
 Source/OpenFoamExporterUI.cs
-Source/OpenFoamExportResource.Designer.cs
+Source/OpenFOAMExportResource1.Designer.cs
 Source/OpenFoamExportResource.resx
 Source/SaveData.cs
 Source/Settings.cs
-Source/STLExportCancelForm.cs
-Source/STLExportCancelForm.Designer.cs
-Source/STLExportCancelForm.resx
-Source/STLExportForm.cs
-Source/STLExportForm.Designer.cs
-Source/STLExportForm.resx
+Source/OpenFOAMExportCancelForm.cs
+Source/OpenFOAMExportCancelForm.Designer.cs
+Source/OpenFOAMExportCancelForm.resx
+Source/OpenFOAMExportForm.cs
+Source/OpenFOAMExportForm.Designer.cs
+Source/OpenFOAMExportForm.resx
 Source/Properties/Resources.Designer.cs
 Source/Properties/Resources.resx
 Source/OpenFOAMUI/OpenFOAMDropDownTreeNode.cs
@@ -44,7 +44,6 @@ Source/OpenFOAM/TransportProperties.cs
 Source/OpenFOAM/TurbulenceProperties.cs
 Source/OpenFOAM/U.cs
 Source/OpenFOAM/Version.cs
-
 )
 # Set the C# language version (defaults to 3.0).
 set(CMAKE_CSharp_FLAGS "/langversion:latest")
