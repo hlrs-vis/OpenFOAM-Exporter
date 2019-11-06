@@ -228,9 +228,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             m_DefaultEnvPath = "None";
             m_EnvTag = "<" + m_Env + ">"; ;
-            string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
-            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
-            m_ConfigPath = assemblyDirCorrect + "openfoam_env_config.config";
+            //string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
+            //string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
+            //string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExporter.dll"), 20).Replace("/", "\\");
+            m_ConfigPath = "c:/tmp/" + "openfoam_env_config.config";
             switch (m_Env)
             {
                 case OpenFOAMEnvironment.blueCFD:
@@ -561,7 +562,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             if(m_Settings.SSH.Slurm)
             {
                 //-c cause distribute between processors and not tasks?
-                shellCommands.Add("; eval salloc " + m_Settings.SSH.SlurmCommand + " /bin/bash ");
+                shellCommands.Add("; "/*eval salloc "*/+m_Settings.SSH.SlurmCommand + " chmod +x ./Allrun; chmod +x ./Allclean ");
             }
 
             return shellCommands;
