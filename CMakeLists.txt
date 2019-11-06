@@ -2,49 +2,77 @@ USING(Revit)
 PROJECT(RevitPlugin CSharp)
 include(CSharpUtilities)
 
+
 add_library(OpenFOAMExporter SHARED
-Source/AssemblyInfo.cs
-Source/DataGenerator.cs
-Source/OpenFoamDialogManager.cs
-Source/OpenFoamExportCommand.cs
-Source/OpenFoamExporterUI.cs
-Source/OpenFOAMExportResource1.Designer.cs
-Source/OpenFoamExportResource.resx
-Source/SaveData.cs
-Source/Settings.cs
-Source/OpenFOAMExportCancelForm.cs
-Source/OpenFOAMExportCancelForm.Designer.cs
-Source/OpenFOAMExportCancelForm.resx
-Source/OpenFOAMExportForm.cs
-Source/OpenFOAMExportForm.Designer.cs
-Source/OpenFOAMExportForm.resx
-Source/Properties/Resources.Designer.cs
-Source/Properties/Resources.resx
-Source/OpenFOAMUI/OpenFOAMDropDownTreeNode.cs
-Source/OpenFOAMUI/OpenFOAMTextBoxTreeNode.cs
-Source/OpenFOAMUI/OpenFOAMTreeView.cs
-Source/OpenFOAM/BlockMeshDict.cs
-Source/OpenFOAM/ControlDict.cs
-Source/OpenFOAM/DecomposeParDict.cs
-Source/OpenFOAM/Epsilon.cs
-Source/OpenFOAM/FoamDict.cs
-Source/OpenFOAM/FoamFile.cs
-Source/OpenFOAM/FoamParameter.cs
-Source/OpenFOAM/FvSchemes.cs
-Source/OpenFOAM/FvSolution.cs
-Source/OpenFOAM/G.cs
-Source/OpenFOAM/K.cs
-Source/OpenFOAM/MeshDict.cs
-Source/OpenFOAM/Nut.cs
-Source/OpenFOAM/P.cs
-Source/OpenFOAM/RunManager.cs
-Source/OpenFOAM/SnappyHexMeshDict.cs
-Source/OpenFOAM/SurfaceFeatureExtract.cs
-Source/OpenFOAM/TransportProperties.cs
-Source/OpenFOAM/TurbulenceProperties.cs
-Source/OpenFOAM/U.cs
-Source/OpenFOAM/Version.cs
+BIM/AssemblyInfo.cs
+BIM/DataGenerator.cs
+BIM/OpenFoamDialogManager.cs
+BIM/OpenFoamExportCommand.cs
+BIM/OpenFoamExporterUI.cs
+BIM/OpenFOAMExportResource.Designer.cs
+BIM/OpenFOAMExportResource.resx
+BIM/SaveData.cs
+BIM/Settings.cs
+BIM/OpenFOAMExportCancelForm.cs
+BIM/OpenFOAMExportCancelForm.Designer.cs
+BIM/OpenFOAMExportCancelForm.resx
+BIM/OpenFOAMExportForm.cs
+BIM/OpenFOAMExportForm.Designer.cs
+BIM/OpenFOAMExportForm.resx
+BIM/Properties/Resources.Designer.cs
+BIM/Properties/Resources.resx
+BIM/OpenFOAMUI/OpenFOAMDropDownTreeNode.cs
+BIM/OpenFOAMUI/OpenFOAMTextBoxForm.cs
+BIM/OpenFOAMUI/OpenFOAMTextBoxForm.Designer.cs
+BIM/OpenFOAMUI/OpenFOAMTextBoxTreeNode.cs
+BIM/OpenFOAMUI/OpenFOAMTreeNode.cs
+BIM/OpenFOAMUI/OpenFOAMTreeView.cs
+BIM/OpenFOAM/Alphat.cs
+BIM/OpenFOAM/BlockMeshDict.cs
+BIM/OpenFOAM/ControlDict.cs
+BIM/OpenFOAM/DecomposeParDict.cs
+BIM/OpenFOAM/Epsilon.cs
+BIM/OpenFOAM/FoamDict.cs
+BIM/OpenFOAM/FoamFile.cs
+BIM/OpenFOAM/FoamParameter.cs
+BIM/OpenFOAM/FvSchemes.cs
+BIM/OpenFOAM/FvSolution.cs
+BIM/OpenFOAM/G.cs
+BIM/OpenFOAM/K.cs
+BIM/OpenFOAM/MeshDict.cs
+BIM/OpenFOAM/Nut.cs
+BIM/OpenFOAM/OpenFOAMCalculator.cs
+BIM/OpenFOAM/P.cs
+BIM/OpenFOAM/P_rgh.cs
+BIM/OpenFOAM/RunManager.cs
+BIM/OpenFOAM/SnappyHexMeshDict.cs
+BIM/OpenFOAM/SurfaceFeatureExtract.cs
+BIM/OpenFOAM/T.cs
+BIM/OpenFOAM/TransportProperties.cs
+BIM/OpenFOAM/TurbulenceProperties.cs
+BIM/OpenFOAM/U.cs
+BIM/OpenFOAM/Version.cs
+BIM/Resources/ADSKSTLExporterHelp.htm
+BIM/Resources/DropDownTreeView.dll
+BIM/Resources/logo_64.png
+BIM/Resources/OpenFoamExport.addin
+BIM/Resources/PackageContents.xml
+BIM/Resources/wind_32.png
+BIM/Resources/wind_32_reworked.png
+BIM/Resources/wind_64.ico
+BIM/Resources/wind_64.png
 )
+
+set_property(SOURCE BIM/Resources/ADSKSTLExporterHelp.htm PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/DropDownTreeView.dll PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/logo_64.png PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/OpenFoamExport.addin PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/PackageContents.xml PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/wind_32.png PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/wind_32_reworked.png PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/wind_64.ico PROPERTY VS_TOOL_OVERRIDE "Resource")
+set_property(SOURCE BIM/Resources/wind_64.png PROPERTY VS_TOOL_OVERRIDE "Resource")
+
 # Set the C# language version (defaults to 3.0).
 set(CMAKE_CSharp_FLAGS "/langversion:latest")
 set_target_properties(OpenFOAMExporter PROPERTIES FOLDER "${MAIN_FOLDER}/Plugins/RevitPlugins")
@@ -76,17 +104,22 @@ IF(CMAKE_CONFIGURATION_TYPES)
     ENDIF(CMAKE_CONFIGURATION_TYPES)
 
 csharp_set_designer_cs_properties(
-Source/AssemblyInfo.cs
-Source/OpenFoamExportResource.Designer.cs
-Source/OpenFoamExportResource.resx
-Source/STLExportCancelForm.cs
-Source/STLExportCancelForm.Designer.cs
-Source/STLExportCancelForm.resx
-Source/STLExportForm.cs
-Source/STLExportForm.Designer.cs
-Source/STLExportForm.resx
-Source/Properties/Resources.Designer.cs
-Source/Properties/Resources.resx
+BIM/OpenFOAMExportResource.Designer.cs
+BIM/OpenFOAMExportResource.resx
+BIM/Properties/Resources.Designer.cs
+BIM/Properties/Resources.resx
+)
+csharp_set_windows_forms_properties(
+BIM/AssemblyInfo.cs
+BIM/OpenFOAMExportCancelForm.cs
+BIM/OpenFOAMExportCancelForm.Designer.cs
+BIM/OpenFOAMExportCancelForm.resx
+BIM/OpenFOAMExportForm.Designer.cs
+BIM/OpenFOAMExportForm.resx
+BIM/OpenFOAMExportForm.cs
+BIM/OpenFOAMUI/OpenFOAMTextBoxForm.cs
+BIM/OpenFOAMUI/OpenFOAMTextBoxForm.Designer.cs
+BIM/OpenFOAMUI/OpenFOAMTextBoxForm.resx
 )
 set_property(TARGET OpenFOAMExporter PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.1")
 #set_property(TARGET OpenFOAMExporter PROPERTY WIN32_EXECUTABLE TRUE)
