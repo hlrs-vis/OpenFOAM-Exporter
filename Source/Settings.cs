@@ -2545,7 +2545,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="type">Type of patch.</param>
         /// <param name="uniform">Uniform / Nonuniform.</param>
         /// <param name="value">Value that will be stored in patch.</param>
-        /// <param name="pType">PatchType: Inlet, Outlet, Wall</param>
+        /// <param name="pType">PatchType: Inlet, Outlet, Wall, None</param>
         /// <param name="useBIM">Use BIM Data-Dictionaries Outlet/Inlet or Meshresolution</param>
         private void CreateFOAMParameterPatches<T>(InitialParameter param, string type, string uniform, T value, PatchType pType, bool useBIM)
         {

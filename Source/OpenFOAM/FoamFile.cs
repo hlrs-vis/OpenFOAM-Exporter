@@ -35,7 +35,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         protected string m_Class = string.Empty;
 
         /// <summary>
-        /// List of attributes for the OpenFOAM-File
+        /// List of attributes for the OpenFOAM-File orderd.
         /// </summary>
         protected Dictionary<string, object> m_Attributes;
 

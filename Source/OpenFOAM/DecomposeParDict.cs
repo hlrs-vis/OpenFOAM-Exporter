@@ -40,7 +40,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         public override void InitAttributes()
         {
             m_NumberOfSubdomains = m_Settings.NumberOfSubdomains;
-
             FoamFile.Attributes.Add("numberOfSubdomains", m_NumberOfSubdomains);
             base.InitAttributes();
         }

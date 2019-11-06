@@ -34,7 +34,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private readonly Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
 
         /// <summary>
-        /// Simulation default.
+        /// Simulation default => castellatedMeshControls.
         /// </summary>
         private Dictionary<string, object> m_SettingsCMC;
 

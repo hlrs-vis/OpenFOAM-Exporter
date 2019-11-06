@@ -211,10 +211,12 @@ namespace BIM.OpenFOAMExport
                 return status;
             }
 
+
             //.foam-File
             File.Create(path + "\\" + m_STLName + ".foam");
 
-            //move .stl from given location into triSurface folder TO-DO: Not Moving => Generate
+            //**********************NEED TO ADJUST THIS************************//
+            //move .stl from given location into triSurface folder TO-DO: Not Moving => generate in target directory
             File.Move(m_Writer.FileName, triSurface + "\\" + m_STLName + ".stl");
             File.Delete(m_Writer.FileName);
 
@@ -238,7 +240,6 @@ namespace BIM.OpenFOAMExport
             if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.ssh)
             {
                 SetupLinux(path, commands);
-                
             }
             else
             {
