@@ -67,7 +67,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 m_FoamFile = new FoamFileAsBinary(/*m_Name*/_name, version, path, /*m_Class*/_class, attributes, format);
             }
             Dictionary<string, object> m_ParentDictionary = m_Settings.SimulationDefault[FoamFile.Location.Trim('"')] as Dictionary<string, object>;
-            m_DictFile = m_ParentDictionary[_class] as Dictionary<string, object>;
+            m_DictFile = m_ParentDictionary[_name] as Dictionary<string, object>;
         }
 
         /// <summary>
