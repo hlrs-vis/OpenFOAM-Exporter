@@ -1464,7 +1464,7 @@ namespace BIM.OpenFOAMExport
             m_SaveFormat = saveFormat;
             m_ExportRange = exportRange;
             m_Mesh = MeshType.Snappy;
-            m_openFOAMEnvironment = OpenFOAMEnvironment.blueCFD;
+            m_openFOAMEnvironment = OpenFOAMEnvironment.ssh;
             ExtractionMethod extractionMethod = ExtractionMethod.extractFromSurface;
             SimulationType simulationType = SimulationType.RAS;
 
@@ -1516,8 +1516,8 @@ namespace BIM.OpenFOAMExport
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
             //SSH
-            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/",
-                true, true, true, 22, "eval salloc -n "+ numberOfSubdomains + " -c %d");
+            m_SSH = new SSH("hpcwoess", "visent.hlrs.de", "of1812", "/mnt/raid/home/hpcwoess/foam",
+                true, false, true, 22, "eval salloc -n "+ numberOfSubdomains );
 
             //General
             m_OpenFOAM = openFoam;
@@ -1570,12 +1570,12 @@ namespace BIM.OpenFOAMExport
             m_ResolveFeatureAngle = 180;
             m_RefinementRegions = new Dictionary<string, object>();
             m_AllowFreeStandingZoneFaces = true;
-            m_LocationInMesh = new Vector3D(0, 0, 0);
+            m_LocationInMesh = new Vector3D(20, 0, 5);
 
             //SnappyHexMesh-SnapControls
             m_NSmoothPatch = 5;
             m_Tolerance = 5;
-            m_NSolverIter = 100;
+            m_NSolverIter = 200;
             m_NRelaxIterSnap = 8;
             m_NFeatureSnapIter = 10;
             m_ImplicitFeatureSnap = true;

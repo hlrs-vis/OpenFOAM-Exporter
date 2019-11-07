@@ -152,7 +152,7 @@ namespace BIM.OpenFOAMExport
             m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
             
             tbSSH.Enabled = false;
-            tbOpenFOAM.Enabled = false;
+            tbOpenFOAM.Enabled = true;
 
             //set size for OpenFOAMTreeView
             InitializeOFTreeViewSize();
