@@ -1516,7 +1516,7 @@ namespace BIM.OpenFOAMExport
             m_TurbulenceParameter = new TurbulenceParameter(simulationType, rasModel, true, true);
 
             //SSH
-            m_SSH = new SSH("name", "111.111.1.111", "source /opt/openfoam6/etc/bashrc", "/home/\"User\"/OpenFOAMRemote/",
+            m_SSH = new SSH("hpcmdjur", "visent.hlrs.de", "of1812", "/mnt/raid/home/hpcmdjur/OpenFOAMRemote/",
                 true, true, true, 22, "eval salloc -n "+ numberOfSubdomains + " -c %d");
 
             //General

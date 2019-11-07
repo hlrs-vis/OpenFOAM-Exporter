@@ -131,6 +131,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 name = face.Key.Key;
                 name = name.Replace(" ", "_");
                 m_Regions.Add(name, new Dictionary<string, object> { { nameGeometry, name } });
+                m_Regions.Add("Terminal_" + name, new Dictionary<string, object> { { nameGeometry, "Terminal_" + name } });
             }
         }
 
@@ -184,16 +185,27 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                     vec = (Vector)m_SettingsCMC["outletLevel"];
                 }
                 m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
+                m_RegionsRefinementCastellated.Add("Terminal_" + name, new Dictionary<string, object>() { { level, vec} });
             }
             foreach (var entry in m_Settings.MeshResolution)
             {
                 name = AutodeskHelperFunctions.GenerateNameFromElement(entry.Key);
-                if(name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
-                {
-                    name = "Terminal_" + name;
-                }
+                //if(name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
+                //{
+                //    //name = "Terminal_" + name;
+                //    m_RegionsRefinementCastellated[name] = ;
+                //    continue;
+                //}
                 vec = new Vector(entry.Value, entry.Value);
-                m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
+                if (name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
+                {
+                    //name = "Terminal_" + name;
+                    m_RegionsRefinementCastellated["Terminal_" + name] = vec;
+                }
+                else
+                {
+                    m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
+                }
             }
         }
 

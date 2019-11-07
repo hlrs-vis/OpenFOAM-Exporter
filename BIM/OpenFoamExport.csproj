@@ -19,7 +19,7 @@
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
     <OutputType>Library</OutputType>
-    <RootNamespace>BIM.OpenFOAMExport</RootNamespace>
+    <RootNamespace>BIM</RootNamespace>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
@@ -147,6 +147,11 @@
     <Compile Include="DataGenerator.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="OpenFOAMExportResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OpenFOAMExportResource.resx</DependentUpon>
+    </Compile>
     <Compile Include="OpenFOAMUI\OpenFOAMDropDownTreeNode.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMTextBoxForm.cs">
       <SubType>Form</SubType>
@@ -212,30 +217,19 @@
     <Compile Include="OpenFOAMExportForm.Designer.cs">
       <DependentUpon>OpenFOAMExportForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="OpenFOAMExportResource1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>OpenFOAMExportResource.resx</DependentUpon>
-    </Compile>
     <Compile Include="XMLHandler.cs" />
+    <EmbeddedResource Include="OpenFOAMExportResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenFOAMExportResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="OpenFOAMUI\OpenFOAMTextBoxForm.resx">
       <DependentUpon>OpenFOAMTextBoxForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="OpenFOAMExportCancelForm.resx">
       <DependentUpon>OpenFOAMExportCancelForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OpenFOAMExportForm.resx">
       <DependentUpon>OpenFOAMExportForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OpenFOAMExportResource.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenFOAMExportResource1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -266,16 +260,20 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\wind_32_reworked.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\ADSKSTLExporterHelp.htm" />
     <EmbeddedResource Include="Resources\logo_64.png" />
+    <None Include="Resources\Image1.bmp" />
     <Content Include="Resources\OpenFoamExport.addin">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Resources\wind_64.ico" />
-    <None Include="ClassDiagram.cd" />
     <None Include="Resources\wind_32_reworked.png" />
   </ItemGroup>
   <ItemGroup />
