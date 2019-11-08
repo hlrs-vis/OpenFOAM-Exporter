@@ -213,16 +213,16 @@ namespace BIM.OpenFOAMExport
             // 
             // rbAscii
             // 
+            this.rbAscii.Checked = true;
             resources.ApplyResources(this.rbAscii, "rbAscii");
             this.rbAscii.Name = "rbAscii";
+            this.rbAscii.TabStop = true;
             this.rbAscii.UseVisualStyleBackColor = true;
             // 
             // rbBinary
             // 
-            this.rbBinary.Checked = true;
             resources.ApplyResources(this.rbBinary, "rbBinary");
             this.rbBinary.Name = "rbBinary";
-            this.rbBinary.TabStop = true;
             this.rbBinary.UseVisualStyleBackColor = true;
             this.rbBinary.CheckedChanged += new System.EventHandler(this.RbExportFormat_CheckedChanged);
             // 
