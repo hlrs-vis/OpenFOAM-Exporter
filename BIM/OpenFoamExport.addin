@@ -3,7 +3,7 @@
   <AddIn Type="Application">
     <Name>OpenFOAMExporterUI</Name>
     <!--<Assembly>C:\src\covise\zebu\lib\OpenFOAMExporter_d.dll</Assembly>-->
-    <Assembly>C:\Users\Angelina\AppData\Roaming\Autodesk\Revit\Addins\2020\OpenFOAMExport.dll</Assembly>
+    <Assembly>.\OpenFOAMExport.dll</Assembly>
     <AddInId>10a97048-ef29-446a-a2ef-ad092b7cd2af</AddInId>
     <FullClassName>BIM.OpenFOAMExport.OpenFOAMExporterUI</FullClassName>
     <VendorId>HLRS</VendorId>
@@ -11,7 +11,7 @@
   </AddIn>
   <AddIn Type="Command">
     <!--<Assembly>C:\src\covise\zebu\lib\OpenFOAMExporter_d.dll</Assembly>-->
-    <Assembly>C:\Users\Angelina\AppData\Roaming\Autodesk\Revit\Addins\2020\OpenFOAMExport.dll</Assembly>
+    <Assembly>.\OpenFOAMExport.dll</Assembly>
     <ClientId>10a97048-ef29-446a-a2ef-ad092b7cd2b0</ClientId>
     <FullClassName>BIM.OpenFOAMExport.OpenFOAMExportCommand</FullClassName>
     <Text>Export</Text>

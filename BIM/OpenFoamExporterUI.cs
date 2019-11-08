@@ -63,8 +63,9 @@ namespace BIM.OpenFOAMExport
                 BitmapDecoder bdc = new BmpBitmapDecoder(xstr, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
                 button.LargeImage = bdc.Frames[0];
             }
+
             button.ToolTip = "The OpenFOAM Exporter for Revit is designed to produce a stereolithography file (STL) of your building model and a OpenFOAM-Config.";
-            button.LongDescription = "The OpenFOAM Exporter for the Autodesk Revit Platform is a project designed to create an STL file from a 3D building information model for OpenFOAM with a Config-File that includes the boundary conditions for airflow simulation.";
+            button.LongDescription = "The OpenFOAM Exporter for the Autodesk Revit Platform is a project designed to create an STL file from a 3D building information model for OpenFOAM with a Config-Folder that includes the boundary conditions for airflow simulation.";
             ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, directoryName + @"\Resources\ADSKSTLExporterHelp.htm");
             button.SetContextualHelp(help);
             return Result.Succeeded;
@@ -76,18 +77,18 @@ namespace BIM.OpenFOAMExport
          }
       }
 
-      private static System.Windows.Media.ImageSource LoadPNGImageFromResource(string imageResourceName)
-        {
-            string[] names =  Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            int i = 0;
-            foreach(var name in names)
-            {
+      //private static System.Windows.Media.ImageSource LoadPNGImageFromResource(string imageResourceName)
+      //  {
+      //      string[] names =  Assembly.GetExecutingAssembly().GetManifestResourceNames();
+      //      int i = 0;
+      //      foreach(var name in names)
+      //      {
 
-                MessageBox.Show(names[i],name);
-                i++;
-            }
-            PngBitmapDecoder decoder = new PngBitmapDecoder(Assembly.GetExecutingAssembly().GetManifestResourceStream(imageResourceName), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-         return decoder.Frames[0];
-      }
+      //          MessageBox.Show(names[i],name);
+      //          i++;
+      //      }
+      //      PngBitmapDecoder decoder = new PngBitmapDecoder(Assembly.GetExecutingAssembly().GetManifestResourceStream(imageResourceName), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+      //   return decoder.Frames[0];
+      //}
    }
 }
