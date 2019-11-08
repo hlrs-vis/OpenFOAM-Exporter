@@ -39,6 +39,9 @@ namespace BIM.OpenFOAMExport
 {
     public partial class OpenFOAMExportForm : System.Windows.Forms.Form
     {
+
+        private bool m_Direct = false;
+
         /// <summary>
         /// DataGenerator-object.
         /// </summary>
@@ -198,6 +201,27 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="revit"></param>
+        /// <param name="direct"></param>
+        public OpenFOAMExportForm(UIApplication revit, bool direct = true)
+        {   
+            m_Revit = revit;
+            m_Direct = direct;
+            m_Revit.ViewActivating += Revit_ViewActivating;
+            m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
+
+            // get new data generator
+            m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
+
+            // initialize settings
+            InitializeSettings();
+
+            BtnSave_Click(null, null);
+        }
+
+        /// <summary>
         /// Initializes the comboBoxes of the OpenFOAM-Tab.
         /// </summary>
         private void InitializeComboBoxes()
@@ -237,14 +261,17 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private void InitializeSettings()
         {
-            SaveFormat saveFormat;
-            if (rbBinary.Checked)
+            SaveFormat saveFormat = SaveFormat.ascii;
+            if(!m_Direct)
             {
-                saveFormat = SaveFormat.binary;
-            }
-            else
-            {
-                saveFormat = SaveFormat.ascii;
+                if (rbBinary.Checked)
+                {
+                    saveFormat = SaveFormat.binary;
+                }
+                else
+                {
+                    saveFormat = SaveFormat.ascii;
+                }
             }
 
             ElementsExportRange exportRange;
@@ -254,23 +281,35 @@ namespace BIM.OpenFOAMExport
             // get selected categories from the category list
             List<Category> selectedCategories = new List<Category>();
 
-            // only for projects
-            if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
+            DisplayUnitType dup = DisplayUnitType.DUT_METERS;
+            if (!m_Direct)
             {
-                foreach (TreeNode treeNode in tvCategories.Nodes)
+                // only for projects
+                if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
                 {
-                    AddSelectedTreeNode(treeNode, selectedCategories);
+                    foreach (TreeNode treeNode in tvCategories.Nodes)
+                    {
+                        AddSelectedTreeNode(treeNode, selectedCategories);
+                    }
                 }
+                /*DisplayUnitType */dup = m_DisplayUnits[comboBox_DUT.Text];
             }
 
-            DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
-
-            saveFormat = SaveFormat.ascii;
+            //saveFormat = SaveFormat.ascii;
 
             // create settings object to save setting information
-            m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked,
-                cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
+            if(!m_Direct)
+            {
+                m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked,
+                    cbExportColor.Checked, cbExportSharedCoordinates.Checked,
+                    false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
+            }
+            else
+            {
+                m_Settings = new Settings(saveFormat, exportRange, true, false,
+                    false, false, false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
+            }
+
             if (!InitBIMData())
             {
                 MessageBox.Show("Problem with initializing BIM-Data.",
@@ -816,8 +855,11 @@ namespace BIM.OpenFOAMExport
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                if (!UpdateNonDefaultSettings())
-                    return;
+                if(!m_Direct)
+                {
+                    if (!UpdateNonDefaultSettings())
+                        return;
+                }
 
                 TopMost = false;
 
