@@ -2,4 +2,7 @@
 .vs/
 Source/bin
 Source/obj
+BIM/bin
+BIM/obj
 Source/*.cd
+out/
