@@ -1,5 +1,6 @@
 ﻿using BIM.OpenFOAMExport.OpenFOAMUI;
 using System;
+using BIM.OpenFOAMExport;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -228,10 +229,11 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             m_DefaultEnvPath = "None";
             m_EnvTag = "<" + m_Env + ">"; ;
-            //string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
-            //string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
+            string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
+            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
             //string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExporter.dll"), 20).Replace("/", "\\");
-            m_ConfigPath = "c:/tmp/" + "openfoam_env_config.config";
+            //m_ConfigPath = "c:/tmp/" + "openfoam_env_config.config";
+            m_ConfigPath = assemblyDirCorrect + "openfoam_env_config.config";
             switch (m_Env)
             {
                 case OpenFOAMEnvironment.blueCFD:
@@ -549,8 +551,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
-            //***********************SSH FOR LINUX IMPLEMENTED*******************/ 
-            //-t for print out all outputs from remote server to client.
+            //***********************SSH FOR LINUX IMPLEMENTED*******************/
             List<string> shellCommands = new List<string>
             {
                 "scp -P "+ m_Settings.SSH.Port + " -r " + m_CasePath + " " + m_Settings.SSH.ConnectionString() + ":" + m_Settings.SSH.ServerCaseFolder,
@@ -561,8 +562,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
 
             if(m_Settings.SSH.Slurm)
             {
-                //-c cause distribute between processors and not tasks?
-                shellCommands.Add("; "/*eval salloc "*/+m_Settings.SSH.SlurmCommand + " chmod +x ./Allrun; chmod +x ./Allclean ");
+                shellCommands.Add("; chmod +x ./Allrun; chmod +x ./Allclean; " + m_Settings.SSH.SlurmCommand + " ./Allrun");
             }
 
             return shellCommands;

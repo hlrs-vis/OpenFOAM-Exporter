@@ -322,7 +322,7 @@ namespace BIM.OpenFOAMExport
 
             if (CreateGeneralFile(path, "Allrun.", allrun))
             {
-                commands.Add("./Allrun");
+                //commands.Add("./Allrun");
 
                 string allclean = "#!/bin/sh" +
                     "\ncd ${0%/*} || exit 1    # run from this directory" +
@@ -961,8 +961,6 @@ namespace BIM.OpenFOAMExport
                 foreach (Element elem in elements.Value)
                 {
                     m_Writer.WriteSolidName("Terminal_" + AutodeskHelperFunctions.GenerateNameFromElement(elem), true);
-
-
                     GeometryElement geometry = null;
                     geometry = elem.get_Geometry(m_ViewOptions);
                     if (null == geometry)
@@ -978,15 +976,14 @@ namespace BIM.OpenFOAMExport
                             AutodeskHelperFunctions.GenerateNameFromElement(elem), elements.Key);
                         m_FacesInletOutlet.Add(inletOutletID, inletOutlet);
                     }
-
                     m_Writer.WriteSolidName("Terminal_" + AutodeskHelperFunctions.GenerateNameFromElement(elem), false);
                 }
             }
 
-            ////close wall section
+            //close wall section
             //m_Writer.WriteSolidName(stlName, false);
 
-            if(m_FacesInletOutlet.Count == 0)
+            if (m_FacesInletOutlet.Count == 0)
             {
                 return;
             }
