@@ -306,6 +306,8 @@ namespace BIM.OpenFOAMExport
         /// <returns>True, if there is no error while computing.</returns>
         private bool InitDuctParameters()
         {
+            int inletCount = 0;
+            int outletCount = 0;
             foreach (Element element in m_DuctTerminals)
             {
                 FamilyInstance instance = element as FamilyInstance;
@@ -370,15 +372,19 @@ namespace BIM.OpenFOAMExport
                     //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Outlet.Add(nameDuct, dProp);
+                    outletCount++;
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Inlet.Add(nameDuct, dProp);
+                    inletCount++;
                 }
                 //AddDuctParameterToSettings(nameDuct, faceNormal, faceBoundary, surfaceArea, flowRate, meanFlowVelocity, staticPressure, rpm);
 
             }
+            m_Settings.InletCount = inletCount;
+            m_Settings.OutletCount = outletCount;
             return true;
         }
 

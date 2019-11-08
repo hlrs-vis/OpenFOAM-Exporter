@@ -1057,6 +1057,10 @@ namespace BIM.OpenFOAMExport
 
         private Dictionary<Element, int> m_MeshResolutionObjects;
 
+        private int inletCount;
+
+        private int outletCount;
+
         private double m_TempWall;
         private double m_TempOutlet;
         private double m_TempInlet;
@@ -1249,6 +1253,12 @@ namespace BIM.OpenFOAMExport
         //Getter for Mesh Resolution.
         public Dictionary<Element, int> MeshResolution { get => m_MeshResolutionObjects; }
 
+        //Getter-Setter for inletCount
+        public int InletCount { get => inletCount; set => inletCount = value; }
+        //Getter-Setter for outletCount
+        public int OutletCount { get => outletCount; set => outletCount = value; }
+
+
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1390,6 +1400,7 @@ namespace BIM.OpenFOAMExport
                 return m_SimulationDefaultList;
             }
         }
+
 
         /// <summary>
         /// Constructor.
@@ -2583,7 +2594,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _inlet.Attributes.Add("rpm      constant", properties.RPM);
-                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate);
+                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate / InletCount);
                                         param.Patches.Add(inlet.Key, _inlet);
                                         continue;
                                     }
@@ -2643,7 +2654,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _outlet.Attributes.Add("rpm     constant", properties);
-                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate);
+                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate / OutletCount);
                                         param.Patches.Add(outlet.Key, _outlet);
                                         continue;
                                     }
