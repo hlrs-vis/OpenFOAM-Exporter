@@ -62,7 +62,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Current objects in scenes with parameter mesh resoluton.
         /// </summary>
-        private List<Element> m_MeshResolutionObjects;
+        //private List<Element> m_MeshResolutionObjects;
 
         /// <summary>
         /// Current inlet/outlet material that specify the surfaces.
@@ -97,12 +97,8 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Selected Unittype in comboBox.
         /// </summary>
-        private static DisplayUnitType m_SelectedDUT = DisplayUnitType.DUT_UNDEFINED;
+        private static DisplayUnitType m_SelectedDUT = DisplayUnitType.DUT_METERS;
 
-        /// <summary>
-        /// Project-Settings.
-        /// </summary>
-        private Settings m_Settings;
 
         /// <summary>
         /// Revit-App.
@@ -151,7 +147,7 @@ namespace BIM.OpenFOAMExport
             
             m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
             
-            tbSSH.Enabled = false;
+            tbSSH.Enabled = true;
             tbOpenFOAM.Enabled = true;
 
             //set size for OpenFOAMTreeView
@@ -187,11 +183,12 @@ namespace BIM.OpenFOAMExport
             InitializeComboBoxes();
 
             // textBoxCPU
-            textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
+            textBoxCPU.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.NumberOfSubdomains.ToString();
             //To-Do: ADD EVENT FOR CHANGING TEXT
 
+            XYZ loc = toXYZ(ConvertToDisplayUnits(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh));
             // textBoxLocationInMesh
-            txtBoxLocationInMesh.Text = m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US")).Replace(",", " ");
+            txtBoxLocationInMesh.Text = loc.ToString().Replace(",", " ");
 
             //initialize SSH
             InitializeSSH();
@@ -203,7 +200,7 @@ namespace BIM.OpenFOAMExport
         private void InitializeComboBoxes()
         {
             // comboBoxEnv
-            var enumEnv = OpenFOAMEnvironment.blueCFD;
+            var enumEnv = OpenFOAMEnvironment.ssh;
             foreach (var value in Enum.GetValues(enumEnv.GetType()))
             {
                 comboBoxEnv.Items.Add(value);
@@ -237,19 +234,8 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private void InitializeSettings()
         {
-            SaveFormat saveFormat;
-            if (rbBinary.Checked)
-            {
-                saveFormat = SaveFormat.binary;
-            }
-            else
-            {
-                saveFormat = SaveFormat.ascii;
-            }
-
-            ElementsExportRange exportRange;
-
-            exportRange = ElementsExportRange.OnlyVisibleOnes;
+            rbBinary.Checked = (BIM.OpenFOAMExport.Exporter.Instance.settings.SaveFormat == SaveFormat.binary);
+            
 
             // get selected categories from the category list
             List<Category> selectedCategories = new List<Category>();
@@ -265,19 +251,14 @@ namespace BIM.OpenFOAMExport
 
             DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
 
-            saveFormat = SaveFormat.ascii;
-
-            // create settings object to save setting information
-            m_Settings = new Settings(saveFormat, exportRange, cbOpenFOAM.Checked, cbIncludeLinked.Checked,
-                cbExportColor.Checked, cbExportSharedCoordinates.Checked,
-                false, 0, 100, 1, 100, 0, 8, 7, 4, selectedCategories, dup);
+            
             if (!InitBIMData())
             {
                 MessageBox.Show("Problem with initializing BIM-Data.",
                     OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            m_Settings.InitOpenFOAMFolderDictionaries();
+            BIM.OpenFOAMExport.Exporter.Instance.settings.InitOpenFOAMFolderDictionaries();
         }
 
         /// <summary>
@@ -286,7 +267,7 @@ namespace BIM.OpenFOAMExport
         /// <returns>true, if BIMData used.</returns>
         private bool InitBIMData()
         {
-            if (m_Settings == null)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings == null)
             {
                 return false;
             }
@@ -369,12 +350,12 @@ namespace BIM.OpenFOAMExport
                     //...............................................
                     //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
-                    m_Settings.Outlet.Add(nameDuct, dProp);
+                    BIM.OpenFOAMExport.Exporter.Instance.settings.Outlet.Add(nameDuct, dProp);
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
-                    m_Settings.Inlet.Add(nameDuct, dProp);
+                    BIM.OpenFOAMExport.Exporter.Instance.settings.Inlet.Add(nameDuct, dProp);
                 }
                 //AddDuctParameterToSettings(nameDuct, faceNormal, faceBoundary, surfaceArea, flowRate, meanFlowVelocity, staticPressure, rpm);
 
@@ -403,12 +384,12 @@ namespace BIM.OpenFOAMExport
         //        //...............................................
         //        //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
         //        DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
-        //        m_Settings.Outlet.Add(nameDuct, dProp);
+        //        BIM.OpenFOAMExport.Exporter.Instance.settings.Outlet.Add(nameDuct, dProp);
         //    }
         //    else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
         //    {
         //        DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
-        //        m_Settings.Inlet.Add(nameDuct, dProp);
+        //        BIM.OpenFOAMExport.Exporter.Instance.settings.Inlet.Add(nameDuct, dProp);
         //    }
         //}
 
@@ -422,6 +403,7 @@ namespace BIM.OpenFOAMExport
             FilteredElementCollector collector = new FilteredElementCollector(m_Revit.ActiveUIDocument.Document);
             collector.WhereElementIsNotElementType();
             FilteredElementIterator iterator = collector.GetElementIterator();
+            BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Clear();
             while (iterator.MoveNext())
             {
                 Application.DoEvents();
@@ -438,7 +420,7 @@ namespace BIM.OpenFOAMExport
                             () => param.Definition.Name.Equals("Mesh Resolution"), ConvertParameterToDisplayUnitType);
                         if (meshResolution != 0)
                         {
-                            m_Settings.MeshResolution.Add(iterator.Current, meshResolution);
+                            BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Add(iterator.Current, meshResolution);
                             succeed = true;
                         }
                     }
@@ -590,13 +572,13 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private void InitializeSSH()
         {
-            txtBoxUserIP.Text = m_Settings.SSH.ConnectionString();
-            txtBoxAlias.Text = m_Settings.SSH.OfAlias;
-            txtBoxCaseFolder.Text = m_Settings.SSH.ServerCaseFolder;
-            txtBoxPort.Text = m_Settings.SSH.Port.ToString();
-            txtBoxSlurmCmd.Text = m_Settings.SSH.SlurmCommand;
-            cbDelete.Checked = m_Settings.SSH.Delete;
-            cbDownload.Checked = m_Settings.SSH.Download;
+            txtBoxUserIP.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString();
+            txtBoxAlias.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.OfAlias;
+            txtBoxCaseFolder.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder;
+            txtBoxPort.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port.ToString();
+            txtBoxSlurmCmd.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.SlurmCommand;
+            cbDelete.Checked = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Delete;
+            cbDownload.Checked = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Download;
 
         }
 
@@ -606,7 +588,7 @@ namespace BIM.OpenFOAMExport
         private void InitializeDefaultParameterOpenFOAM()
         {
             List<string> keyPath = new List<string>();
-            foreach (var att in m_Settings.SimulationDefault)
+            foreach (var att in BIM.OpenFOAMExport.Exporter.Instance.settings.SimulationDefault)
             {
                 keyPath.Add(att.Key);
                 TreeNode treeNodeSimulation = new TreeNode(att.Key);
@@ -628,11 +610,13 @@ namespace BIM.OpenFOAMExport
             string unitName = "Use Internal: Feet";
             m_DisplayUnits.Add(unitName, DisplayUnitType.DUT_UNDEFINED);
             int selectedIndex = comboBox_DUT.Items.Add(unitName);
+
             if (m_SelectedDUT == DisplayUnitType.DUT_UNDEFINED)
-                comboBox_DUT.SelectedIndex = selectedIndex;
+                m_SelectedDUT = DisplayUnitType.DUT_METERS;
 
             Units currentUnits = m_Revit.ActiveUIDocument.Document.GetUnits();
             DisplayUnitType currentDut = currentUnits.GetFormatOptions(UnitType.UT_Length).DisplayUnits;
+            // always use Meters
             unitName = "Use Current: " + LabelUtils.GetLabelFor(currentDut);
             m_DisplayUnits.Add(unitName, currentDut);
             selectedIndex = comboBox_DUT.Items.Add(unitName);
@@ -713,7 +697,7 @@ namespace BIM.OpenFOAMExport
                 else if (att.Value is Enum)
                 {
                     Enum @enum = att.Value as Enum;
-                    OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>(@enum, ref m_Settings, keyPath);
+                    OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>(@enum, ref BIM.OpenFOAMExport.Exporter.Instance.settings, keyPath);
                     child.Nodes.Add(dropDown);
                 }
                 else if (att.Value is bool)
@@ -721,7 +705,7 @@ namespace BIM.OpenFOAMExport
                     bool? _bool = att.Value as bool?;
                     if(_bool != null)
                     {
-                        OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>((bool)_bool, ref m_Settings, keyPath);
+                        OpenFOAMDropDownTreeNode<dynamic> dropDown = new OpenFOAMDropDownTreeNode<dynamic>((bool)_bool, ref BIM.OpenFOAMExport.Exporter.Instance.settings, keyPath);
                         child.Nodes.Add(dropDown);
                     }
                 }
@@ -732,7 +716,7 @@ namespace BIM.OpenFOAMExport
                 }
                 else
                 {
-                    OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value, ref m_Settings, keyPath);
+                    OpenFOAMTextBoxTreeNode<dynamic> txtBoxNode = new OpenFOAMTextBoxTreeNode<dynamic>(att.Value, ref BIM.OpenFOAMExport.Exporter.Instance.settings, keyPath);
                     child.Nodes.Add(txtBoxNode);
                 }
 
@@ -817,7 +801,7 @@ namespace BIM.OpenFOAMExport
 
                 // save Revit document's triangular data in a temporary file, generate openFOAM-casefolder and start simulation
                 m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
-                DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName, m_Settings/*aSetting*/);
+                DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName);
 
                 if (succeed == DataGenerator.GeneratorStatus.FAILURE)
                 {
@@ -847,7 +831,7 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private bool UpdateNonDefaultSettings()
         {
-            if (m_Settings == null)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings == null)
             {
                 return false;
             }
@@ -861,50 +845,48 @@ namespace BIM.OpenFOAMExport
             {
                 saveFormat = SaveFormat.ascii;
             }
-            m_Settings.SaveFormat = saveFormat;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.SaveFormat = saveFormat;
 
             ElementsExportRange exportRange;
             exportRange = ElementsExportRange.OnlyVisibleOnes;
-            m_Settings.ExportRange = exportRange;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.ExportRange = exportRange;
 
-            // get selected categories from the category list
-            List<Category> selectedCategories = new List<Category>();
 
             // only for projects
             if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
             {
                 foreach (TreeNode treeNode in tvCategories.Nodes)
                 {
-                    AddSelectedTreeNode(treeNode, selectedCategories);
+                    AddSelectedTreeNode(treeNode, BIM.OpenFOAMExport.Exporter.Instance.settings.SelectedCategories);
                 }
             }
 
             //Set current selected unit
             DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
             m_SelectedDUT = dup;
-            m_Settings.Units = dup;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.Units = dup;
 
             //Set current selected OpenFoam-Environment as active.
             OpenFOAMEnvironment env = (OpenFOAMEnvironment)comboBoxEnv.SelectedItem;
-            m_Settings.OpenFOAMEnvironment = env;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment = env;
 
             //Set current selected incompressible solver
             SolverControlDict appInc = (SolverControlDict)comboBoxSolver.SelectedItem;
-            m_Settings.AppSolverControlDict = appInc;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.AppSolverControlDict = appInc;
 
             //Set current selected transportModel
             TransportModel transport = (TransportModel)comboBoxTransportModel.SelectedItem;
-            m_Settings.TransportModel = transport;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.TransportModel = transport;
 
             //set number of cpu
             if (int.TryParse(textBoxCPU.Text, out int cpu))
             {
-                m_Settings.NumberOfSubdomains = cpu;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.NumberOfSubdomains = cpu;
             }
             else
             {
                 MessageBox.Show("Please type in the number of subdomains (CPU) for the simulation");
-                textBoxCPU.Text = m_Settings.NumberOfSubdomains.ToString();
+                textBoxCPU.Text = BIM.OpenFOAMExport.Exporter.Instance.settings.NumberOfSubdomains.ToString();
                 return false;
             }
 
@@ -1021,7 +1003,7 @@ namespace BIM.OpenFOAMExport
                 comboBox_DUT.SelectedIndex = comboBox_DUT.Items.IndexOf("Meter");
                 btnHelp.Enabled = false;
                 tbOpenFOAM.Enabled = true;
-                m_Settings.OpenFOAM = true;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAM = true;
                 cbExportColor.Enabled = false;
                 cbExportSharedCoordinates.Enabled = false;
                 cbIncludeLinked.Enabled = false;
@@ -1034,7 +1016,7 @@ namespace BIM.OpenFOAMExport
                 cbExportColor.Enabled = true;
                 cbExportSharedCoordinates.Enabled = true;
                 cbIncludeLinked.Enabled = true;
-                m_Settings.OpenFOAM = false;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAM = false;
                 rbBinary.Enabled = true;
             }
         }
@@ -1063,8 +1045,8 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">event args.</param>
         private void ComboBoxSolver_SelectedValueChanged(object sender, EventArgs e)
         {
-            m_Settings.AppSolverControlDict = (SolverControlDict)comboBoxSolver.SelectedItem;
-            m_Settings.Update();
+            BIM.OpenFOAMExport.Exporter.Instance.settings.AppSolverControlDict = (SolverControlDict)comboBoxSolver.SelectedItem;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.Update();
             TreeNodeCollection collection = m_OpenFOAMTreeView.Nodes;
             collection.Clear();
             InitializeDefaultParameterOpenFOAM();
@@ -1092,10 +1074,10 @@ namespace BIM.OpenFOAMExport
 
             if (m_RegUserIP.IsMatch(txtBox))
             {
-                SSH ssh = m_Settings.SSH;
+                SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
                 ssh.User = txtBox.Split('@')[0];
                 ssh.ServerIP = txtBox.Split('@')[1];
-                m_Settings.SSH = ssh;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
             }
             else
             {
@@ -1117,9 +1099,9 @@ namespace BIM.OpenFOAMExport
         {
             //TextBox_ValueChanged();
             string txt = txtBoxAlias.Text;
-            SSH ssh = m_Settings.SSH;
+            SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
             ssh.OfAlias = txt;
-            m_Settings.SSH = ssh;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
@@ -1136,9 +1118,9 @@ namespace BIM.OpenFOAMExport
 
             if (m_RegServerCasePath.IsMatch(txtBox))
             {
-                SSH ssh = m_Settings.SSH;
+                SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
                 ssh.ServerCaseFolder = txtBox;
-                m_Settings.SSH = ssh;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
             }
             else
             {
@@ -1162,9 +1144,9 @@ namespace BIM.OpenFOAMExport
 
             if (m_RegPort.IsMatch(txtBox))
             {
-                SSH ssh = m_Settings.SSH;
+                SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
                 ssh.Port = Convert.ToInt32(txtBox);
-                m_Settings.SSH = ssh;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
             }
             else
             {
@@ -1188,9 +1170,9 @@ namespace BIM.OpenFOAMExport
 
             //if (m_RegServerCasePath.IsMatch(txtBox))
             //{
-                SSH ssh = m_Settings.SSH;
+                SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
                 ssh.SlurmCommand = txtBox/*Convert.ToInt32(txtBox)*/;
-                m_Settings.SSH = ssh;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
             //}
             //else
             //{
@@ -1209,9 +1191,9 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void CbSlurm_CheckedChanged(object sender, EventArgs e)
         {
-            SSH ssh = m_Settings.SSH;
+            SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
             ssh.Slurm = cbSlurm.Checked;
-            m_Settings.SSH = ssh;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
 
             if(cbSlurm.Checked)
             {
@@ -1233,9 +1215,9 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void CbDownload_CheckedChanged(object sender, EventArgs e)
         {
-            SSH ssh = m_Settings.SSH;
+            SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
             ssh.Download = cbDownload.Checked;
-            m_Settings.SSH = ssh;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
@@ -1247,9 +1229,9 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">The event args.</param>
         private void CbDelete_CheckedChanged(object sender, EventArgs e)
         {
-            SSH ssh = m_Settings.SSH;
+            SSH ssh = BIM.OpenFOAMExport.Exporter.Instance.settings.SSH;
             ssh.Delete = cbDelete.Checked;
-            m_Settings.SSH = ssh;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES
         }
@@ -1263,13 +1245,13 @@ namespace BIM.OpenFOAMExport
         {
             if(!m_Clicked)
             {
-                //System.Windows.Media.Media3D.Vector3D location = m_Settings.LocationInMesh;
+                //System.Windows.Media.Media3D.Vector3D location = BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh;
                 TopMost = true;
 
                 //Create sphere
-                XYZ xyz = ConvertLocationInMeshToInternalUnit()/*new XYZ(location.X, location.Y, location.Z)*/;
-                if(m_SphereLocationInMesh == null)
-                    CreateSphereDirectShape(xyz);
+                XYZ pos = new XYZ(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.X, BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.Z);
+                if (m_SphereLocationInMesh == null)
+                    CreateSphereDirectShape(pos);
                 m_Clicked = true;
             }
         }
@@ -1463,16 +1445,13 @@ namespace BIM.OpenFOAMExport
         /// <param name="e">EventArgs.</param>
         private void LocationInMesh_ChangeValue()
         {
-            XYZ previousLocation = ConvertLocationInMeshToInternalUnit();
+            XYZ previousLocation = new XYZ(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.X, BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.Z);
             if (m_LocationReg.IsMatch(txtBoxLocationInMesh.Text) && m_SphereLocationInMesh != null)
             {
                 List<double> entries = OpenFOAMTreeView.GetListFromVector3DString(txtBoxLocationInMesh.Text);
                 
-                //needs to be converted from internal Unit to meters
-                double x = UnitUtils.ConvertFromInternalUnits(entries[0], DisplayUnitType.DUT_METERS);
-                double y = UnitUtils.ConvertFromInternalUnits(entries[1], DisplayUnitType.DUT_METERS);
-                double z = UnitUtils.ConvertFromInternalUnits(entries[2], DisplayUnitType.DUT_METERS);
-                m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
+                BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(entries[0], entries[1], entries[2]);
+                BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh = ConvertFromDisplayUnits(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh);
 
                 //internal length unit = feet
                 XYZ internalXYZ = new XYZ(entries[0], entries[1], entries[2]);
@@ -1481,7 +1460,7 @@ namespace BIM.OpenFOAMExport
             }
             else
             {
-                string previousLoc = previousLocation.ToString();
+                string previousLoc = ConvertToDisplayUnits(previousLocation).ToString();
                 MessageBox.Show("Please insert 3 dimensional vector in this format: x y z -> (x,y,z) ∊ ℝ", OpenFOAMExportResource.MESSAGE_BOX_TITLE);
                 txtBoxLocationInMesh.Text = previousLoc.Replace(", ", " ").Trim('(', ')');
             }
@@ -1493,7 +1472,7 @@ namespace BIM.OpenFOAMExport
         /// <returns>Location as XYZ as internal Unit.</returns>
         private XYZ ConvertLocationInMeshToInternalUnit()
         {
-            System.Windows.Media.Media3D.Vector3D previousVec = m_Settings.LocationInMesh;
+            System.Windows.Media.Media3D.Vector3D previousVec = BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh;
 
             double xPre = UnitUtils.ConvertToInternalUnits(previousVec.X, DisplayUnitType.DUT_METERS);
             double yPre = UnitUtils.ConvertToInternalUnits(previousVec.Y, DisplayUnitType.DUT_METERS);
@@ -1502,7 +1481,27 @@ namespace BIM.OpenFOAMExport
             XYZ previousLocation = new XYZ(xPre, yPre, zPre);
             return previousLocation;
         }
+        private XYZ ConvertFromDisplayUnits(XYZ v)
+        {
+            return new XYZ(UnitUtils.ConvertToInternalUnits(v.X, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertToInternalUnits(v.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertToInternalUnits(v.Z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units));
+        }
+        private System.Windows.Media.Media3D.Vector3D ConvertFromDisplayUnits(System.Windows.Media.Media3D.Vector3D v)
+        {
+            return new System.Windows.Media.Media3D.Vector3D(UnitUtils.ConvertToInternalUnits(v.X, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertToInternalUnits(v.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertToInternalUnits(v.Z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units));
+        }
 
+        private XYZ ConvertToDisplayUnits(XYZ v)
+        {
+            return new XYZ(UnitUtils.ConvertFromInternalUnits(v.X, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertFromInternalUnits(v.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertFromInternalUnits(v.Z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units));
+        }
+        private XYZ toXYZ(System.Windows.Media.Media3D.Vector3D v)
+        {
+            return new XYZ(v.X,v.Y,v.Z);
+        }
+        private System.Windows.Media.Media3D.Vector3D ConvertToDisplayUnits(System.Windows.Media.Media3D.Vector3D v)
+        {
+            return new System.Windows.Media.Media3D.Vector3D(UnitUtils.ConvertFromInternalUnits(v.X, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertFromInternalUnits(v.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertFromInternalUnits(v.Z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units));
+        }
         /// <summary>
         /// Enter event in txtBoxLocationInMesh.
         /// </summary>
@@ -1526,7 +1525,7 @@ namespace BIM.OpenFOAMExport
             var vector = GetLocationOfElementAsVector(m_SphereLocationInMesh);
             if(vector != new System.Windows.Media.Media3D.Vector3D())
             {
-                m_Settings.LocationInMesh = vector;
+                BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh = vector;
             }
             OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(0, true, true, false);
             using (Transaction t = new Transaction(m_ActiveDocument, "Delete sphere"))
@@ -1545,8 +1544,8 @@ namespace BIM.OpenFOAMExport
                 t.Commit();
             }
 
-            XYZ previousLocation = ConvertLocationInMeshToInternalUnit();
-            string previousLoc = previousLocation.ToString();
+
+            string previousLoc = toXYZ(ConvertToDisplayUnits(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh)).ToString();
             txtBoxLocationInMesh.Text = previousLoc.Replace(", ", " ").Trim('(', ')');
             m_SphereLocationInMesh = null;
         }
@@ -1569,9 +1568,9 @@ namespace BIM.OpenFOAMExport
                 foreach (Solid solid in geometry)
                 {
                     XYZ point = solid.GetBoundingBox().Transform.Origin;
-                    location.X = UnitUtils.ConvertFromInternalUnits(point.X, DisplayUnitType.DUT_METERS);
-                    location.Y = UnitUtils.ConvertFromInternalUnits(point.Y, DisplayUnitType.DUT_METERS);
-                    location.Z = UnitUtils.ConvertFromInternalUnits(point.Z, DisplayUnitType.DUT_METERS);
+                    location.X = point.X;
+                    location.Y = point.Y;
+                    location.Z = point.Z;
                 }
             }
             return location;

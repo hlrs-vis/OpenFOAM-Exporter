@@ -65,8 +65,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="settings"></param>
         /// <param name="vecLowerEdgeLeft">3d-point.</param>
         /// <param name="vecUpperEdgeRight">3d-point.</param>
-        public BlockMeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, Vector3D vecLowerEdgeLeft, Vector3D vecUpperEdgeRight)
-            : base("blockMeshDict", "dictionary", version, path, attributes, format, settings)
+        public BlockMeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Vector3D vecLowerEdgeLeft, Vector3D vecUpperEdgeRight)
+            : base("blockMeshDict", "dictionary", version, path, attributes, format)
         {
             m_VecLowerEdgeLeft = vecLowerEdgeLeft;
             m_VecUpperEdgeRight = vecUpperEdgeRight;

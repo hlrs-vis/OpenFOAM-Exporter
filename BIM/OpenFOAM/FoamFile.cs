@@ -216,7 +216,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
     public class FoamFileAsBinary : FOAMFile
     {
         //
-        private readonly BinaryWriter binaryWriter = null;
+       // private readonly BinaryWriter binaryWriter = null;
 
         /// <summary>
         /// Contructor.

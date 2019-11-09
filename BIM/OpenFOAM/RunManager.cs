@@ -229,9 +229,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             m_DefaultEnvPath = "None";
             m_EnvTag = "<" + m_Env + ">"; ;
-            string assemblyDir = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Substring(8);
-            string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExport.dll"), 18).Replace("/", "\\");
-            //string assemblyDirCorrect = assemblyDir.Remove(assemblyDir.IndexOf("OpenFOAMExporter.dll"), 20).Replace("/", "\\");
+
+            string assemblyDirCorrect = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             //m_ConfigPath = "c:/tmp/" + "openfoam_env_config.config";
             m_ConfigPath = assemblyDirCorrect + "openfoam_env_config.config";
             switch (m_Env)
@@ -529,20 +528,14 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private List<string> m_AliasString = new List<string> { "source", "of", "ofx", /*"bash", */"call"};
 
         /// <summary>
-        /// Settings-object contains ssh details.
-        /// </summary>
-        private readonly Settings m_Settings;
-
-        /// <summary>
         /// Constructor needs the casePath of the openFoam-case and environment.
         /// </summary>
         /// <param name="casePath">Path to openFfoam-case.</param>
         /// <param name="env">Enum that specifies the environment.</param>
-        public RunManagerSSH(string casePath, OpenFOAMEnvironment env, Settings settings)
+        public RunManagerSSH(string casePath, OpenFOAMEnvironment env)
             :base(casePath, env)
         {
             m_CommandBat = casePath + @"\RunSSH.bat";
-            m_Settings = settings;
         }
 
         /// <summary>
@@ -551,18 +544,20 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <returns>List with shell commands as string.</returns>
         public override List<string> InitialEnvRunCommands()
         {
+            string CaseDir = m_CasePath.Substring(m_CasePath.LastIndexOf("\\"));
+
             //***********************SSH FOR LINUX IMPLEMENTED*******************/
             List<string> shellCommands = new List<string>
             {
-                "scp -P "+ m_Settings.SSH.Port + " -r " + m_CasePath + " " + m_Settings.SSH.ConnectionString() + ":" + m_Settings.SSH.ServerCaseFolder,
-                "ssh -p " + m_Settings.SSH.Port + " -t " + m_Settings.SSH.ConnectionString(),
-                " \"shopt -s expand_aliases ; source ~/.bash_aliases; eval " + m_Settings.SSH.OfAlias + 
-                "; cd " + m_Settings.SSH.ServerCaseFolder
+                "scp -P "+ BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port + " -r " + m_CasePath + " " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString() + ":" + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder,
+                "ssh -p " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port + " -t " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString() +
+                " \"shopt -s expand_aliases ; source ~/.bash_aliases; eval " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.OfAlias + 
+                "; cd " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder+"/"+CaseDir
             };
 
-            if(m_Settings.SSH.Slurm)
+            if(BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Slurm)
             {
-                shellCommands.Add("; chmod +x ./Allrun; chmod +x ./Allclean; " + m_Settings.SSH.SlurmCommand + " ./Allrun");
+                shellCommands.Add("; chmod +x ./Allrun; chmod +x ./Allclean; ./Allclean; " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.SlurmCommand + " ./Allrun");
             }
 
             return shellCommands;
@@ -576,15 +571,16 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         public override bool RunCommands(List<string> commands)
         {
             commands.Add("\"");
+            string CaseDir = m_CasePath.Substring(m_CasePath.LastIndexOf("\\"));
 
             //Download directory from Server: scp -r user@ssh.example.com:/path/to/remote/source /path/to/local/destination
-            if (m_Settings.SSH.Download)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Download)
             {
-                commands.Add("scp -P " + m_Settings.SSH.Port + " -r " + m_Settings.SSH.ConnectionString()+ ":" + m_Settings.SSH.ServerCaseFolder + "/. " + m_CasePath);
+                commands.Add("scp -P " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port + " -r " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString()+ ":" + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder + "/" + CaseDir + "/* " + m_CasePath);
             }
-            if(m_Settings.SSH.Delete)
+            if(BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Delete)
             {
-                commands.Add("ssh -p " + m_Settings.SSH.Port + " -t " + m_Settings.SSH.ConnectionString() +  " \"rm -rf " + m_Settings.SSH.ServerCaseFolder);
+                commands.Add("ssh -p " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port + " -t " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString() +  " \"rm -rf " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder);
             }
             bool succeed = base.RunCommands(commands);
             return succeed;
@@ -609,7 +605,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 return;
             }
 
-            if (m_Settings.SSH.Slurm)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Slurm)
             {
                 //current state => only Allrun
                 sw.Write(command + ";");

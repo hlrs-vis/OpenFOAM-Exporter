@@ -62,6 +62,11 @@ namespace BIM.OpenFOAMExport
         /// </returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+
+            m_Revit = commandData.Application;
+            BIM.OpenFOAMExport.Exporter.Instance.exportForm = new OpenFOAMExportForm(m_Revit);
+            BIM.OpenFOAMExport.Exporter.Instance.settings.setDocument(m_Revit.ActiveUIDocument.Document);
+
             //for repeating click-events
             var iterator = System.Windows.Forms.Application.OpenForms.GetEnumerator();
             while(iterator.MoveNext())
@@ -72,22 +77,9 @@ namespace BIM.OpenFOAMExport
                     return Result.Succeeded;
                 }
             }
-            m_Revit = commandData.Application;
             Result result = StartOpenFOAMExportForm();
             return result;
 
-            ///pop up the form //////FROM STL-EXPORTER/////////
-            //using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
-            //{
-            //    //    Attempt to make non modal window  NOT INCLUDED IN STL EXPORTER //asynchronous call of showDialog()
-            //    //    var task = Task.Run(async () => await exportForm.ShowDialogAsync());
-            //    if (DialogResult.Cancel == /*task.Result*/exportForm.ShowDialog())
-            //    {
-            //        return Result.Cancelled;
-            //    }
-            //}
-
-            //return result.succeeded;
         }
 
         /// <summary>
@@ -98,19 +90,16 @@ namespace BIM.OpenFOAMExport
             if (m_Revit == null)
                 return Result.Failed;
 
-            using (OpenFOAMExportForm exportForm = new OpenFOAMExportForm(m_Revit))
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            System.Windows.Forms.Application.EnableVisualStyles();
+            //exportForm.TopMost = true;
+
+            //Start modal form with with responsive messageloop.
+            System.Windows.Forms.Application.Run(BIM.OpenFOAMExport.Exporter.Instance.exportForm);
+
+            if (BIM.OpenFOAMExport.Exporter.Instance.exportForm.DialogResult == DialogResult.Cancel)
             {
-                System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-                System.Windows.Forms.Application.EnableVisualStyles();
-                //exportForm.TopMost = true;
-
-                //Start modal form with with responsive messageloop.
-                System.Windows.Forms.Application.Run(exportForm);
-
-                if (exportForm.DialogResult == DialogResult.Cancel)
-                {
-                    return Result.Cancelled;
-                }
+                return Result.Cancelled;
             }
 
             return Result.Succeeded;

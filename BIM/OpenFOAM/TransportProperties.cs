@@ -21,8 +21,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-objects</param>
-        public TransportProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("transportProperties", "dictionary", version, path, attributes, format, settings)
+        public TransportProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format)
+            : base("transportProperties", "dictionary", version, path, attributes, format)
         {
             InitAttributes();
         }
@@ -32,7 +32,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            m_TransportModel = m_Settings.TransportModel;
+            m_TransportModel = BIM.OpenFOAMExport.Exporter.Instance.settings.TransportModel;
             Dictionary<string, object> transportModelParameterSettings = m_DictFile["transportModelParameter"] as Dictionary<string, object>;
 
             //nu-Unit = default

@@ -61,9 +61,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="settings">Settings-object</param>
         /// <param name="stlName">Name of the STL</param>
         /// <param name="faces">Outlet & Inlet as Faces in a Dictionary with name as Key.</param>
-        public SnappyHexMeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string stlName, string stlWallName,
+        public SnappyHexMeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, string stlName, string stlWallName,
             Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> faces)
-            : base("snappyHexMeshDict", "dictionary", version, path, attributes, format, settings)
+            : base("snappyHexMeshDict", "dictionary", version, path, attributes, format)
         {
             m_STLName = stlName;
             m_Faces = faces;
@@ -99,8 +99,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             FoamFile.Attributes.Add("snapControls", m_DictFile["snapControls"]);
             FoamFile.Attributes.Add("addLayersControls", m_DictFile["addLayersControls"]);
             FoamFile.Attributes.Add("meshQualityControls", m_DictFile["meshQualityControls"]);
-            FoamFile.Attributes.Add("debug", m_Settings.Debug);
-            FoamFile.Attributes.Add("mergeTolerance", m_Settings.MergeTolerance);
+            FoamFile.Attributes.Add("debug", BIM.OpenFOAMExport.Exporter.Instance.settings.Debug);
+            FoamFile.Attributes.Add("mergeTolerance", BIM.OpenFOAMExport.Exporter.Instance.settings.MergeTolerance);
         }
 
         /// <summary>
@@ -150,7 +150,11 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             m_CastellatedMeshControls.Add("refinementSurfaces", m_RefinementSurfaces);
             m_CastellatedMeshControls.Add("resolveFeatureAngle", m_SettingsCMC["resolveFeatureAngle"]);
             m_CastellatedMeshControls.Add("refinementRegions", m_SettingsCMC["refinementRegions"]);
-            m_CastellatedMeshControls.Add("locationInMesh", m_LocationInMesh);
+            Vector3D tmp = new Vector3D(0,0,0);
+            tmp.X = UnitUtils.ConvertFromInternalUnits(m_LocationInMesh.X, BIM.OpenFOAMExport.Exporter.Instance.settings.Units);
+            tmp.Y = UnitUtils.ConvertFromInternalUnits(m_LocationInMesh.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units);
+            tmp.Z = UnitUtils.ConvertFromInternalUnits(m_LocationInMesh.Z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units);
+            m_CastellatedMeshControls.Add("locationInMesh", tmp);
             m_CastellatedMeshControls.Add("allowFreeStandingZoneFaces", m_SettingsCMC["allowFreeStandingZoneFaces"]);
         }
 
@@ -187,7 +191,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
                 m_RegionsRefinementCastellated.Add("Terminal_" + name, new Dictionary<string, object>() { { level, vec} });
             }
-            foreach (var entry in m_Settings.MeshResolution)
+            foreach (var entry in BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution)
             {
                 name = AutodeskHelperFunctions.GenerateNameFromElement(entry.Key);
                 //if(name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
@@ -214,7 +218,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private void InitLocationInMesh()
         {
-            m_LocationInMesh = m_Settings.LocationInMesh;
+            m_LocationInMesh = BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh;
         }
     }
 }

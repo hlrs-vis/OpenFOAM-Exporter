@@ -26,8 +26,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-object</param>
         /// <param name="stlName">Name of the stl</param>
-        public SurfaceFeatureExtract(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string stlName)
-            : base("surfaceFeatureExtractDict", "dictionary", version, path, attributes, format, settings)
+        public SurfaceFeatureExtract(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, string stlName)
+            : base("surfaceFeatureExtractDict", "dictionary", version, path, attributes, format)
         {
             //m_SurfaceFeature = new Dictionary<string, object>();
             //m_SurfaceFeature = m_DictFolder;
@@ -43,7 +43,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             FoamFile.Attributes.Add(m_STLName + ".stl", m_DictFile);
 
             //TO-DO: Dont set in this class
-            //m_Settings.Features.Add("{file \"" + m_STLName + ".eMesh\"; level 3;}");
+            //BIM.OpenFOAMExport.Exporter.Instance.settings.Features.Add("{file \"" + m_STLName + ".eMesh\"; level 3;}");
         }
     }
 }

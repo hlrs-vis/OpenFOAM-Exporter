@@ -21,8 +21,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="format">Ascii or Binary</param>
         /// <param name="settings">Settings-object</param>
         /// <param name="_functions">Additional functions as string</param>
-        public ControlDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _functions)
-            : base("controlDict" , "dictionary", version, path, attributes, format, settings)
+        public ControlDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, string _functions)
+            : base("controlDict" , "dictionary", version, path, attributes, format)
         {
             m_Functions = new Dictionary<string, object>();
 
@@ -34,7 +34,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         public override void InitAttributes()
         {
-            FoamFile.Attributes.Add("application", m_Settings.AppSolverControlDict);
+            FoamFile.Attributes.Add("application", BIM.OpenFOAMExport.Exporter.Instance.settings.AppSolverControlDict);
             base.InitAttributes();
             FoamFile.Attributes.Add("functions", m_Functions);
         }

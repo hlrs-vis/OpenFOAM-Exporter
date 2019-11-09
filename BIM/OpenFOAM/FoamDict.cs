@@ -17,10 +17,6 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         ///// </summary>
         //protected string m_Class = string.Empty;
 
-        /// <summary>
-        /// Settings-object
-        /// </summary>
-        protected Settings m_Settings;
 
         ///// <summary>
         ///// ParentDictionary of the simulation dictionary in settings.
@@ -52,11 +48,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-object</param>
-        public FOAMDict(string _name, string _class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
+        public FOAMDict(string _name, string _class, Version version, string path, Dictionary<string, object> attributes, SaveFormat format)
         {
             //m_Name = _name;
             //m_Class = _class;
-            m_Settings = settings;
 
             if (format == SaveFormat.ascii)
             {
@@ -66,7 +61,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             {
                 m_FoamFile = new FoamFileAsBinary(/*m_Name*/_name, version, path, /*m_Class*/_class, attributes, format);
             }
-            Dictionary<string, object> m_ParentDictionary = m_Settings.SimulationDefault[FoamFile.Location.Trim('"')] as Dictionary<string, object>;
+            Dictionary<string, object> m_ParentDictionary = BIM.OpenFOAMExport.Exporter.Instance.settings.SimulationDefault[FoamFile.Location.Trim('"')] as Dictionary<string, object>;
             m_DictFile = m_ParentDictionary[_name] as Dictionary<string, object>;
         }
 

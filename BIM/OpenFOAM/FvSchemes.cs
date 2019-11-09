@@ -15,8 +15,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary</param>
         /// <param name="settings">Settings-object</param>
-        public FvSchemes(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("fvSchemes", "dictionary", version,path,attributes,format, settings)
+        public FvSchemes(Version version, string path, Dictionary<string, object> attributes, SaveFormat format)
+            : base("fvSchemes", "dictionary", version,path,attributes,format)
         {
             InitAttributes();
         }

@@ -27,6 +27,7 @@ using System.Collections;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System;
+using System.Linq;
 using BIM.OpenFOAMExport.OpenFOAM;
 using utils;
 
@@ -1043,6 +1044,7 @@ namespace BIM.OpenFOAMExport
     /// </summary>
     public class Settings
     {
+        private Document document;
         private Dictionary<string, object> m_SimulationDefaultList;
 
         private Dictionary<string, object> m_System;
@@ -1133,9 +1135,9 @@ namespace BIM.OpenFOAMExport
         private int m_ResolveFeatureAngle;
         private int m_NCellsBetweenLevels;
         private double m_MaxLoadUnbalance;
-        private string m_NameEMesh;
+        //private string m_NameEMesh;
         private ArrayList m_Features;
-        private int m_FeatureLevel;
+        //private int m_FeatureLevel;
         private Vector m_WallLevel;
         private Vector m_OutletLevel;
 
@@ -1409,19 +1411,15 @@ namespace BIM.OpenFOAMExport
         /// <param name="writePrecision">WritePrecision for ControlDict.</param>
         /// <param name="timePrecision">TimePrecision for ControlDict.</param>
         /// <param name="numberOfSubdomains">Number of CPU's</param>
-        /// <param name="selectedCategories">SelectedCategories.</param>
-        /// <param name="units">Unit.</param>
         public Settings(SaveFormat saveFormat, ElementsExportRange exportRange, bool openFoam, 
             bool includeLinkedModels, bool exportColor, bool exportSharedCoordinates, bool runTimeModifiable,
             double startTime, double endTime, double deltaT, double writeInterval, double purgeWrite,
-            double writePrecision, double timePrecision, int numberOfSubdomains, List<Category> selectedCategories,
-            DisplayUnitType units)
+            double writePrecision, double timePrecision, int numberOfSubdomains)
         {
             Init(saveFormat, exportRange, openFoam,
                 includeLinkedModels, exportColor, exportSharedCoordinates, runTimeModifiable,
                 startTime, endTime, deltaT, writeInterval, purgeWrite,
-                writePrecision, timePrecision, numberOfSubdomains, selectedCategories,
-                units);
+                writePrecision, timePrecision, numberOfSubdomains);
         }
 
         /// <summary>
@@ -1447,9 +1445,12 @@ namespace BIM.OpenFOAMExport
         private void Init(SaveFormat saveFormat, ElementsExportRange exportRange, bool openFoam,
             bool includeLinkedModels, bool exportColor, bool exportSharedCoordinates, bool runTimeModifiable,
             double startTime, double endTime, double deltaT, double writeInterval, double purgeWrite,
-            double writePrecision, double timePrecision, int numberOfSubdomains, List<Category> selectedCategories,
-            DisplayUnitType units)
+            double writePrecision, double timePrecision, int numberOfSubdomains)
         {
+
+            // get selected categories from the category list
+            m_SelectedCategories = new List<Category>();
+
             m_Outlets = new Dictionary<string, object>();
             m_Inlets = new Dictionary<string, object>();
             m_MeshResolutionObjects = new Dictionary<Element, int>();
@@ -1524,8 +1525,6 @@ namespace BIM.OpenFOAMExport
             m_IncludeLinkedModels = includeLinkedModels;
             m_exportColor = exportColor;
             m_exportSharedCoordinates = exportSharedCoordinates;
-            m_SelectedCategories = selectedCategories;
-            m_Units = units;
         }
 
         /// <summary>
@@ -1563,19 +1562,21 @@ namespace BIM.OpenFOAMExport
             m_MaxLoadUnbalance = 0.10;
             m_NCellsBetweenLevels = 3;
             m_Features = new ArrayList();
-            m_FeatureLevel = 3;
+            //m_FeatureLevel = 3;
             m_WallLevel = new Vector(3, 3);
             m_OutletLevel = new Vector(4, 4);
             m_InletLevel = new Vector(4, 4);
             m_ResolveFeatureAngle = 180;
             m_RefinementRegions = new Dictionary<string, object>();
             m_AllowFreeStandingZoneFaces = true;
-            m_LocationInMesh = new Vector3D(20, 0, 5);
+            m_LocationInMesh = new Vector3D(65.6, 0, 16.4);
+
+            
 
             //SnappyHexMesh-SnapControls
             m_NSmoothPatch = 5;
             m_Tolerance = 5;
-            m_NSolverIter = 200;
+            m_NSolverIter = 100;
             m_NRelaxIterSnap = 8;
             m_NFeatureSnapIter = 10;
             m_ImplicitFeatureSnap = true;
@@ -1626,6 +1627,35 @@ namespace BIM.OpenFOAMExport
             m_TempWall = kelvin + 25;
             m_TempOutlet = kelvin + 25;
             m_TempInlet = kelvin + 29;
+        }
+        public void setDocument(Document d)
+        {
+            if(document != d)
+            {
+                document = d;
+                // try to get OpenFoamObject and initialize from there
+
+                ElementClassFilter filter = new ElementClassFilter(typeof(FamilyInstance));
+                // Apply the filter to the elements in the active document
+                FilteredElementCollector collector = new FilteredElementCollector(document);
+                collector.WherePasses(filter);
+                // Use Linq query to find family instances whose name is 60" x 30" Student
+                var query = from element in collector
+                            where element.Name == "OpenFOAM"
+                            select element;
+                // Cast found elements to family instances, 
+                // this cast to FamilyInstance is safe because ElementClassFilter for FamilyInstance was used
+                List<FamilyInstance> familyInstances = query.Cast<FamilyInstance>().ToList<FamilyInstance>();
+                if (familyInstances.Count > 0)
+                {
+                    Transform pos = familyInstances[0].GetTransform();
+                    m_LocationInMesh.X = pos.Origin.X;
+                    m_LocationInMesh.Y = pos.Origin.Y;
+                    m_LocationInMesh.Z = pos.Origin.Z;
+                    double height = familyInstances[0].GetParameters("height")[0].AsDouble();
+                    m_LocationInMesh.Z += height;
+                }
+            }
         }
 
         /// <summary>
@@ -1695,7 +1725,7 @@ namespace BIM.OpenFOAMExport
         private void InitControlDict(bool runTimeModifiable, double startTime, double endTime, double deltaT, double writeInterval, double purgeWrite, double writePrecision, double timePrecision)
         {
             StartFrom startFrom = StartFrom.latestTime;
-            SolverControlDict appDictSolver = SolverControlDict.buoyantBoussinesqSimpleFoam;
+            SolverControlDict appDictSolver = SolverControlDict.simpleFoam;
             StopAt stopAt = StopAt.endTime;
             WriteControl writeControl = WriteControl.timeStep;
             WriteFormat writeFormat = WriteFormat.ascii;
@@ -1717,6 +1747,7 @@ namespace BIM.OpenFOAMExport
             m_TimeFormat = timeFormat;
             m_TimePrecision = timePrecision;
             m_RunTimeModifiable = runTimeModifiable;
+
         }
 
         /// <summary>
@@ -2391,7 +2422,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="model">Enum LESModel.</param>
         private void AddLESModelParameterToList(List<InitialParameter> initialParameters, LESModel model)
         {
-            switch(model)
+            /*switch(model)
             {
                 //not implemented les models
                 //case LESModel.DeardorffDiffStress:
@@ -2405,7 +2436,7 @@ namespace BIM.OpenFOAMExport
                 //case LESModel.SpalartAllmarasIDDES:
                 //case LESModel.WALE:
                 //    break;
-            }
+            }*/
         }
 
         /// <summary>

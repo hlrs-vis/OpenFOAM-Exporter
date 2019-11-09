@@ -169,6 +169,8 @@ namespace BIM.OpenFOAMExport
             // cbOpenFOAM
             // 
             resources.ApplyResources(this.cbOpenFOAM, "cbOpenFOAM");
+            this.cbOpenFOAM.Checked = true;
+            this.cbOpenFOAM.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbOpenFOAM.Name = "cbOpenFOAM";
             this.cbOpenFOAM.UseVisualStyleBackColor = true;
             this.cbOpenFOAM.CheckedChanged += new System.EventHandler(this.CbOpenFOAM_CheckedChanged);

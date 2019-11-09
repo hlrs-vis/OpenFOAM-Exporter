@@ -8,6 +8,7 @@ BIM/AssemblyInfo.cs
 BIM/DataGenerator.cs
 BIM/OpenFoamDialogManager.cs
 BIM/OpenFoamExportCommand.cs
+BIM/OpenFoamSimulateCommand.cs
 BIM/OpenFoamExporterUI.cs
 BIM/OpenFOAMExportResource.Designer.cs
 BIM/OpenFOAMExportResource.resx
@@ -75,7 +76,7 @@ set_property(SOURCE BIM/Resources/wind_64.png PROPERTY VS_TOOL_OVERRIDE "Resourc
 
 # Set the C# language version (defaults to 3.0).
 set(CMAKE_CSharp_FLAGS "/langversion:latest")
-set_target_properties(OpenFOAMExporter PROPERTIES FOLDER "${MAIN_FOLDER}/Plugins/RevitPlugins")
+set_target_properties(OpenFOAMExporter PROPERTIES FOLDER "Plugins/RevitPlugins")
 
 SET(BINLIB_SUFFIX "lib")
 SET(MYPATH_POSTFIX )

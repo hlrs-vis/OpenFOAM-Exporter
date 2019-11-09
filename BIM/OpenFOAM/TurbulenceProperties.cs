@@ -15,8 +15,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary.</param>
         /// <param name="settings">Settings-objects</param>
-        public TurbulenceProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("turbulenceProperties", "dictionary", version, path, attributes, format, settings)
+        public TurbulenceProperties(Version version, string path, Dictionary<string, object> attributes, SaveFormat format)
+            : base("turbulenceProperties", "dictionary", version, path, attributes, format)
         {
             InitAttributes();
         }

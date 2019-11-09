@@ -83,9 +83,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
         public FOAMParameter(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _name, string _class, string _wallName,
             List<string> _InletNames, List<string> _OutletNames)
-            : base(_name, _class, version, path, attributes, format, settings)
+            : base(_name, _class, version, path, attributes, format)
         {
-            //m_Settings = settings;
             m_WallName = _wallName;
             m_InletNames = _InletNames;
             m_OutletNames = _OutletNames;

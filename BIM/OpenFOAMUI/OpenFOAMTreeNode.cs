@@ -15,10 +15,6 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         /// </summary>
         protected List<string> m_KeyPath;
 
-        /// <summary>
-        /// Settings-Reference.
-        /// </summary>
-        protected Settings m_Settings;
 
         /// <summary>
         /// Stored Value.
@@ -96,7 +92,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         public OpenFOAMTreeNode(string text, ref Settings _settings, List<string> _keyPath, T _value)
             : base(text)
         {
-            m_Settings = _settings;
+            BIM.OpenFOAMExport.Exporter.Instance.settings = _settings;
             m_KeyPath = new List<string>();
             foreach (string s in _keyPath)
             {
@@ -112,7 +108,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
         ///// </summary>
         //public virtual void UpdateSettingsEntry()
         //{
-        //    Dictionary<string, object> att = m_Settings.SimulationDefault;
+        //    Dictionary<string, object> att = BIM.OpenFOAMExport.Exporter.Instance.settings.SimulationDefault;
         //    foreach (string s in m_KeyPath)
         //    {
         //        if (att[s] is Dictionary<string, object>)
@@ -146,7 +142,7 @@ namespace BIM.OpenFOAMExport.OpenFOAMUI
             set
             {
                 m_Value = value;
-                m_Settings.UpdateSettingsEntry(m_KeyPath, m_Value);
+                BIM.OpenFOAMExport.Exporter.Instance.settings.UpdateSettingsEntry(m_KeyPath, m_Value);
             }
         }
     }

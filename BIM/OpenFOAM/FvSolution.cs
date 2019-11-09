@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Autodesk.Revit.DB;
 
 namespace BIM.OpenFOAMExport.OpenFOAM
 {
@@ -15,19 +16,32 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="attributes">Additional attributes.</param>
         /// <param name="format">Ascii or Binary</param>
         /// <param name="settings">Settings-object</param>
-        public FvSolution(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings)
-            : base("fvSolution", "dictionary", version, path, attributes, format, settings)
+        public FvSolution(Version version, string path, Dictionary<string, object> attributes, SaveFormat format)
+            : base("fvSolution", "dictionary", version, path, attributes, format)
         {
             InitAttributes();
         }
 
+        private System.Windows.Media.Media3D.Vector3D ConvertToDisplayUnits(System.Windows.Media.Media3D.Vector3D v)
+        {
+            return new System.Windows.Media.Media3D.Vector3D(UnitUtils.ConvertFromInternalUnits(v.X, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertFromInternalUnits(v.Y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units), UnitUtils.ConvertFromInternalUnits(v.Z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units));
+        }
         /// <summary>
         /// Initialize attributes of this file.
         /// </summary>
         public override void InitAttributes()
         {
             Dictionary<string, object> m_SIMPLE = m_DictFile["SIMPLE"] as Dictionary<string, object>;
-            m_SIMPLE.Add("pRefPoint", m_Settings.LocationInMesh/*"(" + m_Settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat).Replace(';', ' ') + ")"*/);
+
+            object val=null;
+            if(m_SIMPLE.TryGetValue("pRefPoint",out val)==true)
+            {
+                m_SIMPLE["pRefPoint"] = ConvertToDisplayUnits(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh);
+            }
+            else
+            {
+                m_SIMPLE.Add("pRefPoint", ConvertToDisplayUnits(BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh)/*"(" + BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh.ToString(System.Globalization.CultureInfo.GetCultureInfo("en-US").NumberFormat).Replace(';', ' ') + ")"*/);
+            }
             base.InitAttributes();
         }
     }

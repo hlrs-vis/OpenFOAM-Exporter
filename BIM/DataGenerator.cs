@@ -89,10 +89,6 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private SortedDictionary<string, Category> m_Categories;
 
-        /// <summary>
-        /// Settings of the whole project
-        /// </summary>
-        private Settings m_Settings;
 
         /// <summary>
         /// Cancel GUI
@@ -156,19 +152,19 @@ namespace BIM.OpenFOAMExport
         /// <param name="casePath">Path to openFOAM-Case.</param>
         private GeneratorStatus InitRunManager(string casePath)
         {
-            switch(m_Settings.OpenFOAMEnvironment)
+            switch(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment)
             {
                 case OpenFOAMEnvironment.blueCFD:
-                    m_RunManager = new RunManagerBlueCFD(casePath, m_Settings.OpenFOAMEnvironment);
+                    m_RunManager = new RunManagerBlueCFD(casePath, BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment);
                     break;
                 //case OpenFOAMEnvironment.docker:
-                //    m_RunManager = new RunManagerDocker(casePath, m_Settings.OpenFOAMEnvironment);
+                //    m_RunManager = new RunManagerDocker(casePath, BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment);
                 //    break;
                 case OpenFOAMEnvironment.ssh:
-                    m_RunManager = new RunManagerSSH(casePath, m_Settings.OpenFOAMEnvironment, m_Settings);
+                    m_RunManager = new RunManagerSSH(casePath, BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment);
                     break;
                 case OpenFOAMEnvironment.wsl:
-                    m_RunManager = new RunManagerWSL(casePath, m_Settings.OpenFOAMEnvironment);
+                    m_RunManager = new RunManagerWSL(casePath, BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment);
                     break;
             }
             return m_RunManager.Status;
@@ -211,14 +207,23 @@ namespace BIM.OpenFOAMExport
                 return status;
             }
 
-
+            String foamFile = path + "\\" + m_STLName + ".foam";
             //.foam-File
-            File.Create(path + "\\" + m_STLName + ".foam");
+            if (File.Exists(foamFile))
+            {
+                File.Delete(foamFile);
+            }
+            File.Create(foamFile);
 
             //**********************NEED TO ADJUST THIS************************//
             //move .stl from given location into triSurface folder TO-DO: Not Moving => generate in target directory
-            File.Move(m_Writer.FileName, triSurface + "\\" + m_STLName + ".stl");
-            File.Delete(m_Writer.FileName);
+            String correctFile = triSurface + "\\" + m_STLName + ".stl";
+            if(File.Exists(correctFile))
+            {
+                File.Delete(correctFile);
+            }
+            File.Move(m_Writer.FileName, correctFile);
+            //File.Delete(m_Writer.FileName);
 
             //generate files
             OpenFOAM.Version version = new OpenFOAM.Version();
@@ -237,7 +242,7 @@ namespace BIM.OpenFOAMExport
             List<string> commands = new List<string>();
 
             //commands
-            if (m_Settings.OpenFOAMEnvironment == OpenFOAMEnvironment.ssh)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMEnvironment == OpenFOAMEnvironment.ssh)
             {
                 SetupLinux(path, commands);
             }
@@ -247,14 +252,14 @@ namespace BIM.OpenFOAMExport
                 commands.Add("surfaceFeatureExtract");
                 commands.Add("snappyHexMesh");
                 commands.Add("rm -r processor*");
-                commands.Add(m_Settings.AppSolverControlDict.ToString());
+                commands.Add(BIM.OpenFOAMExport.Exporter.Instance.settings.AppSolverControlDict.ToString());
                 commands.Add("rm -r processor*");
                 
             }
 
             //List<string> commands = new List<string> { "blockMesh", "surfaceFeatureExtract", "snappyHexMesh", "rm -r processor*" };
             ////, "simpleFoam", "rm -r processor*"};
-            //commands.Add(m_Settings.AppSolverControlDict.ToString());
+            //commands.Add(BIM.OpenFOAMExport.Exporter.Instance.settings.AppSolverControlDict.ToString());
             //commands.Add("rm -r processor*");
             //commands.Add("rm - rf constant/extendedFeatureEdgeMesh > / dev / null 2 > &1");
             //commands.Add("rm -f constant/triSurface/buildings.eMesh > /dev/null 2>&1");
@@ -276,7 +281,7 @@ namespace BIM.OpenFOAMExport
         private void SetupLinux(string path, List<string> commands)
         {
             string allrun;
-            if (m_Settings.NumberOfSubdomains != 1)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.NumberOfSubdomains != 1)
             {
                 allrun = "#!/bin/sh" +
                 "\ncd ${0%/*} || exit 1    # run from this directory" +
@@ -416,7 +421,7 @@ namespace BIM.OpenFOAMExport
             string fvSchemes = Path.Combine(system, "fvSchemes.");
             string fvSolution = Path.Combine(system, "fvSolution.");
             string meshDict = "";
-            switch (m_Settings.Mesh)
+            switch (BIM.OpenFOAMExport.Exporter.Instance.settings.Mesh)
             {
                 case MeshType.Snappy:
                     {
@@ -431,13 +436,13 @@ namespace BIM.OpenFOAMExport
             }
 
             //generate Files
-            BlockMeshDict blockMeshDictionary = new BlockMeshDict(version, blockMeshDict, null, SaveFormat.ascii, m_Settings, m_LowerEdgeVector, m_UpperEdgeVector);
-            ControlDict controlDictionary = new ControlDict(version, controlDict, null, SaveFormat.ascii, m_Settings, null);
-            SurfaceFeatureExtract surfaceFeatureExtractDictionary = new SurfaceFeatureExtract(version, surfaceFeatureExtractDict, null, SaveFormat.ascii, m_Settings, m_STLName);
-            DecomposeParDict decomposeParDictionary = new DecomposeParDict(version, decomposeParDict, null, SaveFormat.ascii, m_Settings);
-            FvSchemes fvSchemesDictionary = new FvSchemes(version, fvSchemes, null, SaveFormat.ascii, m_Settings);
-            FvSolution fvSolutionDictionary = new FvSolution(version, fvSolution, null, SaveFormat.ascii, m_Settings);
-            SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_Settings, m_STLName, m_STLWallName, m_FacesInletOutlet);
+            BlockMeshDict blockMeshDictionary = new BlockMeshDict(version, blockMeshDict, null, SaveFormat.ascii, m_LowerEdgeVector, m_UpperEdgeVector);
+            ControlDict controlDictionary = new ControlDict(version, controlDict, null, SaveFormat.ascii, null);
+            SurfaceFeatureExtract surfaceFeatureExtractDictionary = new SurfaceFeatureExtract(version, surfaceFeatureExtractDict, null, SaveFormat.ascii, m_STLName);
+            DecomposeParDict decomposeParDictionary = new DecomposeParDict(version, decomposeParDict, null, SaveFormat.ascii);
+            FvSchemes fvSchemesDictionary = new FvSchemes(version, fvSchemes, null, SaveFormat.ascii);
+            FvSolution fvSolutionDictionary = new FvSolution(version, fvSolution, null, SaveFormat.ascii);
+            SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_STLName, m_STLWallName, m_FacesInletOutlet);
 
             //runmanager have to know how much cpu's should be used
             m_RunManager.DecomposeParDict = decomposeParDictionary;
@@ -461,7 +466,7 @@ namespace BIM.OpenFOAMExport
             List<string> paramList = new List<string>();
 
             //Files in nullfolder
-            foreach (var param in m_Settings.SimulationDefault["0"] as Dictionary<string, object>)
+            foreach (var param in BIM.OpenFOAMExport.Exporter.Instance.settings.SimulationDefault["0"] as Dictionary<string, object>)
             {
                 paramList.Add(Path.Combine(nullFolder, param.Key + "."));
             }
@@ -500,39 +505,39 @@ namespace BIM.OpenFOAMExport
             {
                 if(nameParam.Contains("U."))
                 {
-                    parameter = new U(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new U(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("p."))
                 {
-                    parameter = new P("p", version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new P("p", version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("epsilon."))
                 {
-                    parameter = new Epsilon(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new Epsilon(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("nut."))
                 {
-                    parameter = new Nut(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new Nut(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("k."))
                 {
-                    parameter = new K(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new K(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("alphat"))
                 {
-                    parameter = new Alphat(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new Alphat(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("p_rgh"))
                 {
-                    parameter = new P_rgh(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new P_rgh(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else if(nameParam.Contains("T"))
                 {
-                    parameter = new T(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new T(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 else
                 {
-                    parameter = new U(version, nameParam, null, SaveFormat.ascii, m_Settings, "wall", inletNames, outletNames);
+                    parameter = new U(version, nameParam, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings, "wall", inletNames, outletNames);
                 }
                 m_OpenFOAMDictionaries.Add(parameter);
             }
@@ -549,9 +554,9 @@ namespace BIM.OpenFOAMExport
             string g = Path.Combine(constantFolder, "g.");
             string turbulenceProperties = Path.Combine(constantFolder, "turbulenceProperties.");
 
-            TransportProperties transportPropertiesDictionary = new TransportProperties(version, transportProperties, null, SaveFormat.ascii, m_Settings);
-            G gDictionary = new G(version, g, null, SaveFormat.ascii, m_Settings);
-            TurbulenceProperties turbulencePropertiesDictionary = new TurbulenceProperties(version, turbulenceProperties, null, SaveFormat.ascii, m_Settings);
+            TransportProperties transportPropertiesDictionary = new TransportProperties(version, transportProperties, null, SaveFormat.ascii);
+            G gDictionary = new G(version, g, null, SaveFormat.ascii, BIM.OpenFOAMExport.Exporter.Instance.settings);
+            TurbulenceProperties turbulencePropertiesDictionary = new TurbulenceProperties(version, turbulenceProperties, null, SaveFormat.ascii);
 
             m_OpenFOAMDictionaries.Add(transportPropertiesDictionary);
             m_OpenFOAMDictionaries.Add(gDictionary);
@@ -620,9 +625,8 @@ namespace BIM.OpenFOAMExport
         /// <param name="fileName">The name of the STL file to be saved.</param>
         /// <param name="settings">Settings for save operation.</param>
         /// <returns>Successful or failed.</returns>      
-        public GeneratorStatus SaveSTLFile(string fileName, Settings settings)
+        public GeneratorStatus SaveSTLFile(string fileName)
         {
-            m_Settings = settings;
             ///***********************************************Easier to Debug without try and catch********************************************************************///
             ///*********************************************************************************************************************************///
             ///********************************************************************************************************************************///
@@ -633,19 +637,19 @@ namespace BIM.OpenFOAMExport
                 m_StlExportCancel.Show();
 
                 // save data in certain STL file
-                if (SaveFormat.binary == settings.SaveFormat)
+                if (SaveFormat.binary == BIM.OpenFOAMExport.Exporter.Instance.settings.SaveFormat)
                 {
-                    m_Writer = new SaveDataAsBinary(fileName, settings.SaveFormat);
+                    m_Writer = new SaveDataAsBinary(fileName, BIM.OpenFOAMExport.Exporter.Instance.settings.SaveFormat);
                 }
                 else
                 {
-                    m_Writer = new SaveDataAsAscII(fileName, settings.SaveFormat);
+                    m_Writer = new SaveDataAsAscII(fileName, BIM.OpenFOAMExport.Exporter.Instance.settings.SaveFormat);
                 }
 
                 //TO-DO: create direct into constant/triSurface if simulation is selected.
                 m_Writer.CreateFile();
 
-                GeneratorStatus status = ScanElement(settings.ExportRange);
+                GeneratorStatus status = ScanElement(BIM.OpenFOAMExport.Exporter.Instance.settings.ExportRange);
 
                 Application.DoEvents();
 
@@ -670,7 +674,7 @@ namespace BIM.OpenFOAMExport
                     return GeneratorStatus.FAILURE;
                 }
 
-                if (SaveFormat.binary == settings.SaveFormat)
+                if (SaveFormat.binary == BIM.OpenFOAMExport.Exporter.Instance.settings.SaveFormat)
                 {
                     // add triangular number to STL file
                     m_Writer.TriangularNumber = m_TriangularNumber;
@@ -687,9 +691,9 @@ namespace BIM.OpenFOAMExport
                 m_StlExportCancel.Close();
                 return GeneratorStatus.FAILURE;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                MessageBox.Show(OpenFOAMExportResource.ERR_EXCEPTION + "\n" + e.Message, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                 m_StlExportCancel.Close();
@@ -798,13 +802,13 @@ namespace BIM.OpenFOAMExport
             documents.Add(m_ActiveDocument);
 
             // figure out if we need to get linked models
-            if (m_Settings.IncludeLinkedModels)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.IncludeLinkedModels)
             {
                 List<Document> linkedDocList = GetLinkedModels();
                 documents.AddRange(linkedDocList);
             }
 
-            if (m_Settings.OpenFOAM)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAM)
             {
                 stlName = "wallSTL";
                 m_STLWallName = stlName;
@@ -834,7 +838,7 @@ namespace BIM.OpenFOAMExport
                     collector = new FilteredElementCollector(doc);
                 }
 
-                if(m_Settings.OpenFOAM)
+                if(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAM)
                 {
                     //get the category list seperated via FamilyInstance in the current document
                     m_DuctTerminalsInDoc = GetDefaultCategoryListOfClass<FamilyInstance>(doc, BuiltInCategory.OST_DuctTerminal);
@@ -859,7 +863,7 @@ namespace BIM.OpenFOAMExport
 
                     // check if element's category is in the list, if it is continue.
                     // if there are no selected categories, take anything.
-                    if (m_Settings.SelectedCategories.Count > 0)
+                    if (BIM.OpenFOAMExport.Exporter.Instance.settings.SelectedCategories.Count > 0)
                     {
                         if (currentElement.Category == null)
                         {
@@ -867,7 +871,7 @@ namespace BIM.OpenFOAMExport
                         }
                         else
                         {
-                            IEnumerable<Category> cats = from cat in m_Settings.SelectedCategories
+                            IEnumerable<Category> cats = from cat in BIM.OpenFOAMExport.Exporter.Instance.settings.SelectedCategories
                                                          where cat.Id == currentElement.Category.Id
                                                          select cat;
 
@@ -887,13 +891,13 @@ namespace BIM.OpenFOAMExport
                         continue;
                     }
 
-                    if(m_Settings.OpenFOAM)
+                    if(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAM)
                     {
                         if(IsGeometryInList(m_DuctTerminalsInDoc, geometry))
                         {
                             continue;
                         }
-                        else if(IsGeometryInList(m_Settings.MeshResolution.Keys.ToList(), geometry))
+                        else if(IsGeometryInList(BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Keys.ToList(), geometry))
                         {
                             continue;
                         }
@@ -905,12 +909,12 @@ namespace BIM.OpenFOAMExport
                 terminalListOfAllDocuments.Add(doc, m_DuctTerminalsInDoc);
             }
 
-            if (m_Settings.OpenFOAM && terminalListOfAllDocuments.Count != 0)
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAM && terminalListOfAllDocuments.Count != 0)
             {
                 if(terminalListOfAllDocuments.Count != 0)
                 {
                     WriteAirTerminalsToSTL(terminalListOfAllDocuments, stlName);
-                    if (m_Settings.MeshResolution.Count != 0)
+                    if (BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Count != 0)
                     {
                         WriteMeshResolutionObjectsToSTL(stlName);
                     }
@@ -1013,7 +1017,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="stlName">String that represents the name of the STL.</param>
         private void WriteMeshResolutionObjectsToSTL(string stlName)
         {
-            foreach (var element in m_Settings.MeshResolution.Keys)
+            foreach (var element in BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Keys)
             {
                 string name = AutodeskHelperFunctions.GenerateNameFromElement(element);
                 //m_Writer.WriteSolidName(name, true);
@@ -1369,7 +1373,7 @@ namespace BIM.OpenFOAMExport
                         {
                             point = transform.OfPoint(point);
                         }
-                        if (m_Settings.ExportSharedCoordinates)
+                        if (BIM.OpenFOAMExport.Exporter.Instance.settings.ExportSharedCoordinates)
                         {
                             ProjectPosition ps = document.ActiveProjectLocation.GetProjectPosition(point);
                             x = ps.EastWest;
@@ -1382,11 +1386,11 @@ namespace BIM.OpenFOAMExport
                             y = point.Y;
                             z = point.Z;
                         }
-                        if (m_Settings.Units != DisplayUnitType.DUT_UNDEFINED)
+                        if (BIM.OpenFOAMExport.Exporter.Instance.settings.Units != DisplayUnitType.DUT_UNDEFINED)
                         {
-                            xyz[3 * n] = UnitUtils.ConvertFromInternalUnits(x, m_Settings.Units);
-                            xyz[3 * n + 1] = UnitUtils.ConvertFromInternalUnits(y, m_Settings.Units);
-                            xyz[3 * n + 2] = UnitUtils.ConvertFromInternalUnits(z, m_Settings.Units);
+                            xyz[3 * n] = UnitUtils.ConvertFromInternalUnits(x, BIM.OpenFOAMExport.Exporter.Instance.settings.Units);
+                            xyz[3 * n + 1] = UnitUtils.ConvertFromInternalUnits(y, BIM.OpenFOAMExport.Exporter.Instance.settings.Units);
+                            xyz[3 * n + 2] = UnitUtils.ConvertFromInternalUnits(z, BIM.OpenFOAMExport.Exporter.Instance.settings.Units);
                         }
                         else
                         {
@@ -1410,7 +1414,7 @@ namespace BIM.OpenFOAMExport
                     continue;
                 }
 
-                if (m_Writer is SaveDataAsBinary && m_Settings.ExportColor)
+                if (m_Writer is SaveDataAsBinary && BIM.OpenFOAMExport.Exporter.Instance.settings.ExportColor)
                 {
                     Material material = document.GetElement(face.MaterialElementId) as Material;
                     if (material != null)
