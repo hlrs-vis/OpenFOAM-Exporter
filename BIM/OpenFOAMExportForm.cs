@@ -464,38 +464,164 @@ namespace BIM.OpenFOAMExport
         private bool SearchForObjects()
         {
             bool succeed = false;
+
+            //SSH
+            int port = 22;
+            bool dowload = true;
+            bool delete = false;
+            bool slurm = true;
+            string userIP = "hpcmdjur@visent.hlrs.de";
+            string alias = "of1812";
+            string caseFolder = "/mnt/raid/home/hpcmdjur/OpenFOAMRemote/";
+            string slurmCommand = "eval salloc -n " + 4;
+
+
             FilteredElementCollector collector = new FilteredElementCollector(m_Revit.ActiveUIDocument.Document);
             collector.WhereElementIsNotElementType();
             FilteredElementIterator iterator = collector.GetElementIterator();
-            while (iterator.MoveNext())
+            try
             {
-                Application.DoEvents();
-                //Element element = iterator.Current;
-                FamilyInstance instance = iterator.Current as FamilyInstance;
-                if (instance == null)
-                    continue;
-
-                foreach (Parameter param in instance.Parameters)
+                while (iterator.MoveNext())
                 {
-                    try
+                    Application.DoEvents();
+                    //Element element = iterator.Current;
+                    FamilyInstance instance = iterator.Current as FamilyInstance;
+                    if (instance == null)
+                        continue;
+
+                    if(instance.Name.Equals("OpenFOAM"))
                     {
-                        int meshResolution = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
-                            () => param.Definition.Name.Equals("Mesh Resolution"), ConvertParameterToDisplayUnitType);
-                        if (meshResolution != 0)
+                        var transform = instance.GetTransform();
+                        LocationPoint localPoint = instance.Location as LocationPoint;
+                        double x = UnitUtils.ConvertFromInternalUnits(localPoint.Point.X, DisplayUnitType.DUT_METERS);
+                        double y = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Y, DisplayUnitType.DUT_METERS);
+                        double z = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Z, DisplayUnitType.DUT_METERS);
+                        m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
+                    }
+
+                    foreach (Parameter param in instance.Parameters)
+                    {
+                        //try
+                        //{
+
+                        if(param.Definition.Name.Equals("Mesh Resolution"))
                         {
-                            m_Settings.MeshResolution.Add(iterator.Current, meshResolution);
-                            succeed = true;
+                            m_Settings.MeshResolution.Add(iterator.Current, param.AsInteger());
                         }
+
+                        if(instance.Name.Equals("OpenFOAM"))
+                        {
+                            //numberOfTasks = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
+                            //    () => param.Definition.Name.Equals(""), ConvertParameterToDisplayUnitType);
+                            //if (numberOfTasks != 0)
+                            //{
+                            //    continue;
+                            //}
+
+                            switch(param.Definition.Name)
+                            {
+                                case "numberOfSubdomains":
+                                    {
+                                        m_Settings.NumberOfSubdomains = param.AsInteger();
+                                        break;
+                                    }
+
+                                case "environment":
+                                    {
+                                        var e = m_Settings.OpenFOAMEnvironment;
+                                        Enum.TryParse(param.AsString(), out e);
+                                        m_Settings.OpenFOAMEnvironment = e;
+                                        break;
+                                    }
+
+                                case "solver":
+                                    {
+                                        var e = m_Settings.AppSolverControlDict;
+                                        Enum.TryParse(param.AsString(), out e);
+                                        m_Settings.AppSolverControlDict = e;
+                                        break;
+                                    }
+
+                                case "userIP":
+                                    {
+                                        userIP = param.AsString();
+                                        break;
+                                    }
+                                    
+                                case "alias":
+                                    {
+                                        alias = param.AsString();
+                                        break;
+                                    }
+                                    
+                                case "caseFolder":
+                                    {
+                                        caseFolder = param.AsString();
+                                        break;
+                                    }
+                                    
+                                case "port":
+                                    {
+                                        port = param.AsInteger();
+                                        break;
+                                    }
+                                    
+                                case "slurmcommand":
+                                    {
+                                        slurmCommand = param.AsString();
+                                        break;
+                                    }
+                                case "download":
+                                    {
+                                        dowload = Convert.ToBoolean(param.AsString());
+                                        break;
+                                    }
+                                case "delete":
+                                    {
+                                        delete = Convert.ToBoolean(param.AsString());
+                                        break;
+                                    }
+                                case "slurm":
+                                    {
+                                        slurm = Convert.ToBoolean(param.AsString());
+                                        break;
+                                    }
+                            }
+                        }
+                        //}
+                        //catch (Exception)
+                        //{
+                            //MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
+                            //    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            //    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            //return false;
+                        //}
                     }
-                    catch (Exception)
-                    {
-                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
-                            OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        return false;
-                    }
+
+                    SSH ssh = m_Settings.SSH;
+                    ssh.Port = port;
+                    ssh.OfAlias = alias;
+                    ssh.ServerCaseFolder = caseFolder;
+                    ssh.Slurm = slurm;
+                    ssh.SlurmCommand = slurmCommand;
+                    ssh.Download = dowload;
+                    ssh.Delete = delete;
+
+                    var split = userIP.Split('@');
+                    ssh.User = split[0];
+                    ssh.ServerIP = split[1];
+                    m_Settings.SSH = ssh;
+
                 }
             }
+            catch(Exception)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
+                    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return false;
+            }
+
             return succeed;
         }
 
