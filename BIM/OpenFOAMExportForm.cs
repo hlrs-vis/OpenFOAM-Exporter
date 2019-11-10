@@ -317,6 +317,8 @@ namespace BIM.OpenFOAMExport
                 return;
             }
             m_Settings.InitOpenFOAMFolderDictionaries();
+            if(m_Direct)
+                m_Settings.Update();
         }
 
         /// <summary>
@@ -345,8 +347,8 @@ namespace BIM.OpenFOAMExport
         /// <returns>True, if there is no error while computing.</returns>
         private bool InitDuctParameters()
         {
-            int inletCount = 0;
-            int outletCount = 0;
+            //int inletCount = 0;
+            //int outletCount = 0;
             foreach (Element element in m_DuctTerminals)
             {
                 FamilyInstance instance = element as FamilyInstance;
@@ -411,19 +413,19 @@ namespace BIM.OpenFOAMExport
                     //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Outlet.Add(nameDuct, dProp);
-                    outletCount++;
+                    //outletCount++;
                 }
                 else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
                 {
                     DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
                     m_Settings.Inlet.Add(nameDuct, dProp);
-                    inletCount++;
+                    //inletCount++;
                 }
                 //AddDuctParameterToSettings(nameDuct, faceNormal, faceBoundary, surfaceArea, flowRate, meanFlowVelocity, staticPressure, rpm);
-
             }
-            m_Settings.InletCount = inletCount;
-            m_Settings.OutletCount = outletCount;
+            //m_Settings.InletCount = inletCount;
+            //m_Settings.OutletCount = outletCount;
+            
             return true;
         }
 
@@ -497,6 +499,15 @@ namespace BIM.OpenFOAMExport
                         double y = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Y, DisplayUnitType.DUT_METERS);
                         double z = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Z, DisplayUnitType.DUT_METERS);
                         m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
+                        //OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(100, false, false, false);
+
+                        //using (Transaction t = new Transaction(m_ActiveDocument, "invisible"))
+                        //{
+                        //    t.Start();
+                        //    m_ActiveDocument.ActiveView.SetElementOverrides(instance.Id, ogs);
+                        //    t.Commit();
+                        //}
+
                     }
 
                     foreach (Parameter param in instance.Parameters)
@@ -611,6 +622,7 @@ namespace BIM.OpenFOAMExport
                     ssh.User = split[0];
                     ssh.ServerIP = split[1];
                     m_Settings.SSH = ssh;
+                    //m_Settings.Update();
 
                 }
             }
@@ -1446,31 +1458,6 @@ namespace BIM.OpenFOAMExport
                     CreateSphereDirectShape(xyz);
                 m_Clicked = true;
             }
-        }
-
-        /// <summary>
-        /// Create a cylinder at the given point.
-        /// Source: 
-        /// https://knowledge.autodesk.com/search-result/caas/CloudHelp/cloudhelp/2016/ENU/Revit-API/files/GUID-A1BCB8D4-5628-45AF-B399-AF573CBBB1D0-htm.html
-        /// </summary>
-        /// <param name="point">Location for ball.</param>
-        /// <param name="height">Height of the ball.</param>
-        /// <param name="radius">Radius of the ball.</param>
-        /// <returns>Ball as solid.</returns>
-        private Solid CreateCylindricalVolume(XYZ point, double height, double radius)
-        {
-            // build cylindrical shape around endpoint
-            List<CurveLoop> curveloops = new List<CurveLoop>();
-            CurveLoop circle = new CurveLoop();
-
-            // For solid geometry creation, two curves are necessary, even for closed
-            // cyclic shapes like circles
-            circle.Append(Arc.Create(point, radius, 0, Math.PI, XYZ.BasisX, XYZ.BasisY));
-            circle.Append(Arc.Create(point, radius, Math.PI, 2 * Math.PI, XYZ.BasisX, XYZ.BasisY));
-            curveloops.Add(circle);
-            Solid createdCylinder = GeometryCreationUtilities.CreateExtrusionGeometry(curveloops, XYZ.BasisZ, height);
-
-            return createdCylinder;
         }
 
         /// <summary>

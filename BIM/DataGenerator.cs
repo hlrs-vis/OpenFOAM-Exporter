@@ -856,6 +856,8 @@ namespace BIM.OpenFOAMExport
 
                     //Element element = iterator.Current;
                     Element currentElement = iterator.Current;
+                    if (currentElement.Name.Equals("OpenFOAM"))
+                        continue;
 
                     // check if element's category is in the list, if it is continue.
                     // if there are no selected categories, take anything.

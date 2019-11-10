@@ -2594,7 +2594,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _inlet.Attributes.Add("rpm      constant", properties.RPM);
-                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate / InletCount);
+                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate/* / InletCount*/);
                                         param.Patches.Add(inlet.Key, _inlet);
                                         continue;
                                     }
@@ -2654,7 +2654,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _outlet.Attributes.Add("rpm     constant", properties);
-                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate / OutletCount);
+                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate/* / OutletCount*/);
                                         param.Patches.Add(outlet.Key, _outlet);
                                         continue;
                                     }
