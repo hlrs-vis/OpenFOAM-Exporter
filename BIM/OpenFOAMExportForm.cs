@@ -491,7 +491,7 @@ namespace BIM.OpenFOAMExport
                     if (instance == null)
                         continue;
 
-                    if(instance.Name.Equals("OpenFOAM"))
+                    if (instance.Name.Contains(m_Settings.OpenFOAMObjectName))
                     {
                         var transform = instance.GetTransform();
                         LocationPoint localPoint = instance.Location as LocationPoint;
@@ -499,15 +499,6 @@ namespace BIM.OpenFOAMExport
                         double y = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Y, DisplayUnitType.DUT_METERS);
                         double z = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Z, DisplayUnitType.DUT_METERS);
                         m_Settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
-                        //OverrideGraphicSettings ogs = OverideGraphicSettingsTransparency(100, false, false, false);
-
-                        //using (Transaction t = new Transaction(m_ActiveDocument, "invisible"))
-                        //{
-                        //    t.Start();
-                        //    m_ActiveDocument.ActiveView.SetElementOverrides(instance.Id, ogs);
-                        //    t.Commit();
-                        //}
-
                     }
 
                     foreach (Parameter param in instance.Parameters)
@@ -515,21 +506,14 @@ namespace BIM.OpenFOAMExport
                         //try
                         //{
 
-                        if(param.Definition.Name.Equals("Mesh Resolution"))
+                        if (param.Definition.Name.Equals("Mesh Resolution"))
                         {
                             m_Settings.MeshResolution.Add(iterator.Current, param.AsInteger());
                         }
 
-                        if(instance.Name.Equals("OpenFOAM"))
+                        if (instance.Name.Contains(m_Settings.OpenFOAMObjectName))
                         {
-                            //numberOfTasks = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
-                            //    () => param.Definition.Name.Equals(""), ConvertParameterToDisplayUnitType);
-                            //if (numberOfTasks != 0)
-                            //{
-                            //    continue;
-                            //}
-
-                            switch(param.Definition.Name)
+                            switch (param.Definition.Name)
                             {
                                 case "numberOfSubdomains":
                                     {
@@ -558,25 +542,25 @@ namespace BIM.OpenFOAMExport
                                         userIP = param.AsString();
                                         break;
                                     }
-                                    
+
                                 case "alias":
                                     {
                                         alias = param.AsString();
                                         break;
                                     }
-                                    
+
                                 case "caseFolder":
                                     {
                                         caseFolder = param.AsString();
                                         break;
                                     }
-                                    
+
                                 case "port":
                                     {
                                         port = param.AsInteger();
                                         break;
                                     }
-                                    
+
                                 case "slurmcommand":
                                     {
                                         slurmCommand = param.AsString();
@@ -602,10 +586,10 @@ namespace BIM.OpenFOAMExport
                         //}
                         //catch (Exception)
                         //{
-                            //MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
-                            //    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-                            //    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                            //return false;
+                        //MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
+                        //    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                        //    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        //return false;
                         //}
                     }
 
@@ -625,8 +609,9 @@ namespace BIM.OpenFOAMExport
                     //m_Settings.Update();
 
                 }
+
             }
-            catch(Exception)
+            catch (Exception)
             {
                 MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
                     OpenFOAMExportResource.MESSAGE_BOX_TITLE,

@@ -47,58 +47,57 @@ namespace BIM.OpenFOAMExport
 
       Result IExternalApplication.OnStartup(UIControlledApplication application)
       {
-         try
-         {
-            string str = "OpenFOAM Exporter";
-            RibbonPanel panel = application.CreateRibbonPanel(str);
-            string directoryName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            PushButtonData data = new PushButtonData("Exporter GUI", "Exporter GUI", directoryName + @"\OpenFOAMExport.dll", "BIM.OpenFOAMExport.OpenFOAMExportCommand");
-            PushButton button = panel.AddItem(data) as PushButton;
-            //button.LargeImage = LoadPNGImageFromResource(directoryName + @"../../share/covise/icons/logo_64.png");
-            //button.LargeImage = LoadPNGImageFromResource("BIM.Properties.Resources.logo_64");
-            using (Stream xstr = new MemoryStream())
-            {
-                try
-                {
-                    BIM.Properties.Resources.logo_64.Save(xstr, System.Drawing.Imaging.ImageFormat.Bmp);
-                    xstr.Seek(0, SeekOrigin.Begin);
-                    BitmapDecoder bdc = new BmpBitmapDecoder(xstr, BitmapCreateOptions.IgnoreImageCache/*.PreservePixelFormat*/, BitmapCacheOption.OnLoad);
-                    button.LargeImage = bdc.Frames[0];
-                }
-                catch (Exception)
-                {
-                    //button without image
-                    button.LargeImage = null;
-                }
-            }
-
-            button.ToolTip = "The OpenFOAM Exporter for Revit is designed to produce a stereolithography file (STL) of your building model and a OpenFOAM-Config.";
-            button.LongDescription = "The OpenFOAM Exporter for the Autodesk Revit Platform is a project designed to create an STL file from a 3D building information model for OpenFOAM with a Config-Folder that includes the boundary conditions for airflow simulation.";
-            
-            //STL-Exporter only
-            ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, directoryName + @"\Resources\ADSKSTLExporterHelp.htm");
-            button.SetContextualHelp(help);
-            Result result = Result.Succeeded;
-            result = InitOpenFOAMExporterButtonVersion(application, panel);
-            return /*Result.Succeeded*/result;
-         }
-         catch (Exception exception)
-         {
-            MessageBox.Show(exception.ToString(), "OpenFOAM Exporter for Revit");
-            return Result.Failed;
-         }
-      }
-
-        private Result InitOpenFOAMExporterButtonVersion(UIControlledApplication application, RibbonPanel panel)
-        {
             try
             {
+                string str = "OpenFOAM Exporter";
+                RibbonPanel panel = application.CreateRibbonPanel(str);
                 string directoryName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                PushButtonData data = new PushButtonData("Direct Export", "Direct Export", directoryName + @"\OpenFOAMExport.dll", "BIM.OpenFOAMExport.OpenFOAMExportButtonCommand");
+                    PushButtonData data = new PushButtonData("Exporter GUI", "Exporter GUI", directoryName + @"\OpenFOAMExport.dll", "BIM.OpenFOAMExport.OpenFOAMExportCommand");
                 PushButton button = panel.AddItem(data) as PushButton;
+
 
                 //button.LargeImage = LoadPNGImageFromResource(directoryName + @"../../share/covise/icons/logo_64.png");
                 //button.LargeImage = LoadPNGImageFromResource("BIM.Properties.Resources.logo_64");
+                using (Stream xstr = new MemoryStream())
+                {
+                    try
+                    {
+                        BIM.Properties.Resources.logo_64.Save(xstr, System.Drawing.Imaging.ImageFormat.Bmp);
+                        xstr.Seek(0, SeekOrigin.Begin);
+                        BitmapDecoder bdc = new BmpBitmapDecoder(xstr, BitmapCreateOptions.IgnoreImageCache/*.PreservePixelFormat*/, BitmapCacheOption.OnLoad);
+                        button.LargeImage = bdc.Frames[0];
+                    }
+                    catch (Exception)
+                    {
+                        //button without image
+                        button.LargeImage = null;
+                    }
+                }
+
+                button.ToolTip = "The OpenFOAM Exporter for Revit is designed to produce a stereolithography file (STL) of your building model and a OpenFOAM-Config.";
+                button.LongDescription = "The OpenFOAM Exporter for the Autodesk Revit Platform is a project designed to create an STL file from a 3D building information model for OpenFOAM with a Config-Folder that includes the boundary conditions for airflow simulation.";
+            
+                //STL-Exporter only
+                ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, directoryName + @"\Resources\ADSKSTLExporterHelp.htm");
+                button.SetContextualHelp(help);
+                Result result = Result.Succeeded;
+                result = InitOpenFOAMExporterDirectButtonVersion(application, panel, directoryName);
+                return /*Result.Succeeded*/result;
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.ToString(), "OpenFOAM Exporter for Revit");
+                return Result.Failed;
+            }
+      }
+
+        private Result InitOpenFOAMExporterDirectButtonVersion(UIControlledApplication application, RibbonPanel panel, string directoryName)
+        {
+            try
+            {
+                PushButtonData data = new PushButtonData("Direct Export", "Direct Export", directoryName + @"\OpenFOAMExport.dll", "BIM.OpenFOAMExport.OpenFOAMExportButtonCommand");
+                PushButton button = panel.AddItem(data) as PushButton;
+
                 using (Stream xstr = new MemoryStream())
                 {
                     try

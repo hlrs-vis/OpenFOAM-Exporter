@@ -1061,6 +1061,8 @@ namespace BIM.OpenFOAMExport
 
         private int outletCount;
 
+        private string m_OpenFOAMObjectName;
+
         private double m_TempWall;
         private double m_TempOutlet;
         private double m_TempInlet;
@@ -1257,8 +1259,8 @@ namespace BIM.OpenFOAMExport
         public int InletCount { get => inletCount; set => inletCount = value; }
         //Getter-Setter for outletCount
         public int OutletCount { get => outletCount; set => outletCount = value; }
-
-
+        //Getter-Setter OpenFOAMObjectName
+        public string OpenFOAMObjectName { get => m_OpenFOAMObjectName; }
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1401,6 +1403,8 @@ namespace BIM.OpenFOAMExport
             }
         }
 
+        
+
 
         /// <summary>
         /// Constructor.
@@ -1464,6 +1468,7 @@ namespace BIM.OpenFOAMExport
             m_Outlets = new Dictionary<string, object>();
             m_Inlets = new Dictionary<string, object>();
             m_MeshResolutionObjects = new Dictionary<Element, int>();
+            m_OpenFOAMObjectName = "OpenFOAM";
 
             //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
