@@ -274,7 +274,213 @@ namespace BIM.OpenFOAMExport
             //saveFormat = SaveFormat.ascii;
 
             
-            
+
+            //return true;
+        }
+
+        /// <summary>
+        /// Search for specific objects in scene and adds them to settings.
+        /// </summary>
+        /// <returns>True if everything went well.</returns>
+        private bool SearchForObjects()
+        {
+            bool succeed = false;
+
+            //SSH
+            int port = 22;
+            bool dowload = true;
+            bool delete = false;
+            bool slurm = true;
+            string userIP = "hpcmdjur@visent.hlrs.de";
+            string alias = "of1812";
+            string caseFolder = "/mnt/raid/home/hpcmdjur/OpenFOAMRemote/";
+            string slurmCommand = "eval salloc -n " + 4;
+
+
+            FilteredElementCollector collector = new FilteredElementCollector(m_Revit.ActiveUIDocument.Document);
+            collector.WhereElementIsNotElementType();
+            FilteredElementIterator iterator = collector.GetElementIterator();
+            try
+            {
+                while (iterator.MoveNext())
+                {
+                    Application.DoEvents();
+                    //Element element = iterator.Current;
+                    FamilyInstance instance = iterator.Current as FamilyInstance;
+                    if (instance == null)
+                        continue;
+
+                    if (instance.Name.Contains(/*m_Settings.*/BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMObjectName))
+                    {
+                        var transform = instance.GetTransform();
+                        LocationPoint localPoint = instance.Location as LocationPoint;
+                        double x = UnitUtils.ConvertFromInternalUnits(localPoint.Point.X, DisplayUnitType.DUT_METERS);
+                        double y = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Y, DisplayUnitType.DUT_METERS);
+                        double z = UnitUtils.ConvertFromInternalUnits(localPoint.Point.Z, DisplayUnitType.DUT_METERS);
+                        BIM.OpenFOAMExport.Exporter.Instance.settings.LocationInMesh = new System.Windows.Media.Media3D.Vector3D(x, y, z);
+                    }
+
+                    foreach (Parameter param in instance.Parameters)
+                    {
+                        //try
+                        //{
+
+                        if (param.Definition.Name.Equals("Mesh Resolution"))
+                        {
+                            BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Add(iterator.Current, param.AsInteger());
+                        }
+
+                        if (instance.Name.Contains(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMObjectName))
+                        {
+                            //        switch (param.Definition.Name)
+                            //        {
+                            //            case "numberOfSubdomains":
+                            //                {
+                            //                    m_Settings.NumberOfSubdomains = param.AsInteger();
+                            //                    break;
+                            //                }
+
+                            //            case "environment":
+                            //                {
+                            //                    var e = m_Settings.OpenFOAMEnvironment;
+                            //                    Enum.TryParse(param.AsString(), out e);
+                            //                    m_Settings.OpenFOAMEnvironment = e;
+                            //                    break;
+                            //                }
+
+                            //            case "solver":
+                            //                {
+                            //                    var e = m_Settings.AppSolverControlDict;
+                            //                    Enum.TryParse(param.AsString(), out e);
+                            //                    m_Settings.AppSolverControlDict = e;
+                            //                    break;
+                            //                }
+
+                            //            case "userIP":
+                            //                {
+                            //                    userIP = param.AsString();
+                            //                    break;
+                            //                }
+
+                            //            case "alias":
+                            //                {
+                            //                    alias = param.AsString();
+                            //                    break;
+                            //                }
+
+                            //            case "caseFolder":
+                            //                {
+                            //                    caseFolder = param.AsString();
+                            //                    break;
+                            //                }
+
+                            //            case "port":
+                            //                {
+                            //                    port = param.AsInteger();
+                            //                    break;
+                            //                }
+
+                            //            case "slurmcommand":
+                            //                {
+                            //                    slurmCommand = param.AsString();
+                            //                    break;
+                            //                }
+                            //            case "download":
+                            //                {
+                            //                    dowload = Convert.ToBoolean(param.AsString());
+                            //                    break;
+                            //                }
+                            //            case "delete":
+                            //                {
+                            //                    delete = Convert.ToBoolean(param.AsString());
+                            //                    break;
+                            //                }
+                            //            case "slurm":
+                            //                {
+                            //                    slurm = Convert.ToBoolean(param.AsString());
+                            //                    break;
+                            //                }
+                            //            //case "distribution":
+                            //            //    {
+                            //            //        if(!m_LocationReg.IsMatch(param.AsString()))
+                            //            //        {
+                            //            //            MessageBox.Show("Wrong format for distribution.",
+                            //            //                OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            //            //            break;
+                            //            //        }
+                            //            //        var vec = OpenFOAMTreeView.GetListFromVector3DString(param.AsString());
+                            //            //        Vector3D vector = new Vector3D(vec[0], vec[1], vec[2]);
+                            //            //        m_Settings.HierarchicalCoeffs.SetN(vector);
+                            //            //        m_Settings.SimpleCoeffs.SetN(vector);
+                            //            //        break;
+                            //            //    }
+                            //        }
+                            //    }
+                            //    //}
+                            //    //catch (Exception)
+                            //    //{
+                            //    //MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
+                            //    //    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                            //    //    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                            //    //return false;
+                            //    //}
+                            //}
+
+                            //SSH ssh = m_Settings.SSH;
+                            //ssh.Port = port;
+                            //ssh.OfAlias = alias;
+                            //ssh.ServerCaseFolder = caseFolder;
+                            //ssh.Slurm = slurm;
+                            //ssh.SlurmCommand = slurmCommand;
+                            //ssh.Download = dowload;
+                            //ssh.Delete = delete;
+
+                            //var split = userIP.Split('@');
+                            //ssh.User = split[0];
+                            //ssh.ServerIP = split[1];
+                            //m_Settings.SSH = ssh;
+                            ////m_Settings.Update();
+
+                        }
+
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
+                    OpenFOAMExportResource.MESSAGE_BOX_TITLE,
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return false;
+            }
+
+            return succeed;
+        }
+
+        /// <summary>
+        /// Creates a new struct DuctProperties which includes parameter for the duct terminal.
+        /// </summary>
+        /// <param name="faceNormal">Face normal.</param>
+        /// <param name="faceBoundary">Boundary of the surface.</param>
+        /// <param name="flowRate">The flow rate in duct terminal in m³/s.</param>
+        /// <param name="meanFlowVelocity">Mean flow velocity through terminal.</param>
+        /// <param name="externalPressure">External Pressure.</param>
+        /// <param name="rpm">Revolution per minute.</param>
+        /// <param name="surfaceArea">Area of the surface.</param>
+        /// <returns>Ductproperties with given parameters.</returns>
+        private static DuctProperties CreateDuctProperties(XYZ faceNormal, double faceBoundary, double flowRate,
+            double meanFlowVelocity, double externalPressure, int rpm, double surfaceArea)
+        {
+            return new DuctProperties
+            {
+                Area = surfaceArea,
+                Boundary = faceBoundary,
+                FaceNormal = faceNormal,
+                MeanFlowVelocity = meanFlowVelocity,
+                FlowRate = flowRate,
+                RPM = rpm,
+                ExternalPressure = externalPressure
+            };
         }
 
 

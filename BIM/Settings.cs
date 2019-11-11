@@ -1699,7 +1699,7 @@ namespace BIM.OpenFOAMExport
             BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Clear();
             while (iterator.MoveNext())
             {
-                Application.DoEvents();
+                System.Windows.Forms.Application.DoEvents();
                 //Element element = iterator.Current;
                 FamilyInstance instance = iterator.Current as FamilyInstance;
                 if (instance == null)
@@ -1815,6 +1815,7 @@ namespace BIM.OpenFOAMExport
             m_TempOutlet = kelvin + 25;
             m_TempInlet = kelvin + 29;
         }
+
         private String getString(FamilyInstance familyInstance, String paramName)
         {
             IList<Parameter> parameters = familyInstance.GetParameters(paramName);
@@ -1907,7 +1908,6 @@ namespace BIM.OpenFOAMExport
 
             }
 
-
             Outlet.Clear();
             Inlet.Clear();
             m_SimulationDefaultList.Clear();
@@ -1923,7 +1923,7 @@ namespace BIM.OpenFOAMExport
 
             if (!InitBIMData())
             {
-                MessageBox.Show("Problem with initializing BIM-Data.",
+                System.Windows.Forms.MessageBox.Show("Problem with initializing BIM-Data.",
                     OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
@@ -2008,7 +2008,7 @@ namespace BIM.OpenFOAMExport
                     }
                     catch (Exception)
                     {
-                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method InitDuctParameters.",
+                        System.Windows.Forms.MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method InitDuctParameters.",
                             OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return false;
                     }
