@@ -39,6 +39,9 @@ namespace BIM.OpenFOAMExport
 {
     public partial class OpenFOAMExportForm : System.Windows.Forms.Form
     {
+
+        private bool m_Direct = false;
+
         /// <summary>
         /// DataGenerator-object.
         /// </summary>
@@ -54,20 +57,12 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         private ElementId m_SphereLocationInMesh;
 
-        /// <summary>
-        /// Current duct terminals in scene of the active document.
-        /// </summary>
-        private List<Element> m_DuctTerminals;
 
         /// <summary>
         /// Current objects in scenes with parameter mesh resoluton.
         /// </summary>
         //private List<Element> m_MeshResolutionObjects;
 
-        /// <summary>
-        /// Current inlet/outlet material that specify the surfaces.
-        /// </summary>
-        private List<ElementId> m_InletOutletMaterials;
 
         /// <summary>
         /// For click events.
@@ -152,9 +147,9 @@ namespace BIM.OpenFOAMExport
 
             //set size for OpenFOAMTreeView
             InitializeOFTreeViewSize();
-
+            
             // get new data generator
-            m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
+            m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document);
 
             //add OpenFOAMTreeView to container default
             gbDefault.Controls.Add(m_OpenFOAMTreeView);
@@ -192,6 +187,27 @@ namespace BIM.OpenFOAMExport
 
             //initialize SSH
             InitializeSSH();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="revit"></param>
+        /// <param name="direct"></param>
+        public OpenFOAMExportForm(UIApplication revit, bool direct = true)
+        {   
+            m_Revit = revit;
+            m_Direct = direct;
+            m_Revit.ViewActivating += Revit_ViewActivating;
+            m_ActiveDocument = m_Revit.ActiveUIDocument.Document;
+
+            // get new data generator
+            m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document);
+
+            // initialize settings
+            InitializeSettings();
+
+            BtnSave_Click(null, null);
         }
 
         /// <summary>
@@ -240,128 +256,26 @@ namespace BIM.OpenFOAMExport
             // get selected categories from the category list
             List<Category> selectedCategories = new List<Category>();
 
-            // only for projects
-            if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
+            DisplayUnitType dup = DisplayUnitType.DUT_METERS;
+            if (!m_Direct)
             {
-                foreach (TreeNode treeNode in tvCategories.Nodes)
+                // only for projects
+                if (m_Revit.ActiveUIDocument.Document.IsFamilyDocument == false)
                 {
-                    AddSelectedTreeNode(treeNode, selectedCategories);
+                    foreach (TreeNode treeNode in tvCategories.Nodes)
+                    {
+                        AddSelectedTreeNode(treeNode, selectedCategories);
+                    }
                 }
+                /*DisplayUnitType */dup = m_DisplayUnits[comboBox_DUT.Text];
             }
 
-            DisplayUnitType dup = m_DisplayUnits[comboBox_DUT.Text];
+            //saveFormat = SaveFormat.ascii;
 
             
-            if (!InitBIMData())
-            {
-                MessageBox.Show("Problem with initializing BIM-Data.",
-                    OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            BIM.OpenFOAMExport.Exporter.Instance.settings.InitOpenFOAMFolderDictionaries();
+            
         }
 
-        /// <summary>
-        /// Initialize air flow velocity in settings for each duct terminals based on BIM-Data.
-        /// </summary>
-        /// <returns>true, if BIMData used.</returns>
-        private bool InitBIMData()
-        {
-            if (BIM.OpenFOAMExport.Exporter.Instance.settings == null)
-            {
-                return false;
-            }
-
-            //get duct-terminals in active document
-            m_DuctTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(m_Revit.ActiveUIDocument.Document, BuiltInCategory.OST_DuctTerminal);
-
-            //get materials
-            m_InletOutletMaterials = DataGenerator.GetMaterialList(m_ActiveDocument, m_DuctTerminals, new List<string> { "Inlet", "Outlet" });
-            SearchForObjects();
-            return InitDuctParameters();
-        }
-
-        /// <summary>
-        /// Initialize duct terminal parameters like flowRate, meanFlowVelocity and area.
-        /// </summary>
-        /// <returns>True, if there is no error while computing.</returns>
-        private bool InitDuctParameters()
-        {
-            foreach (Element element in m_DuctTerminals)
-            {
-                FamilyInstance instance = element as FamilyInstance;
-                XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
-                double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
-                double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
-                double flowRate = 0;
-                double meanFlowVelocity = 0;
-                double staticPressure = 0;
-                int rpm = 0;
-
-                foreach (Parameter param in instance.Parameters)
-                {
-                    try
-                    {
-                        if (flowRate == 0)
-                        {
-                            flowRate = GetParamValue(param, DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND,
-                                () => param.Definition.ParameterType == ParameterType.HVACAirflow, ConvertParameterToDisplayUnitType);
-                            if (flowRate != 0)
-                            {
-                                meanFlowVelocity = flowRate / surfaceArea;
-                                continue;
-                            }
-                        }
-
-                        if (staticPressure == 0)
-                        {
-                            staticPressure = GetParamValue(param, DisplayUnitType.DUT_PASCALS,
-                                () => param.Definition.Name.Equals("static Pressure") && param.Definition.ParameterType == ParameterType.HVACPressure,
-                                ConvertParameterToDisplayUnitType);
-                            if (staticPressure != 0)
-                            {
-                                continue;
-                            }
-                        }
-
-                        if (rpm == 0)
-                        {
-                            rpm = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
-                                () => param.Definition.Name.Equals("RPM"), ConvertParameterToDisplayUnitType);
-
-                            if (rpm != 0)
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method InitDuctParameters.",
-                            OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        return false;
-                    }
-                }
-                string nameDuct = AutodeskHelperFunctions.GenerateNameFromElement(element);
-
-                if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
-                {
-                    //negate faceNormal = outlet.
-                    //...............................................
-                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
-                    BIM.OpenFOAMExport.Exporter.Instance.settings.Outlet.Add(nameDuct, dProp);
-                }
-                else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
-                {
-                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
-                    BIM.OpenFOAMExport.Exporter.Instance.settings.Inlet.Add(nameDuct, dProp);
-                }
-                //AddDuctParameterToSettings(nameDuct, faceNormal, faceBoundary, surfaceArea, flowRate, meanFlowVelocity, staticPressure, rpm);
-
-            }
-            return true;
-        }
 
         ///// <summary>
         ///// Add duct terminal parameters to settings.
@@ -393,179 +307,7 @@ namespace BIM.OpenFOAMExport
         //    }
         //}
 
-        /// <summary>
-        /// Search for specific objects in scene and adds them to settings.
-        /// </summary>
-        /// <returns>True if everything went well.</returns>
-        private bool SearchForObjects()
-        {
-            bool succeed = false;
-            FilteredElementCollector collector = new FilteredElementCollector(m_Revit.ActiveUIDocument.Document);
-            collector.WhereElementIsNotElementType();
-            FilteredElementIterator iterator = collector.GetElementIterator();
-            BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Clear();
-            while (iterator.MoveNext())
-            {
-                Application.DoEvents();
-                //Element element = iterator.Current;
-                FamilyInstance instance = iterator.Current as FamilyInstance;
-                if (instance == null)
-                    continue;
 
-                foreach (Parameter param in instance.Parameters)
-                {
-                    try
-                    {
-                        int meshResolution = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
-                            () => param.Definition.Name.Equals("Mesh Resolution"), ConvertParameterToDisplayUnitType);
-                        if (meshResolution != 0)
-                        {
-                            BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Add(iterator.Current, meshResolution);
-                            succeed = true;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method SearchForObjects.",
-                            OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-                            MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        return false;
-                    }
-                }
-            }
-            return succeed;
-        }
-
-        /// <summary>
-        /// Creates a new struct DuctProperties which includes parameter for the duct terminal.
-        /// </summary>
-        /// <param name="faceNormal">Face normal.</param>
-        /// <param name="faceBoundary">Boundary of the surface.</param>
-        /// <param name="flowRate">The flow rate in duct terminal in m³/s.</param>
-        /// <param name="meanFlowVelocity">Mean flow velocity through terminal.</param>
-        /// <param name="externalPressure">External Pressure.</param>
-        /// <param name="rpm">Revolution per minute.</param>
-        /// <param name="surfaceArea">Area of the surface.</param>
-        /// <returns>Ductproperties with given parameters.</returns>
-        private static DuctProperties CreateDuctProperties(XYZ faceNormal, double faceBoundary, double flowRate,
-            double meanFlowVelocity, double externalPressure, int rpm, double surfaceArea)
-        {
-            return new DuctProperties
-            {
-                Area = surfaceArea,
-                Boundary = faceBoundary,
-                FaceNormal = faceNormal,
-                MeanFlowVelocity = meanFlowVelocity,
-                FlowRate = flowRate,
-                RPM = rpm,
-                ExternalPressure = externalPressure
-            };
-        }
-
-        /// <summary>
-        /// Get surface parameter based on given Face-Function. 
-        /// </summary>
-        /// <typeparam name="T">return type.</typeparam>
-        /// <param name="instance">Familyinstance.</param>
-        /// <param name="func">Face-function/methode.</param>
-        /// <returns>Parameter as type T.</returns>
-        private T GetSurfaceParameter<T>(FamilyInstance instance, Func<Face, T> func)
-        {
-            T value = default(T);
-            var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
-            m_ViewOptions.View = m_Revit.ActiveUIDocument.Document.ActiveView;
-
-            GeometryElement geometry = instance.get_Geometry(m_ViewOptions);
-            List<Solid> solids = new List<Solid>();
-            DataGenerator.ExtractSolidList(m_ActiveDocument, geometry, null, solids);
-            foreach (Solid solid in solids)
-            {
-                if (solid == default)
-                {
-                    continue;
-                }
-
-                Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
-                if (face != null)
-                {
-                    value = func(face);
-                }
-            }
-            return value;
-        }
-
-        /// <summary>
-        /// Get face normal from face.
-        /// </summary>
-        /// <param name="face">Face object.</param>
-        /// <returns>Facenormal as xyz object.</returns>
-        private XYZ GetFaceNormal(Face face)
-        {
-            UV point = new UV();
-            return face.ComputeNormal(point);
-        }
-
-        /// <summary>
-        /// Get face are from given face.
-        /// </summary>
-        /// <param name="face">Face object.</param>
-        /// <returns>Area of the face as double.</returns>
-        private double GetFaceArea(Face face)
-        {
-            return UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
-        }
-
-        /// <summary>
-        /// Get face boundary from the given face.
-        /// </summary>
-        /// <param name="face">Face object.</param>
-        /// <returns>Boundary of the face as double.</returns>
-        private double GetFaceBoundary(Face face)
-        {
-            var edges = face.EdgeLoops;
-            double boundary = 0;
-            if (!edges.IsEmpty && edges != null)
-            {
-                foreach (Edge edge in edges.get_Item(0) as EdgeArray)
-                {
-                    boundary += Math.Round(UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS),2);
-                }
-            }
-            return boundary;
-        }
-
-        /// <summary>
-        /// Checks if the given parameter fulfills the given lambda-equation and return the converted parameter as T.
-        /// </summary>
-        /// <param name="param">Parameter object.</param>
-        /// <param name="type">DisplayUnitType to convert.</param
-        /// <param name="lambda">Lambda expression.</param>
-        /// <param name="convertFunc">Convert-function Func<Parameter, DisplayUnitType, T>.</param>
-        /// <returns>Converted Parameter as T.</returns>
-        private T GetParamValue<T>(Parameter param, DisplayUnitType type, Func<bool> lambda, Func<Parameter, DisplayUnitType, T> convertFunc)
-        {
-            T paramValue = default;
-            if(lambda())
-            {
-                paramValue = convertFunc(param, type);
-            }
-            return paramValue;
-        }
-
-        /// <summary>
-        /// Convert given parameter in type with UnitUtils function ConvertFromInternalUnits.
-        /// </summary>
-        /// <param name="param">Parameter of object.</param>
-        /// <param name="type">DisplayUnitType.</param>
-        /// <returns>Parameter value as double.</returns>
-        private double ConvertParameterToDisplayUnitType(Parameter param, DisplayUnitType type)
-        {
-            if(DisplayUnitType.DUT_UNDEFINED == type)
-            {
-                return param.AsInteger();
-            }
-            return UnitUtils.ConvertFromInternalUnits(param.AsDouble(), type);
-        }
 
         /// <summary>
         /// Initialize SSH-Tab.
@@ -794,13 +536,16 @@ namespace BIM.OpenFOAMExport
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                if (!UpdateNonDefaultSettings())
-                    return;
+                if(!m_Direct)
+                {
+                    if (!UpdateNonDefaultSettings())
+                        return;
+                }
 
                 TopMost = false;
 
                 // save Revit document's triangular data in a temporary file, generate openFOAM-casefolder and start simulation
-                m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document, m_Revit.ActiveUIDocument.Document.ActiveView);
+                m_Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document);
                 DataGenerator.GeneratorStatus succeed = m_Generator.SaveSTLFile(fileName);
 
                 if (succeed == DataGenerator.GeneratorStatus.FAILURE)
@@ -1078,13 +823,6 @@ namespace BIM.OpenFOAMExport
                 ssh.User = txtBox.Split('@')[0];
                 ssh.ServerIP = txtBox.Split('@')[1];
                 BIM.OpenFOAMExport.Exporter.Instance.settings.SSH = ssh;
-            }
-            else
-            {
-                MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " " + txtBox, OpenFOAMExportResource.MESSAGE_BOX_TITLE,
-                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
-                return;
             }
 
             //TO-DO: IF XML-CONFIG IMPLEMENTED => ADD CHANGES

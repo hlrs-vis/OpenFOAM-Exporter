@@ -204,7 +204,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 if (name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
                 {
                     //name = "Terminal_" + name;
-                    m_RegionsRefinementCastellated["Terminal_" + name] = vec;
+                    m_RegionsRefinementCastellated["Terminal_" + name] = new Dictionary<string, object>() { { level, vec } };
                 }
                 else
                 {

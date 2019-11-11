@@ -65,7 +65,7 @@ namespace BIM.OpenFOAMExport
 
             m_Revit = commandData.Application;
             BIM.OpenFOAMExport.Exporter.Instance.exportForm = new OpenFOAMExportForm(m_Revit);
-            BIM.OpenFOAMExport.Exporter.Instance.settings.setDocument(m_Revit.ActiveUIDocument.Document);
+            BIM.OpenFOAMExport.Exporter.Instance.settings.setDocument(m_Revit);
 
             //for repeating click-events
             var iterator = System.Windows.Forms.Application.OpenForms.GetEnumerator();

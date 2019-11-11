@@ -26,6 +26,11 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using System.Collections.Generic;
+using System.Windows.Media.Media3D;
+using System.Linq;
+using Autodesk.Revit.DB;
+using RevitView = Autodesk.Revit.DB.View;
 
 namespace BIM.OpenFOAMExport
 {
@@ -40,6 +45,53 @@ namespace BIM.OpenFOAMExport
         }
         public Exporter()
         {
+        }
+
+
+        /// <summary>
+        /// Get view by view name.
+        /// </summary>
+        /// <param name="doc">The document to find the view.</param>
+        /// <param name="activeViewName">The view name.</param>
+        /// <returns>The element id of the view found.</returns>
+        public RevitView FindView(Document doc, string activeViewName)
+        {
+            FilteredElementCollector collector = new FilteredElementCollector(doc);
+            collector.OfClass(typeof(RevitView));
+
+            IEnumerable<Element> selectedView = from view in collector.ToList<Element>()
+                                                where view.Name == activeViewName
+                                                select view;
+
+            if (selectedView.Count() > 0)
+            {
+                return (selectedView.First() as RevitView);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get view by view name.
+        /// </summary>
+        /// <param name="doc">The document to find the view.</param>
+        /// <param name="activeViewName">The view name.</param>
+        /// <returns>The element id of the view found.</returns>
+        public ElementId FindViewId(Document doc, string activeViewName)
+        {
+            FilteredElementCollector collector = new FilteredElementCollector(doc);
+            collector.OfClass(typeof(RevitView));
+
+            IEnumerable<Element> selectedView = from view in collector.ToList<Element>()
+                                                where view.Name == activeViewName
+                                                select view;
+
+            if (selectedView.Count() > 0)
+            {
+                return (selectedView.First() as RevitView).Id;
+            }
+
+            return ElementId.InvalidElementId;
         }
         class Nested
         {
@@ -97,7 +149,7 @@ namespace BIM.OpenFOAMExport
                 ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, directoryName + @"\Resources\ADSKSTLExporterHelp.htm");
                 setupButton.SetContextualHelp(help);
 
-                PushButtonData data = new PushButtonData("OpenFOAM Exporter for Revit", "OpenFOAM Exporter for Revit", dllName, "BIM.OpenFOAMExport.OpenFOAMExportCommand");
+                PushButtonData data = new PushButtonData("OpenFOAM Exporter settings", "Settings", dllName, "BIM.OpenFOAMExport.OpenFOAMExportCommand");
                 PushButton button = panel.AddItem(data) as PushButton;
                 using (Stream xstr = new MemoryStream())
                 {

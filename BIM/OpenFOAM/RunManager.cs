@@ -576,7 +576,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             //Download directory from Server: scp -r user@ssh.example.com:/path/to/remote/source /path/to/local/destination
             if (BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Download)
             {
-                commands.Add("scp -P " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port + " -r " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString()+ ":" + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder + "/" + CaseDir + "/* " + m_CasePath);
+                string CasePathResults = m_CasePath+"_results";
+                if(!Directory.Exists(CasePathResults))
+                {
+                    Directory.CreateDirectory(CasePathResults);
+                }
+                commands.Add("scp -P " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Port + " -r " + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ConnectionString()+ ":" + BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.ServerCaseFolder + "/" + CaseDir + "/* " + CasePathResults);
             }
             if(BIM.OpenFOAMExport.Exporter.Instance.settings.SSH.Delete)
             {

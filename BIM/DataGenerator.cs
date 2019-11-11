@@ -132,14 +132,23 @@ namespace BIM.OpenFOAMExport
         /// <param name="revit">
         /// The application object for the active instance of Autodesk Revit.
         /// </param>
-        public DataGenerator(RevitApplication revitApp, Document doc, RevitView view)
+        public DataGenerator(RevitApplication revitApp, Document doc)
         {
             //initialize the member variable
             if (revitApp != null)
             {
                 m_RevitApp = revitApp;
                 m_ActiveDocument = doc;
-                m_ActiveView = view;
+                Autodesk.Revit.DB.View simulationView = BIM.OpenFOAMExport.Exporter.Instance.FindView(doc, "Simulation");
+                if (simulationView == null)
+                {
+                    simulationView = BIM.OpenFOAMExport.Exporter.Instance.FindView(doc, "{3D}");
+                }
+                if (simulationView == null)
+                {
+                    simulationView = doc.ActiveView;
+                }
+                m_ActiveView = simulationView;
 
                 m_ViewOptions = m_RevitApp.Create.NewGeometryOptions();
                 m_ViewOptions.View = m_ActiveView;
@@ -826,7 +835,7 @@ namespace BIM.OpenFOAMExport
                 if (ElementsExportRange.OnlyVisibleOnes == exportRange)
                 {
                     // find the view having the same name of ActiveView.Name in active and linked model documents.
-                    ElementId viewId = FindView(doc, m_ActiveView.Name);
+                    ElementId viewId = BIM.OpenFOAMExport.Exporter.Instance.FindViewId(doc, m_ActiveView.Name);
 
                     if (viewId != ElementId.InvalidElementId)
                         collector = new FilteredElementCollector(doc, viewId);
@@ -1221,28 +1230,6 @@ namespace BIM.OpenFOAMExport
             return null;
         }
 
-        /// <summary>
-        /// Get view by view name.
-        /// </summary>
-        /// <param name="doc">The document to find the view.</param>
-        /// <param name="activeViewName">The view name.</param>
-        /// <returns>The element id of the view found.</returns>
-        private ElementId FindView(Document doc, string activeViewName)
-        {
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            collector.OfClass(typeof(RevitView));
-
-            IEnumerable<Element> selectedView = from view in collector.ToList<Element>()
-                                                where view.Name == activeViewName
-                                                select view;
-
-            if (selectedView.Count() > 0)
-            {
-                return (selectedView.First() as RevitView).Id;
-            }
-
-            return ElementId.InvalidElementId;
-        }
 
         /// <summary>
         /// Scan GeometryElement to collect triangles.

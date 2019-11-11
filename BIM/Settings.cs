@@ -23,9 +23,11 @@
 using System.Collections.Generic;
 using Category = Autodesk.Revit.DB.Category;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System.Collections;
 using System.Windows;
 using System.Windows.Media.Media3D;
+using System.Windows.Forms;
 using System;
 using System.Linq;
 using BIM.OpenFOAMExport.OpenFOAM;
@@ -1045,11 +1047,21 @@ namespace BIM.OpenFOAMExport
     public class Settings
     {
         private Document document;
+        private UIApplication m_Revit;
         private Dictionary<string, object> m_SimulationDefaultList;
 
         private Dictionary<string, object> m_System;
         private Dictionary<string, object> m_Constant;
         private Dictionary<string, object> m_Null;
+
+        /// <summary>
+        /// Current duct terminals in scene of the active document.
+        /// </summary>
+        private List<Element> m_DuctTerminals;
+        /// <summary>
+        /// Current inlet/outlet material that specify the surfaces.
+        /// </summary>
+        private List<ElementId> m_InletOutletMaterials;
 
         private SaveFormat m_SaveFormat;
         private ElementsExportRange m_ExportRange;
@@ -1058,6 +1070,10 @@ namespace BIM.OpenFOAMExport
         private OpenFOAMEnvironment m_openFOAMEnvironment;
 
         private Dictionary<Element, int> m_MeshResolutionObjects;
+
+        private int inletCount;
+
+        private int outletCount;
 
         private double m_TempWall;
         private double m_TempOutlet;
@@ -1251,6 +1267,12 @@ namespace BIM.OpenFOAMExport
         //Getter for Mesh Resolution.
         public Dictionary<Element, int> MeshResolution { get => m_MeshResolutionObjects; }
 
+        //Getter-Setter for inletCount
+        public int InletCount { get => inletCount; set => inletCount = value; }
+        //Getter-Setter for outletCount
+        public int OutletCount { get => outletCount; set => outletCount = value; }
+
+
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1265,6 +1287,26 @@ namespace BIM.OpenFOAMExport
                 m_SaveFormat = value;
             }
         }
+
+        public List<Element> DuctTerminals
+        {
+            get {
+                return m_DuctTerminals;
+            }
+            set {
+                m_DuctTerminals = value;
+            }
+        }
+        public List<ElementId> InletOutletMaterials
+        {
+            get {
+                return m_InletOutletMaterials;
+            }
+            set {
+                m_InletOutletMaterials = value;
+            }
+        }
+
 
         /// <summary>
         /// The range of elements to be exported.
@@ -1392,6 +1434,7 @@ namespace BIM.OpenFOAMExport
                 return m_SimulationDefaultList;
             }
         }
+
 
         /// <summary>
         /// Constructor.
@@ -1528,6 +1571,140 @@ namespace BIM.OpenFOAMExport
         }
 
         /// <summary>
+        /// Get surface parameter based on given Face-Function. 
+        /// </summary>
+        /// <typeparam name="T">return type.</typeparam>
+        /// <param name="instance">Familyinstance.</param>
+        /// <param name="func">Face-function/methode.</param>
+        /// <returns>Parameter as type T.</returns>
+        private T GetSurfaceParameter<T>(FamilyInstance instance, Func<Face, T> func)
+        {
+            T value = default(T);
+            var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
+            m_ViewOptions.View = document.ActiveView;
+
+            GeometryElement geometry = instance.get_Geometry(m_ViewOptions);
+            List<Solid> solids = new List<Solid>();
+            DataGenerator.ExtractSolidList(document, geometry, null, solids);
+            foreach (Solid solid in solids)
+            {
+                if (solid == default)
+                {
+                    continue;
+                }
+
+                Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
+                if (face != null)
+                {
+                    value = func(face);
+                }
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Get face normal from face.
+        /// </summary>
+        /// <param name="face">Face object.</param>
+        /// <returns>Facenormal as xyz object.</returns>
+        private XYZ GetFaceNormal(Face face)
+        {
+            UV point = new UV();
+            return face.ComputeNormal(point);
+        }
+
+        /// <summary>
+        /// Get face are from given face.
+        /// </summary>
+        /// <param name="face">Face object.</param>
+        /// <returns>Area of the face as double.</returns>
+        private double GetFaceArea(Face face)
+        {
+            return UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+        }
+
+        /// <summary>
+        /// Get face boundary from the given face.
+        /// </summary>
+        /// <param name="face">Face object.</param>
+        /// <returns>Boundary of the face as double.</returns>
+        private double GetFaceBoundary(Face face)
+        {
+            var edges = face.EdgeLoops;
+            double boundary = 0;
+            if (!edges.IsEmpty && edges != null)
+            {
+                foreach (Edge edge in edges.get_Item(0) as EdgeArray)
+                {
+                    boundary += Math.Round(UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS), 2);
+                }
+            }
+            return boundary;
+        }
+
+        /// <summary>
+        /// Checks if the given parameter fulfills the given lambda-equation and return the converted parameter as T.
+        /// </summary>
+        /// <param name="param">Parameter object.</param>
+        /// <param name="type">DisplayUnitType to convert.</param
+        /// <param name="lambda">Lambda expression.</param>
+        /// <param name="convertFunc">Convert-function Func<Parameter, DisplayUnitType, T>.</param>
+        /// <returns>Converted Parameter as T.</returns>
+        private T GetParamValue<T>(Parameter param, DisplayUnitType type, Func<bool> lambda, Func<Parameter, DisplayUnitType, T> convertFunc)
+        {
+            T paramValue = default;
+            if (lambda())
+            {
+                paramValue = convertFunc(param, type);
+            }
+            return paramValue;
+        }
+
+        /// <summary>
+        /// Convert given parameter in type with UnitUtils function ConvertFromInternalUnits.
+        /// </summary>
+        /// <param name="param">Parameter of object.</param>
+        /// <param name="type">DisplayUnitType.</param>
+        /// <returns>Parameter value as double.</returns>
+        private double ConvertParameterToDisplayUnitType(Parameter param, DisplayUnitType type)
+        {
+            if (DisplayUnitType.DUT_UNDEFINED == type)
+            {
+                return param.AsInteger();
+            }
+            return UnitUtils.ConvertFromInternalUnits(param.AsDouble(), type);
+        }
+
+
+        /// <summary>
+        /// Search for specific objects in scene and adds them to settings.
+        /// </summary>
+        /// <returns>True if everything went well.</returns>
+        private bool AddMeshResolutionObjects()
+        {
+            bool succeed = false;
+            FilteredElementCollector collector = new FilteredElementCollector(document);
+            collector.WhereElementIsNotElementType();
+            FilteredElementIterator iterator = collector.GetElementIterator();
+            BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Clear();
+            while (iterator.MoveNext())
+            {
+                Application.DoEvents();
+                //Element element = iterator.Current;
+                FamilyInstance instance = iterator.Current as FamilyInstance;
+                if (instance == null)
+                    continue;
+                int meshResolution = getInt(instance, "Mesh Resolution");
+                if (meshResolution > 0)
+                {
+                    BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Add(instance, meshResolution);
+                    succeed = true;
+                }
+            }
+            return succeed;
+        }
+
+        /// <summary>
         /// Initialize transportProperties default attributes.
         /// </summary>
         private void InitTransportProtperties()
@@ -1628,36 +1805,233 @@ namespace BIM.OpenFOAMExport
             m_TempOutlet = kelvin + 25;
             m_TempInlet = kelvin + 29;
         }
-        public void setDocument(Document d)
+        private String getString(FamilyInstance familyInstance, String paramName)
         {
-            if(document != d)
+            IList<Parameter> parameters = familyInstance.GetParameters(paramName);
+            if (parameters.Count > 0)
             {
-                document = d;
-                // try to get OpenFoamObject and initialize from there
-
-                ElementClassFilter filter = new ElementClassFilter(typeof(FamilyInstance));
-                // Apply the filter to the elements in the active document
-                FilteredElementCollector collector = new FilteredElementCollector(document);
-                collector.WherePasses(filter);
-                // Use Linq query to find family instances whose name is 60" x 30" Student
-                var query = from element in collector
-                            where element.Name == "OpenFOAM"
-                            select element;
-                // Cast found elements to family instances, 
-                // this cast to FamilyInstance is safe because ElementClassFilter for FamilyInstance was used
-                List<FamilyInstance> familyInstances = query.Cast<FamilyInstance>().ToList<FamilyInstance>();
-                if (familyInstances.Count > 0)
-                {
-                    Transform pos = familyInstances[0].GetTransform();
-                    m_LocationInMesh.X = pos.Origin.X;
-                    m_LocationInMesh.Y = pos.Origin.Y;
-                    m_LocationInMesh.Z = pos.Origin.Z;
-                    double height = familyInstances[0].GetParameters("height")[0].AsDouble();
-                    m_LocationInMesh.Z += height;
-                }
+                return parameters[0].AsString();
             }
+            return "";
+        }
+        private int getInt(FamilyInstance familyInstance, String paramName)
+        {
+            IList<Parameter> parameters = familyInstance.GetParameters(paramName);
+            if (parameters.Count > 0)
+            {
+                return parameters[0].AsInteger();
+            }
+            return -1;
+        }
+        private double getDouble(FamilyInstance familyInstance, String paramName)
+        {
+            IList<Parameter> parameters = familyInstance.GetParameters(paramName);
+            if (parameters.Count > 0)
+            {
+                return parameters[0].AsDouble();
+            }
+            return -1;
+        }
+        public void setDocument(UIApplication revit)
+        {
+            m_Revit = revit;
+            document= m_Revit.ActiveUIDocument.Document;
+
+
+            // try to get OpenFoamObject and initialize from there
+
+            ElementClassFilter filter = new ElementClassFilter(typeof(FamilyInstance));
+            // Apply the filter to the elements in the active document
+            FilteredElementCollector collector = new FilteredElementCollector(document);
+            collector.WherePasses(filter);
+            // Use Linq query to find family instances whose name is 60" x 30" Student
+            var query = from element in collector
+                        where element.Name == "OpenFOAM"
+                        select element;
+            // Cast found elements to family instances, 
+            // this cast to FamilyInstance is safe because ElementClassFilter for FamilyInstance was used
+            List<FamilyInstance> familyInstances = query.Cast<FamilyInstance>().ToList<FamilyInstance>();
+            if (familyInstances.Count > 0)
+            {
+                FamilyInstance instance = familyInstances[0];
+                Transform pos = instance.GetTransform();
+                m_LocationInMesh.X = pos.Origin.X;
+                m_LocationInMesh.Y = pos.Origin.Y;
+                m_LocationInMesh.Z = pos.Origin.Z;
+                m_LocationInMesh.Z += getDouble(instance, "height");
+
+                String foamEnv = getString(instance, "OpenFOAM Environment");
+                if(foamEnv == "ssh")
+                {
+                    m_openFOAMEnvironment = OpenFOAMEnvironment.ssh;
+                    m_SSH.User = getString(instance, "user");
+                    m_SSH.ServerIP = getString(instance, "host");
+                    m_SSH.ServerCaseFolder = getString(instance, "serverCaseFolder");
+                    m_SSH.OfAlias = getString(instance, "openFOAM alias");
+                    m_SSH.SlurmCommand = getString(instance, "batchCommand");
+                }
+                if (foamEnv == "blueCFD")
+                {
+                    m_openFOAMEnvironment = OpenFOAMEnvironment.blueCFD;
+                }
+                if (foamEnv == "wsl")
+                {
+                    m_openFOAMEnvironment = OpenFOAMEnvironment.wsl;
+                }
+
+            }
+
+
+            Outlet.Clear();
+            Inlet.Clear();
+            m_SimulationDefaultList.Clear();
+            m_System.Clear();
+            m_Constant.Clear();
+            m_Null.Clear();
+
+
+            if (!InitBIMData())
+            {
+                MessageBox.Show("Problem with initializing BIM-Data.",
+                    OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            InitOpenFOAMFolderDictionaries();
         }
 
+        /// <summary>
+        /// Initialize air flow velocity in settings for each duct terminals based on BIM-Data.
+        /// </summary>
+        /// <returns>true, if BIMData used.</returns>
+        private bool InitBIMData()
+        {
+            if (BIM.OpenFOAMExport.Exporter.Instance.settings == null)
+            {
+                return false;
+            }
+
+            //get duct-terminals in active document
+            m_DuctTerminals = DataGenerator.GetDefaultCategoryListOfClass<FamilyInstance>(document, BuiltInCategory.OST_DuctTerminal);
+
+            //get materials
+            m_InletOutletMaterials = DataGenerator.GetMaterialList(document, m_DuctTerminals, new List<string> { "Inlet", "Outlet" });
+            AddMeshResolutionObjects();
+            return InitDuctParameters();
+        }
+
+        /// <summary>
+        /// Initialize duct terminal parameters like flowRate, meanFlowVelocity and area.
+        /// </summary>
+        /// <returns>True, if there is no error while computing.</returns>
+        private bool InitDuctParameters()
+        {
+            int inletCount = 0;
+            int outletCount = 0;
+            foreach (Element element in m_DuctTerminals)
+            {
+                FamilyInstance instance = element as FamilyInstance;
+                XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
+                double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
+                double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
+                double flowRate = 0;
+                double meanFlowVelocity = 0;
+                double staticPressure = 0;
+                int rpm = 0;
+
+                foreach (Parameter param in instance.Parameters)
+                {
+                    try
+                    {
+                        if (flowRate == 0)
+                        {
+                            flowRate = GetParamValue(param, DisplayUnitType.DUT_CUBIC_METERS_PER_SECOND,
+                                () => param.Definition.ParameterType == ParameterType.HVACAirflow, ConvertParameterToDisplayUnitType);
+                            if (flowRate != 0)
+                            {
+                                meanFlowVelocity = flowRate / surfaceArea;
+                                continue;
+                            }
+                        }
+
+                        if (staticPressure == 0)
+                        {
+                            staticPressure = GetParamValue(param, DisplayUnitType.DUT_PASCALS,
+                                () => param.Definition.Name.Equals("static Pressure") && param.Definition.ParameterType == ParameterType.HVACPressure,
+                                ConvertParameterToDisplayUnitType);
+                            if (staticPressure != 0)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (rpm == 0)
+                        {
+                            rpm = (int)GetParamValue(param, DisplayUnitType.DUT_UNDEFINED,
+                                () => param.Definition.Name.Equals("RPM"), ConvertParameterToDisplayUnitType);
+
+                            if (rpm != 0)
+                            {
+                                continue;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show(OpenFOAMExportResource.ERR_FORMAT + " Format-Exception in class OpenFOAMExportForm in method InitDuctParameters.",
+                            OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        return false;
+                    }
+                }
+                string nameDuct = AutodeskHelperFunctions.GenerateNameFromElement(element);
+
+                if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
+                {
+                    //negate faceNormal = outlet.
+                    //...............................................
+                    //for swirlFlowRateInletVelocity as type => -(faceNormal) = flowRate direction default => the value is positive inwards => -flowRate
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, -flowRate, -meanFlowVelocity, staticPressure, rpm, surfaceArea);
+                    BIM.OpenFOAMExport.Exporter.Instance.settings.Outlet.Add(nameDuct, dProp);
+                    outletCount++;
+                }
+                else if (nameDuct.Contains("Zuluft") || nameDuct.Contains("Inlet"))
+                {
+                    DuctProperties dProp = CreateDuctProperties(faceNormal, faceBoundary, flowRate, meanFlowVelocity, staticPressure, rpm, surfaceArea);
+                    BIM.OpenFOAMExport.Exporter.Instance.settings.Inlet.Add(nameDuct, dProp);
+                    inletCount++;
+                }
+                //AddDuctParameterToSettings(nameDuct, faceNormal, faceBoundary, surfaceArea, flowRate, meanFlowVelocity, staticPressure, rpm);
+
+            }
+            BIM.OpenFOAMExport.Exporter.Instance.settings.InletCount = inletCount;
+            BIM.OpenFOAMExport.Exporter.Instance.settings.OutletCount = outletCount;
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a new struct DuctProperties which includes parameter for the duct terminal.
+        /// </summary>
+        /// <param name="faceNormal">Face normal.</param>
+        /// <param name="faceBoundary">Boundary of the surface.</param>
+        /// <param name="flowRate">The flow rate in duct terminal in m³/s.</param>
+        /// <param name="meanFlowVelocity">Mean flow velocity through terminal.</param>
+        /// <param name="externalPressure">External Pressure.</param>
+        /// <param name="rpm">Revolution per minute.</param>
+        /// <param name="surfaceArea">Area of the surface.</param>
+        /// <returns>Ductproperties with given parameters.</returns>
+        private static DuctProperties CreateDuctProperties(XYZ faceNormal, double faceBoundary, double flowRate,
+            double meanFlowVelocity, double externalPressure, int rpm, double surfaceArea)
+        {
+            return new DuctProperties
+            {
+                Area = surfaceArea,
+                Boundary = faceBoundary,
+                FaceNormal = faceNormal,
+                MeanFlowVelocity = meanFlowVelocity,
+                FlowRate = flowRate,
+                RPM = rpm,
+                ExternalPressure = externalPressure
+            };
+        }
         /// <summary>
         /// Initialize FvSchemes default attributes.
         /// </summary>
@@ -1725,7 +2099,7 @@ namespace BIM.OpenFOAMExport
         private void InitControlDict(bool runTimeModifiable, double startTime, double endTime, double deltaT, double writeInterval, double purgeWrite, double writePrecision, double timePrecision)
         {
             StartFrom startFrom = StartFrom.latestTime;
-            SolverControlDict appDictSolver = SolverControlDict.simpleFoam;
+            SolverControlDict appDictSolver = SolverControlDict.buoyantBoussinesqSimpleFoam; //simpleFoam;
             StopAt stopAt = StopAt.endTime;
             WriteControl writeControl = WriteControl.timeStep;
             WriteFormat writeFormat = WriteFormat.ascii;
@@ -2614,7 +2988,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _inlet.Attributes.Add("rpm      constant", properties.RPM);
-                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate);
+                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate / InletCount);
                                         param.Patches.Add(inlet.Key, _inlet);
                                         continue;
                                     }
@@ -2674,7 +3048,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _outlet.Attributes.Add("rpm     constant", properties);
-                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate);
+                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate / OutletCount);
                                         param.Patches.Add(outlet.Key, _outlet);
                                         continue;
                                     }

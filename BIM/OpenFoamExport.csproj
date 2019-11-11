@@ -147,6 +147,7 @@
     <Compile Include="DataGenerator.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="OpenFOAMExportButtonCommand.cs" />
     <Compile Include="OpenFOAMExportResource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
