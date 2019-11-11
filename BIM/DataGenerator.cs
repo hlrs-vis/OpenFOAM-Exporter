@@ -336,8 +336,6 @@ namespace BIM.OpenFOAMExport
 
             if (CreateGeneralFile(path, "Allrun.", allrun))
             {
-                //commands.Add("./Allrun");
-
                 string allclean = "#!/bin/sh" +
                     "\ncd ${0%/*} || exit 1    # run from this directory" +
                     "\n" +
@@ -454,7 +452,7 @@ namespace BIM.OpenFOAMExport
             SnappyHexMeshDict snappyHexMeshDictionary = new SnappyHexMeshDict(version, meshDict, null, SaveFormat.ascii, m_STLName, m_STLWallName, m_FacesInletOutlet);
 
             //runmanager have to know how much cpu's should be used
-            m_RunManager.DecomposeParDict = decomposeParDictionary;
+            m_RunManager.NumberOfSubdomains = decomposeParDictionary.NumberOfSubdomains;
 
             m_OpenFOAMDictionaries.Add(blockMeshDictionary);
             m_OpenFOAMDictionaries.Add(controlDictionary);
@@ -870,6 +868,9 @@ namespace BIM.OpenFOAMExport
                     //Element element = iterator.Current;
                     Element currentElement = iterator.Current;
 
+                    if (currentElement.Name.Contains(m_Settings.OpenFOAMObjectName))
+                        continue;
+
                     // check if element's category is in the list, if it is continue.
                     // if there are no selected categories, take anything.
                     if (BIM.OpenFOAMExport.Exporter.Instance.settings.SelectedCategories.Count > 0)
@@ -1029,7 +1030,6 @@ namespace BIM.OpenFOAMExport
             foreach (var element in BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Keys)
             {
                 string name = AutodeskHelperFunctions.GenerateNameFromElement(element);
-                //m_Writer.WriteSolidName(name, true);
 
                 GeometryElement geometry = null;
                 geometry = element.get_Geometry(m_ViewOptions);
@@ -1045,9 +1045,6 @@ namespace BIM.OpenFOAMExport
                     ScanGeomElement(m_ActiveDocument, geometry, null);
                     m_Writer.WriteSolidName(name, false);
                 }
-                ////write to stl-file
-                //ScanGeomElement(m_ActiveDocument, geometry, null);
-                //m_Writer.WriteSolidName(name, false);
             }
         }
 

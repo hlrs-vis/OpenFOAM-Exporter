@@ -1050,6 +1050,7 @@ namespace BIM.OpenFOAMExport
         private UIApplication m_Revit;
         private Dictionary<string, object> m_SimulationDefaultList;
 
+        //Folder-Dict
         private Dictionary<string, object> m_System;
         private Dictionary<string, object> m_Constant;
         private Dictionary<string, object> m_Null;
@@ -1067,14 +1068,20 @@ namespace BIM.OpenFOAMExport
         private ElementsExportRange m_ExportRange;
         private MeshType m_Mesh;
 
+        //Environment for simulation
         private OpenFOAMEnvironment m_openFOAMEnvironment;
 
+        //Includes all elements that represents MeshResolutionObject
         private Dictionary<Element, int> m_MeshResolutionObjects;
 
         private int inletCount;
 
         private int outletCount;
 
+        //Name of the OpenFOAM-FamilyInstance in Scene
+        private string m_OpenFOAMObjectName;
+
+        //Temperature for buoyant-Solver
         private double m_TempWall;
         private double m_TempOutlet;
         private double m_TempInlet;
@@ -1271,8 +1278,11 @@ namespace BIM.OpenFOAMExport
         public int InletCount { get => inletCount; set => inletCount = value; }
         //Getter-Setter for outletCount
         public int OutletCount { get => outletCount; set => outletCount = value; }
+        //Getter-Setter OpenFOAMObjectName
+        public string OpenFOAMObjectName { get => m_OpenFOAMObjectName; }
 
-
+        public CoeffsMethod SimpleCoeffs { get => m_SimpleCoeffs; set => m_SimpleCoeffs = value; }
+        public CoeffsMethod HierarchicalCoeffs { get => m_HierarchicalCoeffs; set => m_HierarchicalCoeffs = value; }
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1435,7 +1445,6 @@ namespace BIM.OpenFOAMExport
             }
         }
 
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -1497,6 +1506,7 @@ namespace BIM.OpenFOAMExport
             m_Outlets = new Dictionary<string, object>();
             m_Inlets = new Dictionary<string, object>();
             m_MeshResolutionObjects = new Dictionary<Element, int>();
+            m_OpenFOAMObjectName = "OpenFOAM";
 
             //Dictionary for setting default values in OpenFOAM-Tab
             m_SimulationDefaultList = new Dictionary<string, object>();
@@ -2070,17 +2080,17 @@ namespace BIM.OpenFOAMExport
             m_NumberOfSubdomains = numberOfSubdomains;
             m_MethodDecompose = methodDecompose;
 
-            m_SimpleCoeffs = new CoeffsMethod
+            SimpleCoeffs = new CoeffsMethod
             {
                 Delta = 0.001
             };
-            m_SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
+            SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
 
-            m_HierarchicalCoeffs = new CoeffsMethod
+            HierarchicalCoeffs = new CoeffsMethod
             {
                 Delta = 0.001
             };
-            m_HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
+            HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
             m_Order = "xyz";
             m_DataFile = "cellDecomposition";
         }
@@ -2410,8 +2420,8 @@ namespace BIM.OpenFOAMExport
             Dictionary<string, object> m_DecomposeParDict = new Dictionary<string, object>();
 
             m_DecomposeParDict.Add("method", m_MethodDecompose);
-            m_DecomposeParDict.Add("simpleCoeffs", m_SimpleCoeffs.ToDictionary());
-            Dictionary<string, object> hierarchical = m_HierarchicalCoeffs.ToDictionary();
+            m_DecomposeParDict.Add("simpleCoeffs", SimpleCoeffs.ToDictionary());
+            Dictionary<string, object> hierarchical = HierarchicalCoeffs.ToDictionary();
             hierarchical.Add("order", m_Order);
             m_DecomposeParDict.Add("hierarchicalCoeefs", hierarchical);
             m_DecomposeParDict.Add("manualCoeffs", new Dictionary<string, object> { { "dataFile", m_DataFile } });
@@ -2988,7 +2998,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _inlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _inlet.Attributes.Add("rpm      constant", properties.RPM);
-                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate / InletCount);
+                                        _inlet.Attributes.Add("flowRate     constant", properties.FlowRate/* / InletCount*/);
                                         param.Patches.Add(inlet.Key, _inlet);
                                         continue;
                                     }
@@ -3048,7 +3058,7 @@ namespace BIM.OpenFOAMExport
                                         v = new Vector3D(0, 0, 0);
                                         _outlet = new FOAMParameterPatch<dynamic>(type, uniform, v, pType);
                                         _outlet.Attributes.Add("rpm     constant", properties);
-                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate / OutletCount);
+                                        _outlet.Attributes.Add("flowRate    constant", properties.FlowRate/* / OutletCount*/);
                                         param.Patches.Add(outlet.Key, _outlet);
                                         continue;
                                     }

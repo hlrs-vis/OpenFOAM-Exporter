@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace BIM.OpenFOAMExport
 {
     /// <summary>
-    /// Class OpenFOAMExportCommand is the entry of the AddIn program.
+    /// Class OpenFOAMExportCommand is the entry of the AddIn program. Here its the direct export version.
     /// </summary>
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
@@ -41,14 +41,14 @@ namespace BIM.OpenFOAMExport
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             m_Revit = commandData.Application;
-            Result result = StartOpenFOAMExportFormButton();
+            Result result = StartOpenFOAMExportFormButtonDirect();
             return result;
         }
         
         /// <summary>
-        /// Generates OpenFOAMExportForm and shows it.
+        /// Generates OpenFOAMExportForm without showing it and starts simulation directly.
         /// </summary>
-        private Result StartOpenFOAMExportFormButton()
+        private Result StartOpenFOAMExportFormButtonDirect()
         {
             if (m_Revit == null)
                 return Result.Failed;

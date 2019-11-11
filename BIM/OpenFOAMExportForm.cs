@@ -34,6 +34,7 @@ using Autodesk.Revit.UI.Events;
 using System.IO;
 using Autodesk.Revit.UI.Selection;
 using utils;
+using System.Windows.Media.Media3D;
 
 namespace BIM.OpenFOAMExport
 {
