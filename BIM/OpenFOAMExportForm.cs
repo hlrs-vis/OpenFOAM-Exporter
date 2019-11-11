@@ -34,6 +34,7 @@ using Autodesk.Revit.UI.Events;
 using System.IO;
 using Autodesk.Revit.UI.Selection;
 using utils;
+using System.Windows.Media.Media3D;
 
 namespace BIM.OpenFOAMExport
 {
@@ -549,6 +550,20 @@ namespace BIM.OpenFOAMExport
                                 case "slurm":
                                     {
                                         slurm = Convert.ToBoolean(param.AsString());
+                                        break;
+                                    }
+                                case "distribution":
+                                    {
+                                        if(!m_LocationReg.IsMatch(param.AsString()))
+                                        {
+                                            MessageBox.Show("Wrong format for distribution.",
+                                                OpenFOAMExportResource.MESSAGE_BOX_TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                            break;
+                                        }
+                                        var vec = OpenFOAMTreeView.GetListFromVector3DString(param.AsString());
+                                        Vector3D vector = new Vector3D(vec[0], vec[1], vec[2]);
+                                        m_Settings.HierarchicalCoeffs.SetN(vector);
+                                        m_Settings.SimpleCoeffs.SetN(vector);
                                         break;
                                     }
                             }

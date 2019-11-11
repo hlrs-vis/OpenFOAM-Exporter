@@ -1267,6 +1267,9 @@ namespace BIM.OpenFOAMExport
         public int OutletCount { get => outletCount; set => outletCount = value; }
         //Getter-Setter OpenFOAMObjectName
         public string OpenFOAMObjectName { get => m_OpenFOAMObjectName; }
+
+        public CoeffsMethod SimpleCoeffs { get => m_SimpleCoeffs; set => m_SimpleCoeffs = value; }
+        public CoeffsMethod HierarchicalCoeffs { get => m_HierarchicalCoeffs; set => m_HierarchicalCoeffs = value; }
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1408,9 +1411,6 @@ namespace BIM.OpenFOAMExport
                 return m_SimulationDefaultList;
             }
         }
-
-        
-
 
         /// <summary>
         /// Constructor.
@@ -1688,17 +1688,17 @@ namespace BIM.OpenFOAMExport
             m_NumberOfSubdomains = numberOfSubdomains;
             m_MethodDecompose = methodDecompose;
 
-            m_SimpleCoeffs = new CoeffsMethod
+            SimpleCoeffs = new CoeffsMethod
             {
                 Delta = 0.001
             };
-            m_SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
+            SimpleCoeffs.SetN(new Vector3D(2, 2, 1));
 
-            m_HierarchicalCoeffs = new CoeffsMethod
+            HierarchicalCoeffs = new CoeffsMethod
             {
                 Delta = 0.001
             };
-            m_HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
+            HierarchicalCoeffs.SetN(new Vector3D(2, 2, 1));
             m_Order = "xyz";
             m_DataFile = "cellDecomposition";
         }
@@ -2027,8 +2027,8 @@ namespace BIM.OpenFOAMExport
             Dictionary<string, object> m_DecomposeParDict = new Dictionary<string, object>();
 
             m_DecomposeParDict.Add("method", m_MethodDecompose);
-            m_DecomposeParDict.Add("simpleCoeffs", m_SimpleCoeffs.ToDictionary());
-            Dictionary<string, object> hierarchical = m_HierarchicalCoeffs.ToDictionary();
+            m_DecomposeParDict.Add("simpleCoeffs", SimpleCoeffs.ToDictionary());
+            Dictionary<string, object> hierarchical = HierarchicalCoeffs.ToDictionary();
             hierarchical.Add("order", m_Order);
             m_DecomposeParDict.Add("hierarchicalCoeefs", hierarchical);
             m_DecomposeParDict.Add("manualCoeffs", new Dictionary<string, object> { { "dataFile", m_DataFile } });
