@@ -868,7 +868,7 @@ namespace BIM.OpenFOAMExport
                     //Element element = iterator.Current;
                     Element currentElement = iterator.Current;
 
-                    if (currentElement.Name.Contains(m_Settings.OpenFOAMObjectName))
+                    if (currentElement.Name.Contains(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMObjectName))
                         continue;
 
                     // check if element's category is in the list, if it is continue.

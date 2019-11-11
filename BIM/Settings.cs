@@ -1824,6 +1824,13 @@ namespace BIM.OpenFOAMExport
             }
             return "";
         }
+        private Vector3D getVector(FamilyInstance familyInstance, String paramName)
+        {
+            String s = getString(familyInstance,paramName);
+            List<double> vec = BIM.OpenFOAMExport.OpenFOAMUI.OpenFOAMTreeView.GetListFromVector3DString(s);
+            return new Vector3D(vec[0], vec[1], vec[2]);
+            
+        }
         private int getInt(FamilyInstance familyInstance, String paramName)
         {
             IList<Parameter> parameters = familyInstance.GetParameters(paramName);
@@ -1888,6 +1895,15 @@ namespace BIM.OpenFOAMExport
                 {
                     m_openFOAMEnvironment = OpenFOAMEnvironment.wsl;
                 }
+                String solverName = getString(instance,"solver");
+                if(solverName == "simpleFoam")
+                    AppSolverControlDict = SolverControlDict.simpleFoam;
+                if (solverName == "buoyantBoussinesqSimpleFoam")
+                    AppSolverControlDict = SolverControlDict.buoyantBoussinesqSimpleFoam;
+                Vector3D domainSplit = getVector(instance, "domainSplit");
+                m_HierarchicalCoeffs.SetN(domainSplit);
+                NumberOfSubdomains = getInt(instance,"numberOfSubdomains");
+                m_SimpleCoeffs.SetN(domainSplit);
 
             }
 
@@ -1899,6 +1915,11 @@ namespace BIM.OpenFOAMExport
             m_Constant.Clear();
             m_Null.Clear();
 
+            // if solver changes
+            InitFvSchemes();
+            InitFvSolutionRelaxationFactors();
+            InitFvSolutionSIMPLE();
+            InitFvSolutionSolver();
 
             if (!InitBIMData())
             {
