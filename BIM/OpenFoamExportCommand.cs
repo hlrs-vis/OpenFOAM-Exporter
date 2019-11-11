@@ -63,7 +63,7 @@ namespace BIM.OpenFOAMExport
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             //for repeating click-events
-            var iterator = System.Windows.Forms.Application.OpenForms.GetEnumerator();
+            System.Collections.IEnumerator iterator = System.Windows.Forms.Application.OpenForms.GetEnumerator();
             while(iterator.MoveNext())
             {
                 System.Windows.Forms.Form form = iterator.Current as System.Windows.Forms.Form;

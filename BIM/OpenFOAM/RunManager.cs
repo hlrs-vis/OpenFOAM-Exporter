@@ -56,9 +56,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private readonly OpenFOAMEnvironment m_Env;
 
         /// <summary>
-        /// DecomposPar-Dict for NumberOfSubdomains.
+        /// NumberOfSubdomains
         /// </summary>
-        private DecomposeParDict m_DecomposeParDict;
+        private int m_NumberOfSubdomains;
 
         /// <summary>
         /// TextBox-Form for install folder of simulation environment which will be called if installFolder not default path.
@@ -66,9 +66,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private OpenFOAMTextBoxForm m_OpenFOAMTxtForm;
 
         /// <summary>
-        /// Getter-Setter DecomposePar.
+        /// Getter-Setter for numberOfSubdomains.
         /// </summary>
-        public DecomposeParDict DecomposeParDict { set => m_DecomposeParDict = value; get => m_DecomposeParDict; }
+        public int NumberOfSubdomains { set => m_NumberOfSubdomains = value; get => m_NumberOfSubdomains; }
 
         /// <summary>
         /// Contructor.
@@ -167,14 +167,14 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             string log = " | tee " + @"log/";
             foreach (string command in commands)
             {
-                if (DecomposeParDict != null)
+                if (m_NumberOfSubdomains != 0)
                 {
-                    if(DecomposeParDict.NumberOfSubdomains != 1)
+                    if(m_NumberOfSubdomains > 1)
                     {
                         if (command.Equals("snappyHexMesh"))
                         {
                             runCommands.Add("decomposePar" + log + "decomposepar.log");
-                            runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -overwrite -parallel " + log + command + ".log");
+                            runCommands.Add("mpirun -np " + m_NumberOfSubdomains + " " + command + " -overwrite -parallel " + log + command + ".log");
                             runCommands.Add("reconstructParMesh -constant" + log + "reconstructParMesh.log");
                             continue;
                         }
@@ -182,7 +182,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                         {
                             runCommands.Add("decomposePar");
                             //runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
-                            runCommands.Add("mpirun -np " + DecomposeParDict.NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
+                            runCommands.Add("mpirun -np " + m_NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
                             runCommands.Add("reconstructPar -latestTime");
                             continue;
                         }

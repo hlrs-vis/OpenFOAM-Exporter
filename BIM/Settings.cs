@@ -1043,8 +1043,10 @@ namespace BIM.OpenFOAMExport
     /// </summary>
     public class Settings
     {
+        //Top-Level Dict
         private Dictionary<string, object> m_SimulationDefaultList;
 
+        //Folder-Dict
         private Dictionary<string, object> m_System;
         private Dictionary<string, object> m_Constant;
         private Dictionary<string, object> m_Null;
@@ -1053,16 +1055,20 @@ namespace BIM.OpenFOAMExport
         private ElementsExportRange m_ExportRange;
         private MeshType m_Mesh;
 
+        //Environment for simulation
         private OpenFOAMEnvironment m_openFOAMEnvironment;
 
+        //Includes all elements that represents MeshResolutionObject
         private Dictionary<Element, int> m_MeshResolutionObjects;
 
         private int inletCount;
 
         private int outletCount;
 
+        //Name of the OpenFOAM-FamilyInstance in Scene
         private string m_OpenFOAMObjectName;
 
+        //Temperature for buoyant-Solver
         private double m_TempWall;
         private double m_TempOutlet;
         private double m_TempInlet;
