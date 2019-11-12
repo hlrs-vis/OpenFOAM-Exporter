@@ -1924,6 +1924,14 @@ namespace BIM.OpenFOAMExport
                 if (formatControl.Equals("binary"))
                     m_WriteFormat = WriteFormat.binary;
 
+                //Temperature
+                double temp = getDouble(instance, "inletTemp");
+                m_TempInlet = temp;
+                temp = getDouble(instance, "outletTemp");
+                m_TempOutlet = temp;
+                temp = getDouble(instance, "wallTemp");
+                m_TempWall = temp;
+
                 //Refinement
                 int level = getInt(instance, "wallRefinement");
                 m_WallLevel = new Vector(level, level);
