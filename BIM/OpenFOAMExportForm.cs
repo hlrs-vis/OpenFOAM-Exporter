@@ -330,8 +330,8 @@ namespace BIM.OpenFOAMExport
                             BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution.Add(iterator.Current, param.AsInteger());
                         }
 
-                        if (instance.Name.Contains(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMObjectName))
-                        {
+                        //if (instance.Name.Contains(BIM.OpenFOAMExport.Exporter.Instance.settings.OpenFOAMObjectName))
+                        //{
                             //        switch (param.Definition.Name)
                             //        {
                             //            case "numberOfSubdomains":
@@ -441,7 +441,7 @@ namespace BIM.OpenFOAMExport
                             //m_Settings.SSH = ssh;
                             ////m_Settings.Update();
 
-                        }
+                        //}
 
                     }
                 }

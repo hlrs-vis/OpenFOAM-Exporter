@@ -9,8 +9,8 @@
     <VendorId>HLRS</VendorId>
     <VendorDescription>www.hlrs.de</VendorDescription>
   </AddIn>
-  <AddIn Type="Command">
-    <!--<Assembly>C:\src\covise\zebu\lib\OpenFOAMExporter_d.dll</Assembly>-->
+  <!--<AddIn Type="Command">
+    --><!--<Assembly>C:\src\covise\zebu\lib\OpenFOAMExporter_d.dll</Assembly>--><!--
     <Assembly>.\OpenFOAMExport.dll</Assembly>
     <ClientId>10a97048-ef29-446a-a2ef-ad092b7cd2b0</ClientId>
     <FullClassName>BIM.OpenFOAMExport.OpenFOAMExportCommand</FullClassName>
@@ -21,14 +21,14 @@
 	<VendorId>HLRS</VendorId>
   </AddIn>
   <AddIn Type="Command">
-    <!--<Assembly>C:\src\covise\zebu\lib\OpenFOAMExporter_d.dll</Assembly>-->
+    --><!--<Assembly>C:\src\covise\zebu\lib\OpenFOAMExporter_d.dll</Assembly>--><!--
     <Assembly>.\OpenFOAMExport.dll</Assembly>
     <ClientId>14af3397-0078-4762-9fe0-de496285f627</ClientId>
-    <FullClassName>BIM.OpenFOAMExport.OpenFOAMExportButtonCommand</FullClassName>
+    <FullClassName>BIM.OpenFOAMExport.OpenFoamSimulateCommand</FullClassName>
     <Text>ExportButton</Text>
     <Description>exports geometry and openFoam settings with a button click.</Description>
     <VisibilityMode>AlwaysVisible</VisibilityMode>
     <LanguageType>Unknown</LanguageType>
     <VendorId>HLRS</VendorId>
-  </AddIn>
+  </AddIn>-->
 </RevitAddIns>

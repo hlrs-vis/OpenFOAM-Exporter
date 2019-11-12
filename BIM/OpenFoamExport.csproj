@@ -153,6 +153,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OpenFOAMExportResource.resx</DependentUpon>
     </Compile>
+    <Compile Include="OpenFoamSimulateCommand.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMDropDownTreeNode.cs" />
     <Compile Include="OpenFOAMUI\OpenFOAMTextBoxForm.cs">
       <SubType>Form</SubType>
@@ -190,6 +191,11 @@
     <Compile Include="OpenFOAM\TurbulenceProperties.cs" />
     <Compile Include="OpenFOAM\U.cs" />
     <Compile Include="OpenFOAM\Version.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SaveData.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -258,6 +264,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\wind_32_reworked.png" />
   </ItemGroup>

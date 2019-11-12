@@ -1089,6 +1089,7 @@ namespace BIM.OpenFOAMExport
         //BlockMeshDict
         private Vector3D m_SimpleGrading;
         private Vector3D m_CellSize;
+        private double m_BlockMeshResolution;
 
         //ControlDict
         private SolverControlDict m_AppControlDictSolver;
@@ -1244,6 +1245,8 @@ namespace BIM.OpenFOAMExport
 
         //Getter-Setter Runmanager
         public OpenFOAMEnvironment OpenFOAMEnvironment { get => m_openFOAMEnvironment; set => m_openFOAMEnvironment = value; }
+        //Getter-Setter BlockMeshDict
+        public double BlockMeshResolution { get => m_BlockMeshResolution; }
 
         //Getter-Setter ControlDict        
         public SolverControlDict AppSolverControlDict { get => m_AppControlDictSolver; set => m_AppControlDictSolver = value; }
@@ -1445,6 +1448,8 @@ namespace BIM.OpenFOAMExport
             }
         }
 
+        
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -1526,6 +1531,7 @@ namespace BIM.OpenFOAMExport
 
             m_CellSize = new Vector3D(0, 0, 0);
             m_SimpleGrading = new Vector3D(1.0, 1.0, 1.0);
+            m_BlockMeshResolution = 1;
 
             //ControlDict
 
@@ -1872,12 +1878,15 @@ namespace BIM.OpenFOAMExport
             if (familyInstances.Count > 0)
             {
                 FamilyInstance instance = familyInstances[0];
+
+                //locationInMesh
                 Transform pos = instance.GetTransform();
                 m_LocationInMesh.X = pos.Origin.X;
                 m_LocationInMesh.Y = pos.Origin.Y;
                 m_LocationInMesh.Z = pos.Origin.Z;
                 m_LocationInMesh.Z += getDouble(instance, "height");
 
+                //environment
                 String foamEnv = getString(instance, "OpenFOAM Environment");
                 if(foamEnv == "ssh")
                 {
@@ -1896,7 +1905,9 @@ namespace BIM.OpenFOAMExport
                 {
                     m_openFOAMEnvironment = OpenFOAMEnvironment.wsl;
                 }
-                String solverName = getString(instance,"solver");
+
+                //Solver
+                string solverName = getString(instance,"solver");
                 if(solverName == "simpleFoam")
                     AppSolverControlDict = SolverControlDict.simpleFoam;
                 if (solverName == "buoyantBoussinesqSimpleFoam")
@@ -1906,6 +1917,23 @@ namespace BIM.OpenFOAMExport
                 NumberOfSubdomains = getInt(instance,"numberOfSubdomains");
                 m_SimpleCoeffs.SetN(domainSplit);
 
+                //for debug result
+                string formatControl = getString(instance, "writeFormat");
+                if (formatControl.Equals("ascii"))
+                    m_WriteFormat = WriteFormat.ascii;
+                if (formatControl.Equals("binary"))
+                    m_WriteFormat = WriteFormat.binary;
+
+                //Refinement
+                int level = getInt(instance, "wallRefinement");
+                m_WallLevel = new Vector(level, level);
+                level = getInt(instance, "inletRefinement");
+                m_InletLevel = new Vector(level, level);
+                level = getInt(instance, "outletRefinement");
+                m_OutletLevel = new Vector(level, level);
+
+                //BlockMesh-Resoltion
+                m_BlockMeshResolution = getDouble(instance, "blockMeshResolution");
             }
 
             Outlet.Clear();

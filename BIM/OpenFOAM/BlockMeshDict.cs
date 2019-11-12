@@ -127,9 +127,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private void InitDefaultCellSize()
         {
-            m_CellSize.X = Math.Round(m_VecUpperEdgeRight.X - m_VecLowerEdgeLeft.X);
-            m_CellSize.Y = Math.Round(m_VecUpperEdgeRight.Y - m_VecLowerEdgeLeft.Y);
-            m_CellSize.Z = Math.Round(m_VecUpperEdgeRight.Z - m_VecLowerEdgeLeft.Z);
+            double scalarRes = Exporter.Instance.settings.BlockMeshResolution;
+            m_CellSize.X = Math.Round(m_VecUpperEdgeRight.X - m_VecLowerEdgeLeft.X) * scalarRes;
+            m_CellSize.Y = Math.Round(m_VecUpperEdgeRight.Y - m_VecLowerEdgeLeft.Y) * scalarRes;
+            m_CellSize.Z = Math.Round(m_VecUpperEdgeRight.Z - m_VecLowerEdgeLeft.Z) * scalarRes;
         }
 
         /// <summary>
