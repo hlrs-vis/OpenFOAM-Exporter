@@ -183,7 +183,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                             runCommands.Add("decomposePar");
                             //runCommands.Add("mpirun -n " + DecomposeParDict.NumberOfSubdomains + " renumberMesh -overwrite -parallel");
                             runCommands.Add("mpirun -np " + m_NumberOfSubdomains + " " + command + " -parallel " + log + command + ".log");
-                            runCommands.Add("reconstructPar -latestTime");
+                            runCommands.Add("reconstructPar " + Exporter.Instance.settings.ReconstructParOption);
                             continue;
                         }
                     }

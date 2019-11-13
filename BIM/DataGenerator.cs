@@ -313,7 +313,7 @@ namespace BIM.OpenFOAMExport
                 //"\nrunParallel renumberMesh -overwrite" +
                 "\nrunParallel $(getApplication)" +
                 "\n" +
-                "\nrunApplication reconstructPar -latestTime" +
+                "\nrunApplication reconstructPar "+ Exporter.Instance.settings.ReconstructParOption +
                 "\n#------------------------------------------------------------------------------";
             }
             else

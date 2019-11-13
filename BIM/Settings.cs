@@ -1055,6 +1055,8 @@ namespace BIM.OpenFOAMExport
         private Dictionary<string, object> m_Constant;
         private Dictionary<string, object> m_Null;
 
+        private string m_ReconstructParOption;
+
         /// <summary>
         /// Current duct terminals in scene of the active document.
         /// </summary>
@@ -1083,8 +1085,9 @@ namespace BIM.OpenFOAMExport
 
         //Temperature for buoyant-Solver
         private double m_TempWall;
-        private double m_TempOutlet;
+        //private double m_TempOutlet;
         private double m_TempInlet;
+        private double m_TempInternalField;
 
         //BlockMeshDict
         private Vector3D m_SimpleGrading;
@@ -1286,6 +1289,8 @@ namespace BIM.OpenFOAMExport
 
         public CoeffsMethod SimpleCoeffs { get => m_SimpleCoeffs; set => m_SimpleCoeffs = value; }
         public CoeffsMethod HierarchicalCoeffs { get => m_HierarchicalCoeffs; set => m_HierarchicalCoeffs = value; }
+
+        public string ReconstructParOption { get => m_ReconstructParOption; set => m_ReconstructParOption = value; }
         /// <summary>
         /// Binary or ASCII STL file.
         /// </summary>
@@ -1448,7 +1453,9 @@ namespace BIM.OpenFOAMExport
             }
         }
 
-        
+
+
+
 
         /// <summary>
         /// Constructor.
@@ -1818,7 +1825,7 @@ namespace BIM.OpenFOAMExport
 
             double kelvin = 273.15;
             m_TempWall = kelvin + 25;
-            m_TempOutlet = kelvin + 25;
+            //m_TempOutlet = kelvin + 25;
             m_TempInlet = kelvin + 29;
         }
 
@@ -1912,6 +1919,8 @@ namespace BIM.OpenFOAMExport
                     AppSolverControlDict = SolverControlDict.simpleFoam;
                 if (solverName == "buoyantBoussinesqSimpleFoam")
                     AppSolverControlDict = SolverControlDict.buoyantBoussinesqSimpleFoam;
+
+                //distribution
                 Vector3D domainSplit = getVector(instance, "domainSplit");
                 m_HierarchicalCoeffs.SetN(domainSplit);
                 NumberOfSubdomains = getInt(instance,"numberOfSubdomains");
@@ -1927,10 +1936,14 @@ namespace BIM.OpenFOAMExport
                 //Temperature
                 double temp = getDouble(instance, "inletTemp");
                 m_TempInlet = temp;
-                temp = getDouble(instance, "outletTemp");
-                m_TempOutlet = temp;
+                //temp = getDouble(instance, "outletTemp");
+                //m_TempOutlet = temp;
                 temp = getDouble(instance, "wallTemp");
                 m_TempWall = temp;
+                temp = getDouble(instance, "internalTemp");
+                if (temp == -1)
+                    temp = 298.15;
+                m_TempInternalField = temp;
 
                 //Refinement
                 int level = getInt(instance, "wallRefinement");
@@ -1942,6 +1955,11 @@ namespace BIM.OpenFOAMExport
 
                 //BlockMesh-Resoltion
                 m_BlockMeshResolution = getDouble(instance, "blockMeshResolution");
+
+                //ReconstructParOption
+                m_ReconstructParOption = getString(instance, "reconstructParOption");
+                if (m_ReconstructParOption.Equals(""))
+                    m_ReconstructParOption = "-latestTime";
             }
 
             Outlet.Clear();
@@ -2930,7 +2948,7 @@ namespace BIM.OpenFOAMExport
                         parameter = new InitialParameter(param.ToString(), 0.1, model);
                         CreateFOAMParameterPatches(parameter, "kqRWallFunction", "uniform", 0.1, PatchType.wall, /*false*/true);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.1, PatchType.inlet, /*false*/true);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false*/true);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false/*true*/);
                         foreach (var outlet in parameter.Patches)
                         {
                             if (outlet.Value.Type == PatchType.outlet)
@@ -2945,7 +2963,7 @@ namespace BIM.OpenFOAMExport
                         parameter = new InitialParameter(param.ToString(), 0.01, model);
                         CreateFOAMParameterPatches(parameter, "epsilonWallFunction", "uniform", 0.01, PatchType.wall, true/*false*/);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", 0.01, PatchType.inlet, /*false */true);
-                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, /*false */true);
+                        CreateFOAMParameterPatches(parameter, "inletOutlet", "uniform", 0.1, PatchType.outlet, false /*true*/);
                         foreach(var outlet in parameter.Patches)
                         {
                             if(outlet.Value.Type == PatchType.outlet)
@@ -2974,10 +2992,10 @@ namespace BIM.OpenFOAMExport
 
                 case InitialFOAMParameter.T:
                     {
-                        parameter = new InitialParameter(param.ToString(), m_TransportModelParameter["TRef"], model);
+                        parameter = new InitialParameter(param.ToString(), m_TempInternalField/*m_TransportModelParameter["TRef"]*/, model);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempWall, PatchType.wall, false);
                         CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempInlet, PatchType.inlet, false);
-                        CreateFOAMParameterPatches(parameter, "fixedValue", "uniform", m_TempOutlet, PatchType.outlet, false);
+                        CreateFOAMParameterPatches<int>(parameter, "zeroGradient", "", default, PatchType.outlet, false);
                         break;
                     }
 
