@@ -176,6 +176,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         {
             Vector vec = new Vector();
             string name;
+
+            //patchtype dict
+            Dictionary<string, object> patchType = new Dictionary<string, object> { { "type", "patch" } };
+
             foreach (var face in m_Faces)
             {
                 name = face.Key.Key;
@@ -188,7 +192,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 {
                     vec = (Vector)m_SettingsCMC["outletLevel"];
                 }
-                m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec } });
+                m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec }, { "patchInfo", patchType } });
                 m_RegionsRefinementCastellated.Add("Terminal_" + name, new Dictionary<string, object>() { { level, vec} });
             }
             foreach (var entry in BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution)

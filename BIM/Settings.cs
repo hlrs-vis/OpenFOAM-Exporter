@@ -1960,6 +1960,11 @@ namespace BIM.OpenFOAMExport
                 m_ReconstructParOption = getString(instance, "reconstructParOption");
                 if (m_ReconstructParOption.Equals(""))
                     m_ReconstructParOption = "-latestTime";
+
+                //controlDict
+                m_EndTime = getInt(instance, "endTime");
+                if (m_EndTime == 0)
+                    m_EndTime = 100;
             }
 
             Outlet.Clear();
