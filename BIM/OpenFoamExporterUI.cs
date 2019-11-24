@@ -103,7 +103,7 @@ namespace BIM.OpenFOAMExport
             internal static readonly Exporter instance = new Exporter();
         }
     }
-        public class OpenFOAMExporterUI : IExternalApplication
+    public class OpenFOAMExporterUI : IExternalApplication
     {
         // Fields
         private static string AddInPath;

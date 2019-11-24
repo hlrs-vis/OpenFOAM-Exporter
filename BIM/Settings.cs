@@ -1829,7 +1829,7 @@ namespace BIM.OpenFOAMExport
             m_TempInlet = kelvin + 29;
         }
 
-        private String getString(FamilyInstance familyInstance, String paramName)
+        private string getString(FamilyInstance familyInstance, string paramName)
         {
             IList<Parameter> parameters = familyInstance.GetParameters(paramName);
             if (parameters.Count > 0)
@@ -1838,14 +1838,14 @@ namespace BIM.OpenFOAMExport
             }
             return "";
         }
-        private Vector3D getVector(FamilyInstance familyInstance, String paramName)
+        private Vector3D getVector(FamilyInstance familyInstance, string paramName)
         {
             String s = getString(familyInstance,paramName);
             List<double> vec = BIM.OpenFOAMExport.OpenFOAMUI.OpenFOAMTreeView.GetListFromVector3DString(s);
             return new Vector3D(vec[0], vec[1], vec[2]);
             
         }
-        private int getInt(FamilyInstance familyInstance, String paramName)
+        private int getInt(FamilyInstance familyInstance, string paramName)
         {
             IList<Parameter> parameters = familyInstance.GetParameters(paramName);
             if (parameters.Count > 0)
@@ -1854,7 +1854,7 @@ namespace BIM.OpenFOAMExport
             }
             return -1;
         }
-        private double getDouble(FamilyInstance familyInstance, String paramName)
+        private double getDouble(FamilyInstance familyInstance, string paramName)
         {
             IList<Parameter> parameters = familyInstance.GetParameters(paramName);
             if (parameters.Count > 0)
