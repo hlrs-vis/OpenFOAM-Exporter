@@ -1217,13 +1217,14 @@ namespace BIM.OpenFOAMExport
         /// <param name="faceNormal">Reference of the face normal.</param>
         /// <param name="solid">Solid that will be checked.</param>
         /// <returns>Face normal as XYZ object.</returns>
-        public static Face GetFace(List<ElementId> materialIds, Solid solid)
+        public static List<Face>/*Face*/ GetFace(List<ElementId> materialIds, Solid solid)
         {
             // a solid has many faces
             FaceArray faces = solid.Faces;
+            List<Face> materialFaces = new List<Face>();
             if (0 == faces.Size)
             {
-                return null;
+                return /*null*/materialFaces;
             }
 
             foreach (Face face in faces)
@@ -1238,10 +1239,11 @@ namespace BIM.OpenFOAMExport
                 }
                 if (materialIds.Contains(face.MaterialElementId))
                 {
-                    return face;
+                    //return face;
+                    materialFaces.Add(face);
                 }
             }
-            return null;
+            return materialFaces/*null*/;
         }
 
 

@@ -1600,7 +1600,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="instance">Familyinstance.</param>
         /// <param name="func">Face-function/methode.</param>
         /// <returns>Parameter as type T.</returns>
-        private T GetSurfaceParameter<T>(FamilyInstance instance, Func<Face, T> func)
+        private T GetSurfaceParameter<T>(FamilyInstance instance, Func</*Face*/List<Face>, T> func)
         {
             T value = default(T);
             var m_ViewOptions = m_Revit.Application.Create.NewGeometryOptions();
@@ -1616,10 +1616,14 @@ namespace BIM.OpenFOAMExport
                     continue;
                 }
 
-                Face face = DataGenerator.GetFace(m_InletOutletMaterials, solid);
-                if (face != null)
+                List<Face>/*Face*/ faces = DataGenerator.GetFace(m_InletOutletMaterials, solid);
+                //if (face /*!= null*/)
+                //{
+                //   value = func(faces);
+                //}
+                if(faces.Count > 0)
                 {
-                    value = func(face);
+                    value = func(faces);
                 }
             }
             return value;
@@ -1630,10 +1634,10 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         /// <param name="face">Face object.</param>
         /// <returns>Facenormal as xyz object.</returns>
-        private XYZ GetFaceNormal(Face face)
+        private XYZ GetFaceNormal(List<Face>/*Face*/ faces)
         {
             UV point = new UV();
-            return face.ComputeNormal(point);
+            return faces[0].ComputeNormal(point);
         }
 
         /// <summary>
@@ -1641,9 +1645,15 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         /// <param name="face">Face object.</param>
         /// <returns>Area of the face as double.</returns>
-        private double GetFaceArea(Face face)
+        private double GetFaceArea(/*Face*/List<Face> faces)
         {
-            return UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+            double area = 0;
+            foreach(Face face in faces)
+            {
+                area += UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
+            }
+            return area;
+            //return UnitUtils.ConvertFromInternalUnits(face.Area, DisplayUnitType.DUT_SQUARE_METERS);
         }
 
         /// <summary>
@@ -1651,17 +1661,29 @@ namespace BIM.OpenFOAMExport
         /// </summary>
         /// <param name="face">Face object.</param>
         /// <returns>Boundary of the face as double.</returns>
-        private double GetFaceBoundary(Face face)
+        private double GetFaceBoundary(/*Face*/List<Face> faces)
         {
-            var edges = face.EdgeLoops;
             double boundary = 0;
-            if (!edges.IsEmpty && edges != null)
+            foreach (Face face in faces)
             {
-                foreach (Edge edge in edges.get_Item(0) as EdgeArray)
+                var edges = face.EdgeLoops;
+                if (!edges.IsEmpty && edges != null)
                 {
-                    boundary += Math.Round(UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS), 2);
+                    foreach (Edge edge in edges.get_Item(0) as EdgeArray)
+                    {
+                        boundary += Math.Round(UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS), 2);
+                    }
                 }
             }
+            //var edges = face.EdgeLoops;
+            //double boundary = 0;
+            //if (!edges.IsEmpty && edges != null)
+            //{
+            //    foreach (Edge edge in edges.get_Item(0) as EdgeArray)
+            //    {
+            //        boundary += Math.Round(UnitUtils.ConvertFromInternalUnits(edge.ApproximateLength, DisplayUnitType.DUT_METERS), 2);
+            //    }
+            //}
             return boundary;
         }
 
@@ -2020,6 +2042,7 @@ namespace BIM.OpenFOAMExport
             foreach (Element element in m_DuctTerminals)
             {
                 FamilyInstance instance = element as FamilyInstance;
+                string nameDuct = AutodeskHelperFunctions.GenerateNameFromElement(element);
                 XYZ faceNormal = GetSurfaceParameter(instance, GetFaceNormal);
                 double faceBoundary = GetSurfaceParameter(instance, GetFaceBoundary);
                 double surfaceArea = Math.Round(GetSurfaceParameter(instance, GetFaceArea), 2);
@@ -2072,7 +2095,7 @@ namespace BIM.OpenFOAMExport
                         return false;
                     }
                 }
-                string nameDuct = AutodeskHelperFunctions.GenerateNameFromElement(element);
+                //string nameDuct = AutodeskHelperFunctions.GenerateNameFromElement(element);
 
                 if (nameDuct.Contains("Abluft") || nameDuct.Contains("Outlet"))
                 {
