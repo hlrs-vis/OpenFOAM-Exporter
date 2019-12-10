@@ -31,7 +31,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <summary>
         /// Contains inlet and outlet as Faces
         /// </summary>
-        private readonly Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_Faces;
+        private readonly Dictionary<KeyValuePair<string, Document>, KeyValuePair<List<Face>/*Face*/, Transform>> m_Faces;
 
         /// <summary>
         /// Simulation default => castellatedMeshControls.
@@ -62,7 +62,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="stlName">Name of the STL</param>
         /// <param name="faces">Outlet & Inlet as Faces in a Dictionary with name as Key.</param>
         public SnappyHexMeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, string stlName, string stlWallName,
-            Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> faces)
+            Dictionary<KeyValuePair<string, Document>, KeyValuePair<List<Face>/*Face*/, Transform>> faces)
             : base("snappyHexMeshDict", "dictionary", version, path, attributes, format)
         {
             m_STLName = stlName;

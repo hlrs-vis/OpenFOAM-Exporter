@@ -113,7 +113,7 @@ namespace BIM.OpenFOAMExport
         /// <summary>
         /// Faces of the inlet/outlet for openFOAM-Simulation
         /// </summary>
-        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face, Transform>> m_FacesInletOutlet;
+        private Dictionary<KeyValuePair<string, Document>, KeyValuePair<List<Face>/*Face*/, Transform>> m_FacesInletOutlet;
 
         /// <summary>
         /// Number of triangles in exported Revit document.
@@ -969,7 +969,7 @@ namespace BIM.OpenFOAMExport
         {
             //close wall section
             m_Writer.WriteSolidName(stlName, false);
-            m_FacesInletOutlet = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<Face,Transform>>();
+            m_FacesInletOutlet = new Dictionary<KeyValuePair<string, Document>, KeyValuePair<List<Face>/*Face*/,Transform>>();
             foreach (var elements in terminals)
             {
                 foreach (Element elem in elements.Value)
@@ -983,7 +983,7 @@ namespace BIM.OpenFOAMExport
                     }
 
                     //need transform for inlet/outlet-face and the face itself.
-                    KeyValuePair<Face, Transform> inletOutlet = ExtractMaterialFaces(elements.Key, geometry, null, m_InletOutletMaterials);
+                    KeyValuePair<List<Face>/*Face*/, Transform> inletOutlet = ExtractMaterialFaces(elements.Key, geometry, null, m_InletOutletMaterials);
                     if (inletOutlet.Key != null)
                     {
                         KeyValuePair<string, Document> inletOutletID = new KeyValuePair<string, Document>(
@@ -1005,19 +1005,33 @@ namespace BIM.OpenFOAMExport
             //begin to write inlet/oulet-face to stl
             foreach (var face in m_FacesInletOutlet)
             {
-                Face currentFace = face.Value.Key;
-
                 //face.Key.Key = Name + ID
-                m_Writer.WriteSolidName(face.Key.Key,true);
-                Mesh mesh = currentFace.Triangulate();
-                if(mesh == null)
+                m_Writer.WriteSolidName(face.Key.Key, true);
+                foreach (Face currentFace in face.Value.Key)
                 {
-                    continue;
+                    Mesh mesh = currentFace.Triangulate();
+                    if (mesh == null)
+                    {
+                        continue;
+                    }
+                    //face.Key.Value = Document ; face.Value.Value = transform
+                    WriteFaceToSTL(face.Key.Value, mesh, currentFace, face.Value.Value);
                 }
-
-                //face.Key.Value = Document ; face.Value.Value = transform
-                WriteFaceToSTL(face.Key.Value, mesh, currentFace, face.Value.Value);
                 m_Writer.WriteSolidName(face.Key.Key, false);
+
+                //Face currentFace = face.Value.Key;
+
+                ////face.Key.Key = Name + ID
+                //m_Writer.WriteSolidName(face.Key.Key,true);
+                //Mesh mesh = currentFace.Triangulate();
+                //if(mesh == null)
+                //{
+                //    continue;
+                //}
+
+                ////face.Key.Value = Document ; face.Value.Value = transform
+                //WriteFaceToSTL(face.Key.Value, mesh, currentFace, face.Value.Value);
+                //m_Writer.WriteSolidName(face.Key.Key, false);
             }
         }
 
@@ -1056,17 +1070,18 @@ namespace BIM.OpenFOAMExport
         /// <param name="transform"></param>
         /// <param name="materialList"></param>
         /// <returns></returns>
-        private KeyValuePair<Face, Transform> ExtractMaterialFaces(Document document, GeometryElement geometry,
+        private KeyValuePair<List<Face>/*Face*/, Transform> ExtractMaterialFaces(Document document, GeometryElement geometry,
             Transform transform, List<ElementId> materialList)
         {
-            KeyValuePair<Face, Transform> face = new KeyValuePair<Face, Transform>();
+            KeyValuePair<List<Face>/*Face*/, Transform> face = new KeyValuePair<List<Face>/*Face*/, Transform>();
             foreach (GeometryObject gObject in geometry)
             {
                 Solid solid = gObject as Solid;
                 if (null != solid)
                 {
-                    KeyValuePair<Face, Transform> keyValuePair = new KeyValuePair<Face, Transform>(ScanForMaterialFace(document, solid, transform, materialList), transform);
-                    if (keyValuePair.Key != null)
+                    KeyValuePair<List<Face>/*Face*/, Transform> keyValuePair = new KeyValuePair<List<Face>/*Face*/, Transform>
+                        (ScanForMaterialFace(document, solid, transform, materialList), transform);
+                    if (keyValuePair.Key.Count > 0/*!= null*/)
                     {
                         face = keyValuePair;
                         //break;
@@ -1108,15 +1123,16 @@ namespace BIM.OpenFOAMExport
         /// <param name="solid">Solid object that includes the inlet/outlet.</param>
         /// <param name="transform">The transformation.</param>
         /// <returns>Inlet/Outlet as a Face-object.</returns>
-        private Face ScanForMaterialFace(Document document, Solid solid, Transform transform, List<ElementId> materialList)
+        private List<Face>/*Face*/ ScanForMaterialFace(Document document, Solid solid, Transform transform, List<ElementId> materialList)
         {
-            Face faceItem = null;
-
+            // Face faceItem = null;
+            List<Face> faceItems = new List<Face>();
             // a solid has many faces
             FaceArray faces = solid.Faces;
             if (0 == faces.Size)
             {
-                return faceItem;
+                //return faceItem;
+                return faceItems;
             }
             foreach (Face face in faces)
             {
@@ -1138,14 +1154,15 @@ namespace BIM.OpenFOAMExport
                 m_TriangularNumber += mesh.NumTriangles;
                 if (materialList.Contains(face.MaterialElementId))
                 {
-                    faceItem = face;
+                    //faceItem = face;
+                    faceItems.Add(face);
                     continue;
                 }
 
                 //if face is not a inlet/outlet write it to the wall section of the stl.
                 WriteFaceToSTL(document, mesh, face, transform);
             }
-            return faceItem;//valuePair;
+            return faceItems/*faceItem*/;//valuePair;
         }
 
         /// <summary>
@@ -1200,13 +1217,14 @@ namespace BIM.OpenFOAMExport
         /// <param name="faceNormal">Reference of the face normal.</param>
         /// <param name="solid">Solid that will be checked.</param>
         /// <returns>Face normal as XYZ object.</returns>
-        public static Face GetFace(List<ElementId> materialIds, Solid solid)
+        public static List<Face>/*Face*/ GetFace(List<ElementId> materialIds, Solid solid)
         {
             // a solid has many faces
             FaceArray faces = solid.Faces;
+            List<Face> materialFaces = new List<Face>();
             if (0 == faces.Size)
             {
-                return null;
+                return /*null*/materialFaces;
             }
 
             foreach (Face face in faces)
@@ -1221,10 +1239,11 @@ namespace BIM.OpenFOAMExport
                 }
                 if (materialIds.Contains(face.MaterialElementId))
                 {
-                    return face;
+                    //return face;
+                    materialFaces.Add(face);
                 }
             }
-            return null;
+            return materialFaces/*null*/;
         }
 
 
