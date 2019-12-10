@@ -337,7 +337,7 @@ namespace BIM.OpenFOAMExport
             value = _value;
             type = _type;
             patchType = _patchType;
-            if(_value != default && !_uniform.Equals(""))
+            if (!_value.Equals(default) && !_uniform.Equals(""))
             {
                 attributes = new Dictionary<string, object>
                 {
