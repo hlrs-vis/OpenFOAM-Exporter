@@ -126,7 +126,7 @@ namespace BIM.OpenFOAMExport
 
                 Exporter.Instance.settings = new Settings(SaveFormat.ascii, ElementsExportRange.OnlyVisibleOnes, true, true,
                     false, false,
-                    false, 0, 101, 1, 100, 0, 8, 7, 4);
+                    false, 0, 101, 1, 100, 2/*purgeWrite*/, 8, 7, 4);
 
                 string str = "OpenFOAM Exporter";
                 RibbonPanel panel = application.CreateRibbonPanel(str);

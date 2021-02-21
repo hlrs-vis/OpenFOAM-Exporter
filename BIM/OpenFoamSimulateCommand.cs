@@ -21,6 +21,7 @@
 // Author: Marko Djuric
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using utils;
@@ -67,9 +68,13 @@ namespace BIM.OpenFOAMExport
             m_Revit = commandData.Application;
 
             BIM.OpenFOAMExport.Exporter.Instance.settings.setDocument(m_Revit);
-            string fileName =@"c:\data\Draeger\foam\testFoamOnly.stl";
+            string fileName = "wallSTL.stl";
             // save Revit document's triangular data in a temporary file, generate openFOAM-casefolder and start simulation
-           
+
+            Directory.CreateDirectory(BIM.OpenFOAMExport.Exporter.Instance.settings.localCaseFolder);
+            Directory.CreateDirectory(BIM.OpenFOAMExport.Exporter.Instance.settings.localCaseFolder + "\\constant");
+            Directory.CreateDirectory(BIM.OpenFOAMExport.Exporter.Instance.settings.localCaseFolder + "\\constant\\triSurface");
+
             DataGenerator Generator = new DataGenerator(m_Revit.Application, m_Revit.ActiveUIDocument.Document);
             DataGenerator.GeneratorStatus succeed = Generator.SaveSTLFile(fileName);
 

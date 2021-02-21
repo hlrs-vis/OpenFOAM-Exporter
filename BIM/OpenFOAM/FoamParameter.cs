@@ -9,9 +9,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
     public abstract class FOAMParameter<T> : FOAMDict
     {
         /// <summary>
-        /// Name of the patch wall
+        /// String- list of all patch-names of the walls
         /// </summary>
-        protected string m_WallName;
+        protected List<string> m_WallNames;
 
         /// <summary>
         /// ValueType for entries in boundaryField
@@ -27,6 +27,11 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// String-array with all patchnames of the outlets
         /// </summary>
         protected List<string> m_OutletNames;
+
+        /// <summary>
+        /// String-array with all patch-names of the slip type walls
+        /// </summary>
+        protected List<string> m_SlipNames;
 
         /// <summary>
         /// Struct for internalField-entry
@@ -81,13 +86,14 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="_wallName">Name of the patch wall.</param>
         /// <param name="_InletNames">Patchnames of the inlets as string-array.</param>
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
-        public FOAMParameter(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _name, string _class, string _wallName,
-            List<string> _InletNames, List<string> _OutletNames)
+        public FOAMParameter(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _name, string _class, List<string> _wallNames,
+            List<string> _InletNames, List<string> _OutletNames, List<string> _SlipNames)
             : base(_name, _class, version, path, attributes, format)
         {
-            m_WallName = _wallName;
+            m_WallNames = _wallNames;
             m_InletNames = _InletNames;
             m_OutletNames = _OutletNames;
+            m_SlipNames = _SlipNames;
             m_Uniform = "uniform";
             m_Dimensions = new int[7];
             m_BoundaryField = new Dictionary<string, object>();
@@ -101,7 +107,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         public override void InitAttributes()
         {
             FOAMParameterPatch<dynamic> patch = (FOAMParameterPatch<dynamic>)m_DictFile["wall"];
-            m_BoundaryField.Add(m_WallName, patch.Attributes);
+            foreach (string s in m_WallNames)
+            {
+                m_BoundaryField.Add(s, patch.Attributes);
+            }
+
+            //TODO Add SlipWalls
 
             foreach (string s in m_OutletNames)
             {

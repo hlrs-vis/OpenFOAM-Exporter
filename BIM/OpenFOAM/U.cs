@@ -24,9 +24,9 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// <param name="_wallName">Name of the patch wall.</param>
         /// <param name="_InletNames">Patchnames of the inlets as string-array.</param>
         /// <param name="_OutletNames">Patchnames of the outlets as string-array.</param>
-        public U(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, string _wallName,
-            List<string> _InletNames, List<string> _OutletNames)
-            :base(version, path, attributes, format, settings, "U", "volVectorField", _wallName, _InletNames, _OutletNames)
+        public U(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Settings settings, List<string> _wallNames,
+            List<string> _InletNames, List<string> _OutletNames, List<string> _SlipNames)
+            :base(version, path, attributes, format, settings, "U", "volVectorField", _wallNames, _InletNames, _OutletNames,_SlipNames)
         {
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using Autodesk.Revit.DB;
 using System.Windows.Media.Media3D;
@@ -109,12 +110,33 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private void InitGeometry()
         {
             InitGeometryRegions();
-            m_Stl.Add("type", "triSurfaceMesh");
-            m_Stl.Add(nameGeometry, m_STLName);
-            m_Stl.Add(regions, m_Regions);
 
-            string nameWithExtension = m_STLName + ".stl";
-            m_Geometry.Add(nameWithExtension, m_Stl);
+            bool singleSTLFile = false;
+            if (!singleSTLFile)
+            {
+
+                foreach (Dictionary<string, object> region in m_Regions.Values)
+                {
+                    Dictionary<string, object> regionDict = new Dictionary<string, object>();
+                    regionDict.Add("type", "triSurfaceMesh");
+                    string regName = region["name"] as string;
+                    Dictionary<string, object> nameDict = new Dictionary<string, object>();
+                    nameDict.Add(regions, region);
+                    regionDict.Add(nameGeometry, regName);
+                    regionDict.Add(regName, nameDict);
+                    string nameWithExtension = regName + ".stl";
+                    m_Geometry.Add(nameWithExtension, regionDict);
+                }
+            }
+            else
+            {
+
+                    m_Stl.Add("type", "triSurfaceMesh");
+                    m_Stl.Add(nameGeometry, m_STLName);
+                    m_Stl.Add(regions, m_Regions);
+                    string nameWithExtension = m_STLName + ".stl";
+                m_Geometry.Add(nameWithExtension, m_Stl);
+            }
         }
 
         /// <summary>
@@ -130,8 +152,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 //face.Key.Key = Name + ID
                 name = face.Key.Key;
                 name = name.Replace(" ", "_");
+                //m_Regions.Add(name, new Dictionary<string, object> { { nameGeometry, name } });
                 m_Regions.Add(name, new Dictionary<string, object> { { nameGeometry, name } });
-                m_Regions.Add("Terminal_" + name, new Dictionary<string, object> { { nameGeometry, "Terminal_" + name } });
             }
         }
 
@@ -163,10 +185,22 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private void InitRefinementSurfaces()
         {
-            InitRegionsRefinement();
             m_StlRefinement.Add(level, m_SettingsCMC["wallLevel"]);
-            m_StlRefinement.Add(regions, m_RegionsRefinementCastellated);
-            m_RefinementSurfaces.Add(m_STLName, m_StlRefinement);
+            bool singleSTLFile = false;
+            if (!singleSTLFile)
+            {
+
+                //m_StlRefinement.Add(regions, m_RegionsRefinementCastellated);
+                //m_RefinementSurfaces.Add(m_STLName, m_RegionsRefinementCastellated);
+                m_RefinementSurfaces.Add(m_STLName, m_StlRefinement);
+                InitRegionsRefinement();
+            }
+            else
+            {
+                InitRegionsRefinement();
+                m_StlRefinement.Add(regions, m_RegionsRefinementCastellated);
+                m_RefinementSurfaces.Add(m_STLName, m_StlRefinement);
+            }
         }
 
         /// <summary>
@@ -192,8 +226,8 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 {
                     vec = (Vector)m_SettingsCMC["outletLevel"];
                 }
-                m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec }, { "patchInfo", patchType } });
-                m_RegionsRefinementCastellated.Add("Terminal_" + name, new Dictionary<string, object>() { { level, vec} });
+                m_RefinementSurfaces.Add(name, new Dictionary<string, object>() { { level, vec }, { "patchInfo", patchType } });
+                //m_RegionsRefinementCastellated.Add(name, new Dictionary<string, object>() { { level, vec} });
             }
             foreach (var entry in BIM.OpenFOAMExport.Exporter.Instance.settings.MeshResolution)
             {
@@ -208,7 +242,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 if (name.Contains("Zuluft") || name.Contains("Abluft") || name.Contains("Outlet") || name.Contains("Inlet"))
                 {
                     //name = "Terminal_" + name;
-                    m_RegionsRefinementCastellated["Terminal_" + name] = new Dictionary<string, object>() { { level, vec } };
+                    m_RegionsRefinementCastellated[name] = new Dictionary<string, object>() { { level, vec } };
                 }
                 else
                 {

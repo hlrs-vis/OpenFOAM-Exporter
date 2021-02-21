@@ -369,6 +369,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                 }
 
                 foamFile = new StreamWriter(m_Path);
+                foamFile.NewLine = "\n";
                 fileAttribute = File.GetAttributes(m_Path) | fileAttribute;
                 File.SetAttributes(m_Path, fileAttribute);
             }

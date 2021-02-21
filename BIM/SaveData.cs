@@ -65,7 +65,7 @@ namespace BIM.OpenFOAMExport
         /// <param name="format">File format.</param>
         public SaveData(string fileName, SaveFormat format)
         {
-            m_FileName = fileName;
+            m_FileName = BIM.OpenFOAMExport.Exporter.Instance.settings.localCaseFolder + "\\constant\\triSurface\\"+fileName;
             m_SaveFormat = format;
         }
 
@@ -368,6 +368,7 @@ namespace BIM.OpenFOAMExport
                 }
 
                 stlFile = new StreamWriter(m_FileName);
+                stlFile.NewLine = "\n";
                 fileAttribute = File.GetAttributes(m_FileName) | fileAttribute;
                 File.SetAttributes(m_FileName, fileAttribute);
 

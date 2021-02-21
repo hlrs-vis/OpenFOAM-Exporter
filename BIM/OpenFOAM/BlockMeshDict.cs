@@ -68,8 +68,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         public BlockMeshDict(Version version, string path, Dictionary<string, object> attributes, SaveFormat format, Vector3D vecLowerEdgeLeft, Vector3D vecUpperEdgeRight)
             : base("blockMeshDict", "dictionary", version, path, attributes, format)
         {
+
             m_VecLowerEdgeLeft = vecLowerEdgeLeft;
             m_VecUpperEdgeRight = vecUpperEdgeRight;
+
 
             m_Vertices = new ArrayList();
             m_Edges = new ArrayList();
@@ -88,12 +90,12 @@ namespace BIM.OpenFOAMExport.OpenFOAM
             m_SimpleGrading = (Vector3D)m_DictFile["simpleGrading"];
             EnlargeBoundingboxVector(1);
             m_CellSize = (Vector3D)m_DictFile["cellSize"];
+
+            InitBoundingboxFromPoints();
             if (m_CellSize.Length == 0)
             {
                 InitDefaultCellSize();
             }
-
-            InitBoundingboxFromPoints();
             InitBlocks();
             InitEdges();
             InitBoundary();
@@ -111,14 +113,39 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private void InitBoundingboxFromPoints()
         {
-            m_Vertices.Add(m_VecLowerEdgeLeft);
-            m_Vertices.Add(new Vector3D(m_VecUpperEdgeRight.X, m_VecLowerEdgeLeft.Y, m_VecLowerEdgeLeft.Z));
-            m_Vertices.Add(new Vector3D(m_VecUpperEdgeRight.X, m_VecUpperEdgeRight.Y, m_VecLowerEdgeLeft.Z));
-            m_Vertices.Add(new Vector3D(m_VecLowerEdgeLeft.X, m_VecUpperEdgeRight.Y, m_VecLowerEdgeLeft.Z));
-            m_Vertices.Add(new Vector3D(m_VecLowerEdgeLeft.X, m_VecLowerEdgeLeft.Y, m_VecUpperEdgeRight.Z));
-            m_Vertices.Add(new Vector3D(m_VecUpperEdgeRight.X, m_VecLowerEdgeLeft.Y, m_VecUpperEdgeRight.Z));
-            m_Vertices.Add(m_VecUpperEdgeRight);
-            m_Vertices.Add(new Vector3D(m_VecLowerEdgeLeft.X, m_VecUpperEdgeRight.Y, m_VecUpperEdgeRight.Z));
+            Settings s = Exporter.Instance.settings;
+            if (s.DomainX.IsZeroLength())
+            {
+                m_Vertices.Add(m_VecLowerEdgeLeft);
+                m_Vertices.Add(new Vector3D(m_VecUpperEdgeRight.X, m_VecLowerEdgeLeft.Y, m_VecLowerEdgeLeft.Z));
+                m_Vertices.Add(new Vector3D(m_VecUpperEdgeRight.X, m_VecUpperEdgeRight.Y, m_VecLowerEdgeLeft.Z));
+                m_Vertices.Add(new Vector3D(m_VecLowerEdgeLeft.X, m_VecUpperEdgeRight.Y, m_VecLowerEdgeLeft.Z));
+                m_Vertices.Add(new Vector3D(m_VecLowerEdgeLeft.X, m_VecLowerEdgeLeft.Y, m_VecUpperEdgeRight.Z));
+                m_Vertices.Add(new Vector3D(m_VecUpperEdgeRight.X, m_VecLowerEdgeLeft.Y, m_VecUpperEdgeRight.Z));
+                m_Vertices.Add(m_VecUpperEdgeRight);
+                m_Vertices.Add(new Vector3D(m_VecLowerEdgeLeft.X, m_VecUpperEdgeRight.Y, m_VecUpperEdgeRight.Z));
+
+            }
+            else
+            { 
+                m_Vertices.Add(new Vector3D(s.DomainOrigin.X, s.DomainOrigin.Y, s.DomainOrigin.Z));
+                Autodesk.Revit.DB.XYZ tmp = s.DomainOrigin+s.DomainX;
+                m_VecLowerEdgeLeft = new Vector3D(tmp.X, tmp.Y, tmp.Z);
+                m_Vertices.Add(new Vector3D(tmp.X,tmp.Y,tmp.Z));
+                tmp = s.DomainOrigin + s.DomainX + s.DomainY;
+                m_Vertices.Add(new Vector3D(tmp.X, tmp.Y, tmp.Z));
+                tmp = s.DomainOrigin + s.DomainY;
+                m_Vertices.Add(new Vector3D(tmp.X, tmp.Y, tmp.Z));
+                tmp = s.DomainOrigin + s.DomainZ;
+                m_Vertices.Add(new Vector3D(tmp.X, tmp.Y, tmp.Z));
+                tmp = s.DomainOrigin + s.DomainZ + s.DomainX;
+                m_Vertices.Add(new Vector3D(tmp.X, tmp.Y, tmp.Z));
+                tmp = s.DomainOrigin + s.DomainZ + s.DomainX + s.DomainY;
+                m_Vertices.Add(new Vector3D(tmp.X, tmp.Y, tmp.Z));
+                m_VecUpperEdgeRight = new Vector3D(tmp.X, tmp.Y, tmp.Z);
+                tmp = s.DomainOrigin + s.DomainZ + s.DomainY;
+                m_Vertices.Add(new Vector3D(tmp.X, tmp.Y, tmp.Z));
+            }
 
         }
 
@@ -157,7 +184,10 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         /// </summary>
         private void InitBoundary()
         {
-            Dictionary<string, object> boundingBox = new Dictionary<string, object>()
+            Settings s = Exporter.Instance.settings;
+            if (s.DomainX.IsZeroLength()) // no ComputationalDomain Family instance
+            {
+                Dictionary<string, object> boundingBox = new Dictionary<string, object>()
             {
                 {"type", "wall"} ,
                 {"faces", new ArrayList {
@@ -169,7 +199,54 @@ namespace BIM.OpenFOAMExport.OpenFOAM
                           {new int[]{ 2, 3, 7, 6 } } }
                 }
             };
-            m_Boundary.Add(new KeyValuePair<string,object>("boundingBox",boundingBox));
+                m_Boundary.Add(new KeyValuePair<string, object>("boundingBox", boundingBox));
+            }
+            else
+            {
+
+                Dictionary<string, object> frontAndBack = new Dictionary<string, object>()
+                {
+                    {"type", "wall"} ,
+                    {"faces", new ArrayList {
+                              {new int[]{ 1, 2, 6, 5 } },
+                              {new int[]{ 3, 0, 4, 7 } }}
+                    }
+                };
+                m_Boundary.Add(new KeyValuePair<string, object>("frontAndBack", frontAndBack));
+
+                Dictionary<string, object> inlet = new Dictionary<string, object>()
+                {
+                    {"type", "patch"} ,
+                    {"faces", new ArrayList {
+                              {new int[]{ 0, 1, 5, 4 } }}
+                    }
+                };
+                m_Boundary.Add(new KeyValuePair<string, object>("inlet", inlet));
+                Dictionary<string, object> outlet = new Dictionary<string, object>()
+                {
+                    {"type", "patch"} ,
+                    {"faces", new ArrayList {
+                              {new int[]{ 2, 3, 7, 6 } }}
+                    }
+                };
+                m_Boundary.Add(new KeyValuePair<string, object>("outlet", outlet));
+                Dictionary<string, object> lowerWall = new Dictionary<string, object>()
+                {
+                    {"type", "wall"} ,
+                    {"faces", new ArrayList {
+                              {new int[]{ 0, 3, 2, 1 } }}
+                    }
+                };
+                m_Boundary.Add(new KeyValuePair<string, object>("lowerWall", lowerWall));
+                Dictionary<string, object> upperWall = new Dictionary<string, object>()
+                {
+                    {"type", "wall"} ,
+                    {"faces", new ArrayList {
+                              {new int[]{ 4, 5, 6, 7 } }}
+                    }
+                };
+                m_Boundary.Add(new KeyValuePair<string, object>("upperWall", upperWall));
+            }
         }
 
         /// <summary>

@@ -334,6 +334,7 @@ namespace BIM.OpenFOAMExport.OpenFOAM
         private void NewConfig()
         {
             StreamWriter sw = new StreamWriter(m_ConfigPath);
+            sw.NewLine = "\n";
             sw.WriteLine("**********************Config for OpenFOAM-Environment**********************");
 
             if (File.Exists(m_DefaultEnvPath))
